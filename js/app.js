@@ -55,6 +55,12 @@
 				controller: "CriarPostsController"
 			}
 		)
+		.when("/infoInicial",
+			{
+				templateUrl: "../html/create/infoInicial.html",
+				controller: "CriarInfoInicialController"
+			}
+		)
 		.when("/finalizados2018",
 			{
 				templateUrl: "../html/finalizados2018.html",
@@ -122,6 +128,78 @@
 	});
 
 //**********Controles**********//
+	//informacoesiniciais
+	app.controller('InformacoesiniciaisController', ['HTTPService', '$rootScope', function(httpService, $rootScope) {
+		
+		$rootScope.informacoesiniciais = function() {
+			//Chama informacoesiniciais
+			httpService.get('/informacoesiniciais', function(answer) {
+				if(answer != null) {
+					$rootScope.informacoesiniciais =  answer;
+				}
+			}.bind(this));
+		}			
+	}]);
+
+	//CriarInfoInicialController Controller
+	app.controller('CriarInfoInicialController', ['HTTPService', '$timeout', '$scope', '$location', '$window', '$rootScope', function(httpService, $timeout, $scope, $location, $window, $rootScope) {		
+		//Inicia
+		$timeout(function() {
+			//Inicializa elementos do Materialize
+			$(document).ready(function() {
+				//Select
+				$('select').material_select();
+
+				$scope.inicialAttr = $location.search();
+
+				//Inserir os \n (enter)
+				$scope.inicialAttr.Texto = $scope.inicialAttr.Texto.replace(/<br>/g, '\n'); //Insere os break-lines
+				$scope.inicialAttr.ComoParticipar = $scope.inicialAttr.ComoParticipar.replace(/<br>/g, '\n'); //Insere os break-lines
+				$scope.inicialAttr.Calendario = $scope.inicialAttr.Calendario.replace(/<br>/g, '\n'); //Insere os break-lines
+				$scope.inicialAttr.Regras = $scope.inicialAttr.Regras.replace(/<br>/g, '\n'); //Insere os break-lines
+				
+				//Edita os valores dos elementos
+				$("#Texto").val($scope.inicialAttr.Texto);
+				$("#ComoParticipar").val($scope.inicialAttr.ComoParticipar);
+				$("#Calendario").val($scope.inicialAttr.Calendario);
+				$("#Regras").val($scope.inicialAttr.Regras);
+									
+				//Reinicia os elementos Materialize
+				Materialize.updateTextFields();
+				$('select').material_select();
+			});
+		});
+		//Submit o formulario de Editar Informacoes Iniciais
+		$scope.editarInfoInicial = function(params) {		
+			
+			if(params.Texto) {
+				params.Texto = params.Texto.replace(/\n\r?/g, '<br>'); //Insere os break-lines
+			}
+			if(params.ComoParticipar) {
+				params.ComoParticipar = params.ComoParticipar.replace(/\n\r?/g, '<br>'); //Insere os break-lines
+			}
+			if(params.Calendario) {
+				params.Calendario = params.Calendario.replace(/\n\r?/g, '<br>'); //Insere os break-lines
+			}
+			if(params.Regras) {
+				params.Regras = params.Regras.replace(/\n\r?/g, '<br>'); //Insere os break-lines
+			}
+			//Chama o POST Editar info
+			httpService.post('/editar-info', params, function(answer) {
+				//Emite alerta sobre o status da operacao e redireciona
+				if(answer) {
+					Materialize.toast("Informações editadas com sucesso!", 2000);
+					$location.url($location.path('/main-page'));
+					setTimeout(function(){ parent.location="javascript:location.reload()";}, 1000)
+				} else {
+					Materialize.toast("Erro ao editar Informações.", 3000);
+				}
+			});
+		}
+
+	}]);
+	
+
 	//Login Controller
 	app.controller('LoginController', ['HTTPService', '$rootScope', function(httpService, $rootScope) {
 		var usuarioLogado;
@@ -285,8 +363,7 @@
 			//Seta o ano do evento, levando em consideracao a data da inscricao do evento
 			console.log(params.DataInscricao);
 			var anoEvento = params.DataInscricao.substring(11, 15);
-			console.log("Ano do evento: " + anoEvento);
-			params.ano = 2018;
+			params.ano = anoEvento;
 
 			//Deleta params inuteis
 			delete params.HorarioInscricao;
@@ -491,32 +568,69 @@
 				evento.Confirmados = answer;
 			});
 		}
+
+		$timeout(function() {
+			//Inicializa elementos do Materialize
+			$(document).ready(function() {
+				//Select
+				$('select').material_select();
+
+				if($rootScope.usuario.rg) {
+					$(".rgUser").val($rootScope.usuario.rg);
+				}
+				else {
+					$(".rgUser").val("");
+				}
+									
+				//Reinicia os elementos Materialize
+				Materialize.updateTextFields();
+				$('select').material_select();
+			});
+		});
+		// Setar ng-model RG padrao
+		$scope.setarRgPadrao = function(){
+			if($rootScope.usuario.rg) {
+				return $rootScope.usuario.rg;
+			}
+			else {
+				return "";
+			}
+		};
 		
 		//Confirmar em Evento
-		$scope.confirmarEvento = function(evento) {
-			$("#btn-confirmar-" + evento.ID).attr("disabled", true);
-			
-			var data = {
-				evento: evento.ID,
-				usuario: $rootScope.usuario.ID,
-				blacklist: $rootScope.usuario.ListaNegra
-			}
-			//Chama POST Confirmar Evento
-			httpService.post('/confirmar-evento', data, function(answer) {
-				//Reabilita o botao de se inscrever
-				$("#btn-confirmar-" + evento.ID).attr("disabled", false);
-				
-				//Emite alerta sobre o status da operacao e redireciona
-				if(answer) {
-					Materialize.toast("Inscrição em evento realizada com sucesso!", 3000);
-										
-					//Atualiza lista de confirmados
-					$scope.postConfirmado(evento);
-					$scope.confirmadosPorMim();
-				} else {
-					Materialize.toast("Erro ao se inscrever no evento! Verifique se você está na lista negra.", 3000);
+		$scope.confirmarEvento = function(evento, rg) {
+			// Verifica se a algum rg cadastro ou se o evento eh do tipo prelecao - tipo 1
+			//Dessa maneira, o usuario nao eh obrigado a colocar o rg para inscrever-se na prelecao
+			//Mas eh obrigado para se inscrever no trekking (tipo 2) ou acampamento (tipo 3)
+			if(rg || evento.Tipo == 1) {
+				$("#btn-confirmar-" + evento.ID).attr("disabled", true);
+				var data = {
+					evento: evento.ID,
+					usuario: $rootScope.usuario.ID,
+					blacklist: $rootScope.usuario.ListaNegra,
+					rg: rg
 				}
-			});
+				//Chama POST Confirmar Evento
+				httpService.post('/confirmar-evento', data, function(answer) {
+					//Reabilita o botao de se inscrever
+					$("#btn-confirmar-" + evento.ID).attr("disabled", false);
+					
+					//Emite alerta sobre o status da operacao e redireciona
+					if(answer) {
+						Materialize.toast("Inscrição em evento realizada com sucesso!", 3000);
+											
+						//Atualiza lista de confirmados
+						$scope.postConfirmado(evento);
+						$scope.confirmadosPorMim();
+					} else {
+						Materialize.toast("Erro ao se inscrever no evento! Verifique se você está na lista negra.", 3000);
+					}
+				});
+			}
+			// Se nao inseriu nenhum rg, entao avisar o usuario
+			else {
+				Materialize.toast("Para participar do Trekking é necessário inserir o seu número de identidade (REGISTRO GERAL (RG))", 3000);
+			}
 		}
 		
 		//Cancelar em Evento
@@ -627,45 +741,88 @@
 
 
 		//Gerar lista PDF
-		$scope.gerarPDF = function(idDoEventoParaGerarTabela, nomeDoEvento, dataDoEvento) {
-			var columns = [
-			{title: "P", dataKey: "id"},
-			{title: "Nome", dataKey: "name"}, 
-			{title: "          ", dataKey: "a"},
-			{title: "          ", dataKey: "b"},
-			{title: "          ", dataKey: "c"},
-			{title: "Assinatura", dataKey: "d"},
-			{title: "          ", dataKey: "e"},
-			{title: "          ", dataKey: "f"},
-			{title: "          ", dataKey: "g"}
-			];
-			var numeroDeTD = $('#'+ idDoEventoParaGerarTabela + ' td').length;
-			var rows = [];
-			for(var i=0;i<numeroDeTD;i++) {
-				var aux = $('#'+idDoEventoParaGerarTabela + ' td')[i].innerHTML;
-				rows.push({"id": i+1 + "º", "name": aux});
+		$scope.gerarPDF = function(idDoEventoParaGerarTabela, nomeDoEvento, dataDoEvento, tipoEvento) {
+			// Verifica se o evento eh do tipo prelecao, se sim, baixar a lista de presenca
+			if (tipoEvento == "1") {
+				var columns = [
+				{title: "P", dataKey: "id"},
+				{title: "Nome", dataKey: "name"}, 
+				{title: "          ", dataKey: "a"},
+				{title: "          ", dataKey: "b"},
+				{title: "          ", dataKey: "c"},
+				{title: "Assinatura", dataKey: "d"},
+				{title: "          ", dataKey: "e"},
+				{title: "          ", dataKey: "f"},
+				{title: "          ", dataKey: "g"}
+				];
+				var numeroDeTD = $('#'+ idDoEventoParaGerarTabela + ' td').length;
+				var rows = [];
+				var posicao = 1;
+				for(var i=0;i<numeroDeTD;i=i+2) {
+					var aux = $('#'+idDoEventoParaGerarTabela + ' td')[i].innerHTML;
+					rows.push({"id": posicao + "º", "name": aux});
+					posicao++;
+				}
+				var doc = new jsPDF('p', 'pt');
+
+				doc.setFontSize(14);
+				doc.text(nomeDoEvento, 40, 45);
+				doc.text('Data: ' + dataDoEvento, 40, 70);
+
+				doc.autoTable(columns, rows, {
+					styles: {fillColor: [130, 130, 130]},
+					bodyStyles: {
+						fillColor: [210, 210, 210],
+					},
+					alternateRowStyles: {
+						fillColor: [240, 240, 240]
+					},
+					columnStyles: {
+						name: {fillColor: 247},
+						id: {fillColor: 240}
+					},
+					margin: {top: 90}
+				});
+				doc.save('ListaDePresenca.pdf');
 			}
-			var doc = new jsPDF('p', 'pt');
+			//Se o evento nao for do tipo prelecao, entao ele sera do tipo trekking ou acampamento
+			else {
+				var columns = [
+				{title: "P", dataKey: "id"},
+				{title: "Nome", dataKey: "name"}, 
+				{title: "Identidade (RG)", dataKey: "rg"}
+				];
+				var numeroDeTD = $('#'+ idDoEventoParaGerarTabela + ' td').length;
+				var rows = [];
+				var posicao = 1;
+				for(var i=0;i<numeroDeTD;i=i+2) {
+					var aux = $('#'+idDoEventoParaGerarTabela + ' td')[i].innerHTML;
+					var auxRG = $('#'+idDoEventoParaGerarTabela + ' td')[i+1].innerHTML;
+					rows.push({"id": posicao + "º", "name": aux, "rg": auxRG});
+					posicao++;
+				}
+				var doc = new jsPDF('p', 'pt');
 
-			doc.setFontSize(14);
-			doc.text(nomeDoEvento, 40, 45);
-			doc.text('Data: ' + dataDoEvento, 40, 70);
+				doc.setFontSize(14);
+				doc.text(nomeDoEvento, 40, 45);
+				doc.text('Data: ' + dataDoEvento, 40, 70);
 
-			doc.autoTable(columns, rows, {
-				styles: {fillColor: [130, 130, 130]},
-				bodyStyles: {
-					fillColor: [210, 210, 210],
-				},
-				alternateRowStyles: {
-					fillColor: [240, 240, 240]
-				},
-				columnStyles: {
-					name: {fillColor: 247},
-					id: {fillColor: 240}
-				},
-				margin: {top: 90}
-			});
-			doc.save('ListaDePresenca.pdf');	
+				doc.autoTable(columns, rows, {
+					styles: {fillColor: [130, 130, 130]},
+					bodyStyles: {
+						fillColor: [210, 210, 210],
+					},
+					alternateRowStyles: {
+						fillColor: [240, 240, 240]
+					},
+					columnStyles: {
+						name: {fillColor: 247},
+						id: {fillColor: 240}
+					},
+					margin: {top: 90}
+				});
+				doc.save('ListaComRG.pdf');
+			}
 		}
 
 		//Adicionar usuario na lista negra
