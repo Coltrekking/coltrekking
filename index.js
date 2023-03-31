@@ -8,7 +8,7 @@ var mysql = require('mysql');
 var bodyParser = require('body-parser');
 var session = require('express-session');
 var moment = require('moment');
-var aws = require('aws-sdk');
+var aws = require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 var app = express();
 
 //*****DEPENDENCIAS*****//
@@ -17,7 +17,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 //Utilizar o express-session
-app.use(session({ secret: 'S3NH4' }));
+app.use(session({
+	secret: 'S3NH4',
+	resave: true,
+	saveUninitialized: true
+}));
 
 //Utilizar o express-static
 app.use(express.static('./', {
