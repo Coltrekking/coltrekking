@@ -52,35 +52,15 @@
     background-color: rgb(219, 47, 41) !important;
     color: #FFFFFF !important;
   }
-  #loginFacebook {
-    background-color: rgba(31, 150, 247) !important;
-    margin-top: -7% !important;
-    color: #FFFFFF !important;
-  }
-  #loginFacebookMobile{
-    background-color: rgba(31, 150, 247) !important;
-    margin-top: -3% !important;
-    color: #FFFFFF !important;
-  }
-  #loginFacebook:hover {
-    background-color: rgb(21, 135, 228) !important;
-    color: #FFFFFF !important;
-  }
 
-  /* Ajustar o tamanho da fonte de logar com facebook e google */
+  /* Ajustar o tamanho da fonte de logar com google */
   @media screen and (max-width: 758px) {
     #loginGoogle {
-      font-size: 10px;
-    }
-    #loginFacebook {
       font-size: 10px;
     }
   }
   @media screen and (max-width: 641px) {
     #loginGoogle {
-      font-size: 8px;
-    }
-    #loginFacebook {
       font-size: 8px;
     }
     .btn {
@@ -89,10 +69,6 @@
   }
 
   @media screen and (max-width: 346px) {
-    #loginFacebookMobile {
-      padding: 0 0rem;
-      font-size: 12px;
-    }
     #loginGoogleMobile {
       padding: 0 0rem;
       font-size: 12px;
@@ -203,8 +179,6 @@ html, body, .content, .container, .row, .col, .valign-wrapper {
     margin-bottom: 10%; }
     .card a i {
       margin-right: 0%; }
-  .card #loginFacebook {
-    margin-bottom: 5%; }
 
 @media screen and (max-width: 647px) {
   .valign-wrapper {
