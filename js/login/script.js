@@ -21,30 +21,13 @@ window.onload = function () {
 	initApp();
 }
 
-/***Sign In com Provedor Correto (apos erro)***/
-function signInProvedor() {
-	window.provedor == "google" ? googleSignIn() : facebookSignIn();
-}
-
 /***Google Sign In***/
 function googleSignIn() {
 	//Altera botao de login
-	$('#loginFacebook, #loginFacebookMobile').attr('disabled', true);
 	$('#loginGoogle, #loginGoogleMobile').attr('onClick', 'return false');
 	$('#loginGoogle, #loginGoogleMobile').html('<i class="fa fa-refresh fa-spin fa-3x fa-fw"></i>');
 
 	signIn(googleProvider);
-}
-
-/***Facebook Sign In***/
-function facebookSignIn() {
-	//Altera botao de login
-	$('#loginGoogle, #loginGoogleMobile').attr('disabled', true);
-	$('#loginFacebook, #loginFacebookMobile').attr('onClick', 'return false');
-	$('#loginFacebook, #loginFacebookMobile').html('<i class="fa fa-refresh fa-spin fa-3x fa-fw"></i>');
-
-	facebookProvider.addScope('email');
-	signIn(facebookProvider);
 }
 
 /**Sign In com Popup***/
@@ -115,7 +98,5 @@ function initApp() {
 function reativarBotoes() {
 	$('.botao-login').attr('disabled', false);
 	$('#loginGoogle').html('<i class="material-icons left"><img src="../../rsc/login/icones/google.png"></i>Entrar com o Google');
-	$('#loginFacebook').html('<i class="material-icons left"><img src="../../rsc/login/icones/facebook-box.png"></i>Entrar com o Facebook');
 	$('#loginGoogleMobile').html('Entrar c/ Google');
-	$('#loginFacebookMobile').html('Entrar c/ Facebook');
 }
