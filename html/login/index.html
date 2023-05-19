@@ -7,7 +7,7 @@
 		<meta charset="utf-8">
 
 		<!--Importa firebase + login google-->
-		<!--<script src="https://www.gstatic.com/firebasejs/3.7.1/firebase.js"></script>-->
+		<script src="https://www.gstatic.com/firebasejs/3.7.1/firebase.js"></script>
 		<script src="https://apis.google.com/js/platform.js" async defer></script>
 		<meta name="google-signin-client_id" content="436699561525-24tmevumrhqj4dct2rlcukesubat6ugl.apps.googleusercontent.com">
 		
@@ -27,9 +27,9 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
 		<!--Adiciona firebase.js-->
-		<!--<script src="../../js/firebase.js" type='module'></script>-->
+		<script src="../../js/firebase.js"></script>
 		<!--Adiciona script.js-->
-		<!--<script src="../../js/login/script.js" type='module'></script>-->
+		<script src="../../js/login/script.js"></script>
 
 		<!--Importa CSS-->
 		<link rel="stylesheet" type="text/css" href="../../css/login/style.css">
@@ -122,9 +122,7 @@
 									<a id="loginGoogleMobile" href="#" class="botao-login hide-on-med-and-up waves-effect waves-light btn-large red lighten-1" onclick="googleSignIn();">Entrar c/ TeiaColtec</a>
 
 									<!--Botoes de Login para computador-->
-									<a id="loginGoogle" class="botao-login hide-on-small-only waves-effect waves-light btn-large red lighten-1"><i class="material-icons left"><img src="../../rsc/login/icones/google.png"></i>Entrar com o TeiaColtec</a>
-									<button id='login'>Logar com o Google</button>
-									<script type='module' src='js/login/auth.js'</script>
+									<a id="loginGoogle" href="#" class="botao-login hide-on-small-only waves-effect waves-light btn-large red lighten-1" onclick="googleSignIn();"><i class="material-icons left"><img src="../../rsc/login/icones/google.png"></i>Entrar com o TeiaColtec</a>
 								</div>
 							</div>
 						</div>
