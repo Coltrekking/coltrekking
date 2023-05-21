@@ -22,7 +22,7 @@ const logarComPopup = function()
 
 onAuthStateChanged(auth, (result) =>
 {
-    const usuarioLogado = obterUserAtual()
+    const usuarioLogado = obterUserFormatado(result)
 
     if(usuarioLogado === null)
 		console.log("Nao tem user")
@@ -30,17 +30,16 @@ onAuthStateChanged(auth, (result) =>
  		enviarUserParaDB(usuarioLogado, '/post-user')
 })
 
-const obterUserAtual    = function()
+const obterUserFormatado    = function(resultado)
 {
-	const user      = auth.currentUser
     let usuarioInfo = {}
 
-    if(user)
+    if(resultado)
     {
-        usuarioInfo.Nome    = user.displayName;
-        usuarioInfo.Email   = user.email;
-        usuarioInfo.Foto    = user.photoURL;
-        usuarioInfo.ID      = user.uid;
+        usuarioInfo.Nome    = resultado.displayName;
+        usuarioInfo.Email   = resultado.email;
+        usuarioInfo.Foto    = resultado.photoURL;
+        usuarioInfo.ID      = resultado.uid;
     }
     else
         usuarioInfo = null
