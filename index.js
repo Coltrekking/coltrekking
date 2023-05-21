@@ -32,8 +32,8 @@ app.use(express.static('./', {
 var pool = mysql.createPool({
 	connectionLimit: 10000,
 	host: 'localhost',
-	user: 'root',
-	password: '',
+	user: 'admin',
+	password: 'coltec',
 	database: 'coltrekking',
 	debug: false
 });
