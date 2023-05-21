@@ -962,7 +962,7 @@ function montaRanking(ano, connection, callback) {
 }
 
 /*************************INICIA SERVIDOR*****************************/
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 80;
 
 app.listen(port, function () {
 	//console.log("Ouvindo na porta " + port);
