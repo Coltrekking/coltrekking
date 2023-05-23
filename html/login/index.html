@@ -6,11 +6,6 @@
 		<meta name="theme-color" content="#8bc34a">
 		<meta charset="utf-8">
 
-		<!--Importa firebase + login google-->
-		<script src="https://www.gstatic.com/firebasejs/3.7.1/firebase.js"></script>
-		<script src="https://apis.google.com/js/platform.js" async defer></script>
-		<meta name="google-signin-client_id" content="436699561525-24tmevumrhqj4dct2rlcukesubat6ugl.apps.googleusercontent.com">
-		
 		<!--Adiciona Angular-->
 		<script src="../../node_modules/angular/angular.min.js"></script>
 		<script src="../../node_modules/angular-route/angular-route.min.js"></script>
@@ -26,8 +21,6 @@
 		<!--Mobile Viewport-->
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-		<!--Adiciona firebase.js-->
-		<script src="../../js/firebase.js"></script>
 		<!--Adiciona auth.js-->
 		<script type="module" src="../../js/login/auth.js"></script>
 
@@ -58,60 +51,12 @@
 									</span>
 
 									<div class="row">
-										<!-- Modal Trigger -->
+										<!-- Botoes -->
 										<div class="col s12">
-											<a onclick="abrirModal();" class="waves-effect waves-light btn modal-trigger" href="#modal1">O que é?</a>
-											<a onclick="abrirModal();" class="waves-effect waves-light btn modal-trigger" href="#modal2">Como Participar?</a>
-											<a onclick="abrirModal();" class="waves-effect waves-light btn modal-trigger" href="#modal3">Calendário</a>
-											<a onclick="abrirModal();" class="waves-effect waves-light btn modal-trigger" href="#modal4">Regras</a>
-										</div>
-									</div>
-									<div ng-controller="InformacoesiniciaisController" ng-init="informacoesiniciais()">
-										<div ng-repeat="x in informacoesiniciais">
-											<!-- Modal Structure -->
-											<div id="modal1" class="modal modal-fixed-footer">
-												<div class="modal-content">
-													<h4>Sobre o Coltrekking</h4>
-													<p ng-bind-html="x.Texto"></p>
-													<p class="oQueELink">Fique por dentro das novidades!</p>
-													<a class="oQueELink" target="_blank" href="https://www.instagram.com/coltrekking/">Instagram</a>
-												</div>
-												<div class="modal-footer">
-													<a class="modal-close waves-effect waves-green btn-flat">Fechar</a>
-												</div>
-											</div>
-											<!-- Modal Structure -->
-											<div id="modal2" class="modal modal-fixed-footer">
-												<div class="modal-content">
-													<h4>Como Participar?</h4>
-													<p ng-bind-html="x.ComoParticipar"></p>
-												</div>
-												<div class="modal-footer">
-													<a class="modal-close waves-effect waves-green btn-flat">Fechar</a>
-												</div>
-											</div>
-											<div id="modal3" class="modal modal-fixed-footer">
-												<div class="modal-content">
-													<h4>Calendário</h4>
-													<p>Este calendário mostra a data dos trekkings.</p>
-													<p>Ele NÃO mostra o período de inscrições dos eventos.</p>
-													<p>A data das inscrições são divulgadas no <a class="paginaFace" target="_blank" href="https://www.facebook.com/groups/2011942699021364/">Grupo do Facebook</a> alguns dias antes do evento.</p>
-													<p></p>
-													<a class="calendarioLink" target="_blank" ng-href="{{x.Calendario}}">CLIQUE AQUI PARA VER O CALENDÁRIO</a>
-												</div>
-												<div class="modal-footer">
-													<a class="modal-close waves-effect waves-green btn-flat">Fechar</a>
-												</div>
-											</div>
-											<div id="modal4" class="modal modal-fixed-footer">
-												<div class="modal-content">
-													<h4>Regras</h4>
-													<p ng-bind-html="x.Regras"></p>
-												</div>
-												<div class="modal-footer">
-													<a class="modal-close waves-effect waves-green btn-flat">Fechar</a>
-												</div>
-											</div>
+											<a class="waves-effect waves-light btn" href="https://www.google.com/" target="_blank">O que é?</a>
+											<a class="waves-effect waves-light btn" href="https://www.google.com/" target="_blank">Como Participar?</a>
+											<a class="waves-effect waves-light btn" href="https://www.google.com/" target="_blank">Calendário</a>
+											<a class="waves-effect waves-light btn" href="https://www.google.com/" target="_blank">Regras</a>
 										</div>
 									</div>
 
@@ -128,33 +73,9 @@
 			</div>
 		</div>
 		
-		<!-- Modal de Provedor -->
-		<div id="modal-provedor" class="modal">
-			<div class="modal-content">
-				<h4>Erro ao entrar</h4>
-				<p>O email usado na sua conta já foi cadastrado no site. Deseja tentar entrar com a outra rede social?</p>
-			</div>
-			<div class="modal-footer">
-				<a href="#!" class="modal-action modal-close waves-effect waves-red btn-flat">Cancelar</a>
-				<a href="#!" onclick="signInProvedor();" class="modal-action modal-close waves-effect waves-green btn-flat">Sim</a>
-			</div>
-		</div>
-
-
 		<!--Importa jQuery + materialize.js-->
 		<script src="https://use.fontawesome.com/ef528e6d3b.js"></script>
 		<script type="text/javascript" src="../../node_modules/jquery/dist/jquery.min.js"></script>
 		<script type="text/javascript" src="../../node_modules/materialize-css/dist/js/materialize.min.js"></script>
-
-		<!-- Scrip do modal -->
-		<script>
-			function abrirModal() {
-				$(document).ready(function(){
-					$('.modal').modal();
-				});
-			}
-			//Chamar a funcao abrir modal apos 1 segundos
-			setTimeout(function(){ abrirModal(); }, 1000);
-		</script>
 	</body>
 </html>
