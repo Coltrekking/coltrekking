@@ -1,28 +1,8 @@
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js'
-import { GoogleAuthProvider, getAuth, signInWithPopup, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.19.1/firebase-auth.js'
+import { auth } from '../firebase.js'
 
-const firebaseConfig    =
+auth.mudouEstado(auth.servico, (user) =>
 {
-    apiKey: "AIzaSyAYwLIkAUkXJvUeNqf-Uy0YpdoqAkSDIY4",
-    authDomain: "coltrekking.firebaseapp.com",
-    projectId: "coltrekking",
-    storageBucket: "coltrekking.appspot.com",
-    messagingSenderId: "1082334786056",
-    appId: "1:1082334786056:web:9884aab1e74c8da305d7bd"
-}
-
-const app       = initializeApp(firebaseConfig)
-const auth      = getAuth(app)
-const provedor  = new GoogleAuthProvider()
-
-const logarComPopup = function()
-{
-	signInWithPopup(auth, provedor)
-}
-
-onAuthStateChanged(auth, (result) =>
-{
-    const usuarioLogado = obterUserFormatado(result)
+    const usuarioLogado = obterUserFormatado(user)
 
     if(usuarioLogado === null)
 		console.log("Nao tem user")
@@ -47,7 +27,7 @@ const obterUserFormatado    = function(resultado)
     return usuarioInfo
 }
 
-const enviarUserParaDB  = function(usuario, url)
+const enviarUserParaDB      = function(usuario, url)
 {
     $.ajax
     ({
@@ -67,5 +47,5 @@ const enviarUserParaDB  = function(usuario, url)
     });
 }
 
-document.getElementById('loginGoogle').addEventListener('click', logarComPopup)
-document.getElementById('loginGoogleMobile').addEventListener('click', logarComPopup)
+document.getElementById('loginGoogle').addEventListener('click', () => auth.logar(auth.servico, auth.provedorGmail))
+document.getElementById('loginGoogleMobile').addEventListener('click', () => auth.logar(auth.servico, auth.provedorGmail))
