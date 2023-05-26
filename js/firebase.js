@@ -11,9 +11,9 @@ const firebaseConfig    =
     appId: "1:1082334786056:web:9884aab1e74c8da305d7bd"
 }
 
-export const auth   = {}
-auth.app            = initializeApp(firebaseConfig)
-auth.servico        = getAuth(auth.app)
-auth.provedorGmail  = new GoogleAuthProvider()
-auth.logar          = signInWithPopup
-auth.mudouEstado    = onAuthStateChanged
+export const auth       = {}
+auth.app                = initializeApp(firebaseConfig)
+auth.servico            = getAuth(auth.app)
+auth.provedorGmail      = new GoogleAuthProvider()
+auth.signInWithPopup    = signInWithPopup
+auth.onAuthStateChanged = onAuthStateChanged
