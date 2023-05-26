@@ -1,5 +1,5 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js'
-import { GoogleAuthProvider, getAuth, signInWithPopup, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.19.1/firebase-auth.js'
+import { GoogleAuthProvider, getAuth, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.19.1/firebase-auth.js'
 
 const firebase          = {}
 firebase.config         =
@@ -19,3 +19,4 @@ auth.servico            = getAuth(auth.app)
 auth.provedorGmail      = new GoogleAuthProvider()
 auth.signInWithPopup    = signInWithPopup
 auth.onAuthStateChanged = onAuthStateChanged
+auth.signOut            = signOut
