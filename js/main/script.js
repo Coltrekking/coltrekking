@@ -1,3 +1,5 @@
+import { auth } from '../firebase.js'
+
 /**********Materialize**********/
 $(document).ready(function() {
 	//SideNav
@@ -126,7 +128,7 @@ function verificaTipo() {
 
 /**********LOG OUT**********/
 function logOut() {
-	firebase.auth().signOut().then(function() {
+	auth.signOut(auth.servico).then(function() {
 		//SignOut bem-sucedido
 	}, function(error) {
 		//Deu ruim

@@ -1,6 +1,6 @@
 import { auth } from '../firebase.js'
 
-auth.mudouEstado(auth.servico, (user) =>
+auth.onAuthStateChanged(auth.servico, (user) =>
 {
     const usuarioLogado = obterUserFormatado(user)
 
@@ -47,5 +47,5 @@ const enviarUserParaDB      = function(usuario, url)
     });
 }
 
-document.getElementById('loginGoogle').addEventListener('click', () => auth.logar(auth.servico, auth.provedorGmail))
-document.getElementById('loginGoogleMobile').addEventListener('click', () => auth.logar(auth.servico, auth.provedorGmail))
+document.getElementById('loginGoogle').addEventListener('click', () => auth.signInWithPopup(auth.servico, auth.provedorGmail))
+document.getElementById('loginGoogleMobile').addEventListener('click', () => auth.signInWithPopup(auth.servico, auth.provedorGmail))
