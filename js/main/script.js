@@ -36,13 +36,16 @@ $(document).ready(function() {
 
 
 		//Script que remove o filtro do ano que nao estamos
-		for (j=0;j<5;j++) {
+		for (let j = 0; j < 5; j++)
+		{
 			var list = document.getElementsByClassName("dropdown-content select-dropdown")[0];
 			var ano = new Date().getFullYear();
-			for (i=1;i<list.getElementsByTagName("LI").length;i++){
-				if (list.getElementsByTagName("LI")[i].innerText > ano) {
+
+			for (let i = 1; i < list.getElementsByTagName("LI").length; i++)
+			{
+				if (list.getElementsByTagName("LI")[i].innerText > ano)
+
 					list.getElementsByTagName("LI")[i].remove();                		
-				}
 			}
 		}
 
