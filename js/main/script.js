@@ -127,10 +127,13 @@ function verificaTipo() {
 }
 
 /**********LOG OUT**********/
-function logOut() {
+function logOut()
+{
 	auth.signOut(auth.servico).then(function() {
 		//SignOut bem-sucedido
 	}, function(error) {
 		//Deu ruim
 	});
 }
+
+document.getElementById('sair-button').addEventListener('click', logOut)
