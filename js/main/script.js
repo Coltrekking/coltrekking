@@ -28,7 +28,7 @@ $(document).ready(function() {
 		}
 
 
-		//Verifica se não ha pessoas na lista negra para mostrar a mensagem "nao ha pessoas na lista negra"
+		//Verifica se não ha pessoas na lista negra para verificaTipomostrar a mensagem "nao ha pessoas na lista negra"
 		if(!document.getElementsByClassName("listaNegraUsuario")[0]){
 			document.getElementById("naoHapessoasListaNegra").style.display="block";
 			document.getElementById("nomeUsuariosListaNegra").style.display="none";
@@ -86,7 +86,7 @@ function esconderMensagemEscolhaAno(){
 
 /**********FORMULARIO**********/
 //Verifica o tipo do evento inserido
-function verificaTipo() {
+export const verificaTipo = function() {
 
 	/*
 	var x = document.getElementById("tipo").value;
@@ -139,4 +139,10 @@ function logOut()
 	});
 }
 
-document.getElementById('sair-button').addEventListener('click', logOut)
+document.getElementById('sair-button')		.addEventListener('click', logOut)
+document.getElementById('btn-disponivel')	.addEventListener('click', NAOmostrarBotaoEventosAnteriores)
+document.getElementById('btn-finalizados')	.addEventListener('click', botaoMostrarEventosAnteriores)
+document.getElementById('btn-eventos')		.addEventListener('click', mostrarEventos)
+document.getElementById('btn-lst-negra')	.addEventListener('click', mostrarListaNegra)
+document.getElementById('btn-ranking')		.addEventListener('click', mostrarRanking)
+document.getElementById('selectBox')		.addEventListener('change', esconderMensagemEscolhaAno)

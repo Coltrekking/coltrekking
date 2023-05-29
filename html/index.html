@@ -91,9 +91,9 @@
 							<div class="container nav-container">
 								<div class="nav-content">
 									<ul class="tabs tabs-transparent tabs-fixed-width" ng-show="$location.path() === '/' || $location.path() === '/finalizados2018' || $location.path() === '/finalizados2017'"> <!--So aparece na Pagina Principal e eventos finalizados-->
-										<li class="tab"><a href="#eventos" onclick="mostrarEventos();">Eventos</a></li>
-										<li class="tab"><a href="#listanegra" onclick="mostrarListaNegra();">Lista Negra</a></li>
-										<li class="tab"><a href="#ranking" onclick="mostrarRanking();">Ranking</a></li>
+										<li class="tab"><a id="btn-eventos" href="#eventos">Eventos</a></li>
+										<li class="tab"><a id="btn-lst-negra" href="#listanegra">Lista Negra</a></li>
+										<li class="tab"><a id="btn-ranking" href="#ranking">Ranking</a></li>
 									</ul>
 								</div>
 							</div>
@@ -215,8 +215,8 @@
 									<div class="col m1 l3"></div>
 									<div class="col s12 m10 l6">
 										<ul class="tabsEventos tabs tabs-green">
-											<li class="tabsEventos tab col s6"><a onclick="NAOmostrarBotaoEventosAnteriores();" href="#exibirEventosDisponiveis">Disponíveis</a></li>
-											<li class="tabsEventos tab col s6"><a onclick="botaoMostrarEventosAnteriores();" href="#exibirEventosFinalizados">Finalizados</a></li>
+											<li class="tabsEventos tab col s6"><a id="btn-disponivel" href="#exibirEventosDisponiveis">Disponíveis</a></li>
+											<li class="tabsEventos tab col s6"><a id="btn-finalizados" href="#exibirEventosFinalizados">Finalizados</a></li>
 										</ul>
 									</div>
 									<div class="col m1 l3"></div>								
@@ -743,7 +743,7 @@
 										<div class="row">
 											<div class="col s1 l3"></div>
 											<div class="col s10 l6">
-												<select name="selectBox" id="selectBox" class="materialSelect" ng-model="mySelect" onchange="esconderMensagemEscolhaAno();" ng-change="selecionarAnoRanking(mySelect)">
+												<select name="selectBox" id="selectBox" class="materialSelect" ng-model="mySelect" ng-change="selecionarAnoRanking(mySelect)">
 													<option value="" disabled selected>ESCOLHER ANO</option>
 													<option value="2017">2017</option>
 													<option value="2018">2018</option>
