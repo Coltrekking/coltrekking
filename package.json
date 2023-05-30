@@ -13,8 +13,6 @@
     "express": "^4.10.6",
     "express-session": "^1.17.3",
     "jquery": "^3.2.1",
-    "jspdf": "^2.5.1",
-    "jspdf-autotable": "^2.3.4",
     "materialize-css": "^0.99",
     "moment": "^2.22.2",
     "moment-timezone": "^0.5.21",

@@ -739,6 +739,7 @@
 
 
 		//Gerar lista PDF
+		/*
 		$scope.gerarPDF = function(idDoEventoParaGerarTabela, nomeDoEvento, dataDoEvento, tipoEvento) {
 			// Verifica se o evento eh do tipo prelecao, se sim, baixar a lista de presenca
 			if (tipoEvento == "1") {
@@ -822,6 +823,7 @@
 				doc.save('ListaComRG.pdf');
 			}
 		}
+		*/
 
 		//Adicionar usuario na lista negra
 		$scope.adicionarListaNegra = function(id, idevento) {

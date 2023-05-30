@@ -9,10 +9,6 @@
 		<!--Adiciona jQuery-->
 		<script src="../node_modules/jquery/dist/jquery.min.js"></script>
 
-		<!--Js PDF-->
-		<script src="../node_modules/jspdf/dist/jspdf.min.js"></script>
-		<script src="../node_modules/jspdf-autotable/dist/jspdf.plugin.autotable.js"></script>
-
 		<!--Adiciona Angular-->
 		<script src="../node_modules/angular/angular.min.js"></script>
 		<script src="../node_modules/angular-route/angular-route.min.js"></script>
@@ -369,7 +365,7 @@
 														<span class="topico-info"> Nº de Inscritos:</span> {{evento.Confirmados.length}}/{{evento.NumeroMax}}
 													</p>
 				
-				
+													<!--
 													<div class="gerarPdfListaIncritos">
 														<table ng-attr-id="{{'tabelaDoEventoNumero-' + evento.ID}}">
 															
@@ -388,14 +384,17 @@
 															</tbody>
 														</table>
 													</div>
+													-->
 											
 												</div>
 												
 												<!--Card Action LISTA DE INSCRITOS-->
+												<!--
 												<div class="card-action" ng-show="evento.Disponivel">
 													<a class="listaDeincritos" ng-attr-href="{{'#lista-inscritos-finalizados' + evento.ID}}" ng-click="postConfirmado(evento)" onclick="return false;">Lista de Inscritos no Evento</a><br>
 													<a class="listaDeincritos" ng-if="usuario.Admin" ng-click="gerarPDF('tabelaDoEventoNumero-' + evento.ID, evento.Nome, evento.DataInicio, evento.Tipo);" onclick="return false;">Baixar lista (PDF)</a>
 												</div>
+												-->
 										
 											</div>
 											
@@ -646,7 +645,7 @@
 														<span class="topico-info"> Nº de Inscritos:</span> {{evento.Confirmados.length}}/{{evento.NumeroMax}}
 													</p>
 
-													
+													<!--
 													<div class="gerarPdfListaIncritos">
 														<table ng-attr-id="{{'tabelaDoEventoNumero-' + evento.ID}}">
 															
@@ -665,16 +664,17 @@
 															</tbody>
 														</table>
 													</div>
-
-
+													-->
 
 												</div>
 												
 												<!--Card Action LISTA DE INSCRITOS-->
+												<!--
 												<div class="card-action" ng-show="evento.Disponivel">
 													<a class="listaDeincritos" ng-attr-href="{{'#lista-inscritos' + evento.ID}}" ng-click="postConfirmado(evento);" onclick="return false;">Lista de Inscritos no Evento</a><br>
 													<a class="listaDeincritos" ng-if="usuario.Admin" ng-click="gerarPDF('tabelaDoEventoNumero-' + evento.ID, evento.Nome, evento.DataInicio, evento.Tipo);" onclick="return false;">Baixar lista (PDF)</a>
 												</div>										
+												-->
 											</div>
 											
 											<!--Lista de Inscritos-->
