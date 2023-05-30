@@ -350,7 +350,6 @@
 			params.DataInscricao = new Date(params.DataInscricao);
 			//Remover o GMT do usuario que cadastrou a data de inscricao
 			params.DataInscricao = params.DataInscricao.toString().substring(0, 24);
-			
 
 			//Seta fim da inscricao
 			params.FimInscricao = params.DataFimInscricao.split("/").reverse().join("-");
@@ -361,7 +360,6 @@
 			params.FimInscricao = params.FimInscricao.toString().substring(0, 24);
 			
 			//Seta o ano do evento, levando em consideracao a data da inscricao do evento
-			console.log(params.DataInscricao);
 			var anoEvento = params.DataInscricao.substring(11, 15);
 			params.ano = anoEvento;
 
