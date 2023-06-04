@@ -595,15 +595,20 @@ function confirmarEventoDB(data, connection, callback) {
 				estaInscrito(data, connection, function (status) {
 					//Se nao esta inscrito
 					if (status) {
-						//Datetime eh o horario correto, que ordena a posicao da inscricao						
+						//Datetime eh o horario correto, que ordena a posicao da inscricao
+						let fusoHorarioServidor	= -3; //HORARIO DE BRASILIA
 						var datetime = new Date().toISOString();
+
 						datetime = datetime.split('T');
 						datetime[1] = datetime[1].split('.')[0];
+						datetime[1] = datetime[1].split(':');
+						datetime[1][0] = String(parseInt(datetime[1][0]) + fusoHorarioServidor);
+						datetime[1] = datetime[1].join(':');
 						datetime = datetime.join(' ');
 
 						//Horario certo so funciona para mostrar para o usuario o tempo, ele nao ordena, APENAS a variavel datetime ordena
 						moment.locale("pt-br");
-						horarioCerto = moment().format('LLL:ss');
+						horarioCerto = moment().add(fusoHorarioServidor, 'hours').format('LLL:ss');
 
 						//Seta o post
 						post = {

@@ -423,8 +423,8 @@
 			// Pegar o fuso horario do usuario em milissegundo
 			var fusoUsuario = new Date().getTimezoneOffset() * 60000;
 			//O horario atual ira desconsiderar o fuso horario do usuario e ira considerar o fuso horario do servidor
-			var agora = $scope.horaServidor + fusoUsuario - $scope.fusoHorarioServidor;
-			var distancia = dataCountdown - agora;
+			var agora		= $scope.horaServidor;
+			var distancia	= dataCountdown - agora;
 			
 			//Transforma distancia em d h m s
 			var days = Math.floor(distancia / (1000 * 60 * 60 * 24));
