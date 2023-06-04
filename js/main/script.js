@@ -139,10 +139,10 @@ function logOut()
 	});
 }
 
-document.getElementById('sair-button')		.addEventListener('click', logOut)
-document.getElementById('btn-disponivel')	.addEventListener('click', NAOmostrarBotaoEventosAnteriores)
-document.getElementById('btn-finalizados')	.addEventListener('click', botaoMostrarEventosAnteriores)
-document.getElementById('btn-eventos')		.addEventListener('click', mostrarEventos)
-document.getElementById('btn-lst-negra')	.addEventListener('click', mostrarListaNegra)
-document.getElementById('btn-ranking')		.addEventListener('click', mostrarRanking)
-document.getElementById('selectBox')		.addEventListener('change', esconderMensagemEscolhaAno)
+$('#sair-button')		.on('click', logOut)
+$('#btn-disponivel')	.on('click', NAOmostrarBotaoEventosAnteriores)
+$('#btn-finalizados')	.on('click', botaoMostrarEventosAnteriores)
+$('#btn-eventos')		.on('click', mostrarEventos)
+$('#btn-lst-negra')		.on('click', mostrarListaNegra)
+$('#btn-ranking')		.on('click', mostrarRanking)
+$('#selectBox')			.on('change', esconderMensagemEscolhaAno)
