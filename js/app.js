@@ -350,7 +350,6 @@
 			params.DataInscricao = new Date(params.DataInscricao);
 			//Remover o GMT do usuario que cadastrou a data de inscricao
 			params.DataInscricao = params.DataInscricao.toString().substring(0, 24);
-			
 
 			//Seta fim da inscricao
 			params.FimInscricao = params.DataFimInscricao.split("/").reverse().join("-");
@@ -361,7 +360,6 @@
 			params.FimInscricao = params.FimInscricao.toString().substring(0, 24);
 			
 			//Seta o ano do evento, levando em consideracao a data da inscricao do evento
-			console.log(params.DataInscricao);
 			var anoEvento = params.DataInscricao.substring(11, 15);
 			params.ano = anoEvento;
 
@@ -425,8 +423,8 @@
 			// Pegar o fuso horario do usuario em milissegundo
 			var fusoUsuario = new Date().getTimezoneOffset() * 60000;
 			//O horario atual ira desconsiderar o fuso horario do usuario e ira considerar o fuso horario do servidor
-			var agora = $scope.horaServidor + fusoUsuario - $scope.fusoHorarioServidor;
-			var distancia = dataCountdown - agora;
+			var agora		= $scope.horaServidor;
+			var distancia	= dataCountdown - agora;
 			
 			//Transforma distancia em d h m s
 			var days = Math.floor(distancia / (1000 * 60 * 60 * 24));
@@ -741,6 +739,7 @@
 
 
 		//Gerar lista PDF
+		/*
 		$scope.gerarPDF = function(idDoEventoParaGerarTabela, nomeDoEvento, dataDoEvento, tipoEvento) {
 			// Verifica se o evento eh do tipo prelecao, se sim, baixar a lista de presenca
 			if (tipoEvento == "1") {
@@ -824,6 +823,7 @@
 				doc.save('ListaComRG.pdf');
 			}
 		}
+		*/
 
 		//Adicionar usuario na lista negra
 		$scope.adicionarListaNegra = function(id, idevento) {

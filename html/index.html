@@ -9,10 +9,6 @@
 		<!--Adiciona jQuery-->
 		<script src="../node_modules/jquery/dist/jquery.min.js"></script>
 
-		<!--Js PDF-->
-		<script src="../node_modules/jspdf/dist/jspdf.min.js"></script>
-		<script src="../node_modules/jspdf-autotable/dist/jspdf.plugin.autotable.js"></script>
-
 		<!--Adiciona Angular-->
 		<script src="../node_modules/angular/angular.min.js"></script>
 		<script src="../node_modules/angular-route/angular-route.min.js"></script>
@@ -78,7 +74,7 @@
 												<li><a href="#!">Lista Negra: <span class="listaNegraSimOuNao">{{ login.usuarioLogado.ListaNegra }}</span></a></li>
 												<li class="divider"></li>
 												<!--Logout Button-->
-												<li><a id="sair-button" href="/logout" onclick="logOut();">Sair</a></li>
+												<li><a id="sair-button" href="/logout">Sair</a></li>
 											</ul>
 										</ul>
 									</div>
@@ -91,9 +87,9 @@
 							<div class="container nav-container">
 								<div class="nav-content">
 									<ul class="tabs tabs-transparent tabs-fixed-width" ng-show="$location.path() === '/' || $location.path() === '/finalizados2018' || $location.path() === '/finalizados2017'"> <!--So aparece na Pagina Principal e eventos finalizados-->
-										<li class="tab"><a href="#eventos" onclick="mostrarEventos();">Eventos</a></li>
-										<li class="tab"><a href="#listanegra" onclick="mostrarListaNegra();">Lista Negra</a></li>
-										<li class="tab"><a href="#ranking" onclick="mostrarRanking();">Ranking</a></li>
+										<li class="tab"><a id="btn-eventos" href="#eventos">Eventos</a></li>
+										<li class="tab"><a id="btn-lst-negra" href="#listanegra">Lista Negra</a></li>
+										<li class="tab"><a id="btn-ranking" href="#ranking">Ranking</a></li>
 									</ul>
 								</div>
 							</div>
@@ -215,8 +211,8 @@
 									<div class="col m1 l3"></div>
 									<div class="col s12 m10 l6">
 										<ul class="tabsEventos tabs tabs-green">
-											<li class="tabsEventos tab col s6"><a onclick="NAOmostrarBotaoEventosAnteriores();" href="#exibirEventosDisponiveis">Disponíveis</a></li>
-											<li class="tabsEventos tab col s6"><a onclick="botaoMostrarEventosAnteriores();" href="#exibirEventosFinalizados">Finalizados</a></li>
+											<li class="tabsEventos tab col s6"><a id="btn-disponivel" href="#exibirEventosDisponiveis">Disponíveis</a></li>
+											<li class="tabsEventos tab col s6"><a id="btn-finalizados" href="#exibirEventosFinalizados">Finalizados</a></li>
 										</ul>
 									</div>
 									<div class="col m1 l3"></div>								
@@ -369,7 +365,7 @@
 														<span class="topico-info"> Nº de Inscritos:</span> {{evento.Confirmados.length}}/{{evento.NumeroMax}}
 													</p>
 				
-				
+													<!--
 													<div class="gerarPdfListaIncritos">
 														<table ng-attr-id="{{'tabelaDoEventoNumero-' + evento.ID}}">
 															
@@ -388,14 +384,17 @@
 															</tbody>
 														</table>
 													</div>
+													-->
 											
 												</div>
 												
 												<!--Card Action LISTA DE INSCRITOS-->
+												<!--
 												<div class="card-action" ng-show="evento.Disponivel">
 													<a class="listaDeincritos" ng-attr-href="{{'#lista-inscritos-finalizados' + evento.ID}}" ng-click="postConfirmado(evento)" onclick="return false;">Lista de Inscritos no Evento</a><br>
 													<a class="listaDeincritos" ng-if="usuario.Admin" ng-click="gerarPDF('tabelaDoEventoNumero-' + evento.ID, evento.Nome, evento.DataInicio, evento.Tipo);" onclick="return false;">Baixar lista (PDF)</a>
 												</div>
+												-->
 										
 											</div>
 											
@@ -646,7 +645,7 @@
 														<span class="topico-info"> Nº de Inscritos:</span> {{evento.Confirmados.length}}/{{evento.NumeroMax}}
 													</p>
 
-													
+													<!--
 													<div class="gerarPdfListaIncritos">
 														<table ng-attr-id="{{'tabelaDoEventoNumero-' + evento.ID}}">
 															
@@ -665,16 +664,17 @@
 															</tbody>
 														</table>
 													</div>
-
-
+													-->
 
 												</div>
 												
 												<!--Card Action LISTA DE INSCRITOS-->
+												
 												<div class="card-action" ng-show="evento.Disponivel">
 													<a class="listaDeincritos" ng-attr-href="{{'#lista-inscritos' + evento.ID}}" ng-click="postConfirmado(evento);" onclick="return false;">Lista de Inscritos no Evento</a><br>
-													<a class="listaDeincritos" ng-if="usuario.Admin" ng-click="gerarPDF('tabelaDoEventoNumero-' + evento.ID, evento.Nome, evento.DataInicio, evento.Tipo);" onclick="return false;">Baixar lista (PDF)</a>
+													<!--<a class="listaDeincritos" ng-if="usuario.Admin" ng-click="gerarPDF('tabelaDoEventoNumero-' + evento.ID, evento.Nome, evento.DataInicio, evento.Tipo);" onclick="return false;">Baixar lista (PDF)</a>-->
 												</div>										
+												
 											</div>
 											
 											<!--Lista de Inscritos-->
@@ -743,7 +743,7 @@
 										<div class="row">
 											<div class="col s1 l3"></div>
 											<div class="col s10 l6">
-												<select name="selectBox" id="selectBox" class="materialSelect" ng-model="mySelect" onchange="esconderMensagemEscolhaAno();" ng-change="selecionarAnoRanking(mySelect)">
+												<select name="selectBox" id="selectBox" class="materialSelect" ng-model="mySelect" ng-change="selecionarAnoRanking(mySelect)">
 													<option value="" disabled selected>ESCOLHER ANO</option>
 													<option value="2017">2017</option>
 													<option value="2018">2018</option>

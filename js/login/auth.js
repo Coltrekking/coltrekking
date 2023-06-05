@@ -47,5 +47,5 @@ const enviarUserParaDB      = function(usuario, url)
     });
 }
 
-document.getElementById('loginGoogle').addEventListener('click', () => auth.signInWithPopup(auth.servico, auth.provedorGmail))
-document.getElementById('loginGoogleMobile').addEventListener('click', () => auth.signInWithPopup(auth.servico, auth.provedorGmail))
+document.getElementById('loginGoogle')          .onclick    = () => auth.signInWithPopup(auth.servico, auth.provedorGmail)
+document.getElementById('loginGoogleMobile')    .onclick    = () => auth.signInWithPopup(auth.servico, auth.provedorGmail)

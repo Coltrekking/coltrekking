@@ -28,7 +28,7 @@ $(document).ready(function() {
 		}
 
 
-		//Verifica se não ha pessoas na lista negra para mostrar a mensagem "nao ha pessoas na lista negra"
+		//Verifica se não ha pessoas na lista negra para verificaTipomostrar a mensagem "nao ha pessoas na lista negra"
 		if(!document.getElementsByClassName("listaNegraUsuario")[0]){
 			document.getElementById("naoHapessoasListaNegra").style.display="block";
 			document.getElementById("nomeUsuariosListaNegra").style.display="none";
@@ -36,13 +36,16 @@ $(document).ready(function() {
 
 
 		//Script que remove o filtro do ano que nao estamos
-		for (j=0;j<5;j++) {
+		for (let j = 0; j < 5; j++)
+		{
 			var list = document.getElementsByClassName("dropdown-content select-dropdown")[0];
 			var ano = new Date().getFullYear();
-			for (i=1;i<list.getElementsByTagName("LI").length;i++){
-				if (list.getElementsByTagName("LI")[i].innerText > ano) {
+
+			for (let i = 1; i < list.getElementsByTagName("LI").length; i++)
+			{
+				if (list.getElementsByTagName("LI")[i].innerText > ano)
+
 					list.getElementsByTagName("LI")[i].remove();                		
-				}
 			}
 		}
 
@@ -83,7 +86,7 @@ function esconderMensagemEscolhaAno(){
 
 /**********FORMULARIO**********/
 //Verifica o tipo do evento inserido
-function verificaTipo() {
+export const verificaTipo = function() {
 
 	/*
 	var x = document.getElementById("tipo").value;
@@ -127,10 +130,19 @@ function verificaTipo() {
 }
 
 /**********LOG OUT**********/
-function logOut() {
+function logOut()
+{
 	auth.signOut(auth.servico).then(function() {
 		//SignOut bem-sucedido
 	}, function(error) {
 		//Deu ruim
 	});
 }
+
+document.getElementById('sair-button')		.onclick	= logOut
+document.getElementById('btn-disponivel')	.onclick	= NAOmostrarBotaoEventosAnteriores
+document.getElementById('btn-finalizados')	.onclick	= botaoMostrarEventosAnteriores
+document.getElementById('btn-eventos')		.onclick	= mostrarEventos
+document.getElementById('btn-lst-negra')	.onclick	= mostrarListaNegra
+document.getElementById('btn-ranking')		.onclick	= mostrarRanking
+document.getElementById('selectBox')		.onchange	= esconderMensagemEscolhaAno

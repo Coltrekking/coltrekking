@@ -17,7 +17,7 @@
 				<div class="row">
 					<!--Tipo-->
 					<div class="col s12 l1"></div>
-					<div onchange="verificaTipo();" class="input-field col s12 l5">
+					<div id="select-tipo" class="input-field col s12 l5">
 						<select id="tipo" name="tipo" ng-model="params.Tipo">
 							<option value="1">Preleção</option>
 							<option value="2">Trekking</option>
@@ -163,3 +163,10 @@
 		</div>
 	</div>
 </div>
+
+<script type="module">
+	import { verificaTipo } from '../../js/main/script.js'
+
+	$('#select-tipo').trigger('change')
+	$('#select-tipo').change(verificaTipo)
+</script>
