@@ -1,14 +1,16 @@
 /********************************SETUP**********************************/
-var http = require('http');
-var fs = require('fs');
-var url = require('url');
-var path = require('path');
-var express = require('express');
-var mysql = require('mysql');
-var bodyParser = require('body-parser');
-var session = require('express-session');
-var moment = require('moment');
-var aws = require('aws-sdk/lib/maintenance_mode_message').suppress = true;
+import * as http	from 'http'
+import * as fs		from 'fs'
+import * as url		from 'url'
+import * as path	from 'path'
+import * as mysql	from 'mysql'
+import * as moment	from 'moment'
+import express		from 'express'
+import bodyParser	from 'body-parser'
+import session from 'express-session'
+import __dirname	from './root_dir.mjs'
+
+//var aws = require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 var app = express();
 
 //*****DEPENDENCIAS*****//
@@ -31,7 +33,7 @@ app.use(express.static('./', {
 //*****MySQL*****//
 var pool = mysql.createPool({
 	connectionLimit: 10000,
-	host: 'localhost',
+	host: '172.17.0.2',
 	user: 'admin',
 	password: 'coltec',
 	database: 'coltrekking',
@@ -967,7 +969,7 @@ function montaRanking(ano, connection, callback) {
 }
 
 /*************************INICIA SERVIDOR*****************************/
-var port = process.env.PORT || 80;
+var port = process.env.PORT || 3000;
 
 app.listen(port, function () {
 	//console.log("Ouvindo na porta " + port);
