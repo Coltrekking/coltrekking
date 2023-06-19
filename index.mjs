@@ -3,8 +3,8 @@ import * as http	from 'http'
 import * as fs		from 'fs'
 import * as url		from 'url'
 import * as path	from 'path'
-import * as mysql	from 'mysql'
 import * as moment	from 'moment'
+import * as db		from './db.mjs'
 import express		from 'express'
 import bodyParser	from 'body-parser'
 import session from 'express-session'
@@ -29,33 +29,6 @@ app.use(session({
 app.use(express.static('./', {
 	index: 'html/login/index.html'
 }));
-
-//*****MySQL*****//
-var pool = mysql.createPool({
-	connectionLimit: 10000,
-	host: 'localhost',
-	user: 'admin',
-	password: 'coltec',
-	database: 'coltrekking',
-	debug: false
-});
-
-// Conecta ao DB
-function handleDatabase(req, res, call) {
-	pool.getConnection(function (err, connection) {
-		if (err) {
-			res.json({ "code": 100, "status": "Error in connection database" });
-			return false;
-		}
-
-		call(req, res, connection);
-
-		connection.on('error', function (err) {
-			//res.json({"code": 100, "status": "Error in query"});
-			return false;
-		});
-	});
-}
 
 /*********************************PAGINAS********************************/
 var index = '/html/index.html';
@@ -91,12 +64,12 @@ app.post("/post-user", function (req, res) {
 		req.session.usuarioLogado = req.body;
 
 		//Adiciona usuario ao DB
-		handleDatabase(req, res, function (req, res, connection) {
+		db.handleDatabase(req, res, function (req, res, connection) {
 			addDB(req, connection, function (status) {
 				if (status) {
 					req.session.loginSucesso = true;
 
-					handleDatabase(req, res, function (req, res, connection) {
+					db.handleDatabase(req, res, function (req, res, connection) {
 						//Pega info como fatork, posicao, etc
 						pegaInfoUsuarioLogado(req, connection, function (status) {
 							if (status) {
@@ -139,7 +112,7 @@ app.post("/criar-evento", function (req, res) {
 	if (!req.session.usuarioLogado.ID) {
 		res.send(false);
 	} else {
-		handleDatabase(req, res, function (req, res, connection) {
+		db.handleDatabase(req, res, function (req, res, connection) {
 			criarEventoDB(req, req.body, connection, function (status) {
 				res.send(status);
 			});
@@ -152,7 +125,7 @@ app.post("/editar-evento", function (req, res) {
 	if (!req.session.usuarioLogado.ID) {
 		res.send(false);
 	} else {
-		handleDatabase(req, res, function (req, res, connection) {
+		db.handleDatabase(req, res, function (req, res, connection) {
 			editarEventoDB(req, req.body, connection, function (status) {
 				res.send(status);
 			});
@@ -165,7 +138,7 @@ app.post("/editar-info", function (req, res) {
 	if (!req.session.usuarioLogado.ID) {
 		res.send(false);
 	} else {
-		handleDatabase(req, res, function (req, res, connection) {
+		db.handleDatabase(req, res, function (req, res, connection) {
 			editarInfoDB(req, req.body, connection, function (status) {
 				res.send(status);
 			});
@@ -175,7 +148,7 @@ app.post("/editar-info", function (req, res) {
 
 //******Get informacoes iniciais*****//
 app.get("/informacoesiniciais", function (req, res) {
-	handleDatabase(req, res, function (req, res, connection) {
+	db.handleDatabase(req, res, function (req, res, connection) {
 		getInformacoesiniciais(connection, function (rows) {
 			res.send(rows);
 		});
@@ -187,7 +160,7 @@ app.get("/eventos", function (req, res) {
 	if (!req.session.usuarioLogado.ID) {
 		res.send(false);
 	} else {
-		handleDatabase(req, res, function (req, res, connection) {
+		db.handleDatabase(req, res, function (req, res, connection) {
 			getEventos(connection, function (rows) {
 				res.send(rows);
 			});
@@ -200,7 +173,7 @@ app.post("/confirmados", function (req, res) {
 	if (!req.session.usuarioLogado.ID) {
 		res.send(false);
 	} else {
-		handleDatabase(req, res, function (req, res, connection) {
+		db.handleDatabase(req, res, function (req, res, connection) {
 			getConfirmados(req.body.IDEvento, connection, function (rows) {
 				res.send(rows);
 			});
@@ -213,7 +186,7 @@ app.post("/confirmados-por-mim", function (req, res) {
 	if (!req.session.usuarioLogado.ID) {
 		res.send(false);
 	} else {
-		handleDatabase(req, res, function (req, res, connection) {
+		db.handleDatabase(req, res, function (req, res, connection) {
 			getConfirmadosPorMim(req.body.usuarioID, connection, function (rows) {
 				res.send(rows);
 			});
@@ -226,7 +199,7 @@ app.post("/confirmar-evento", function (req, res) {
 	if (!req.session.usuarioLogado.ID) {
 		res.send(false);
 	} else {
-		handleDatabase(req, res, function (req, res, connection) {
+		db.handleDatabase(req, res, function (req, res, connection) {
 			confirmarEventoDB(req.body, connection, function (status) {
 				res.send(status);
 			});
@@ -239,7 +212,7 @@ app.post("/cancelar-evento", function (req, res) {
 	if (!req.session.usuarioLogado.ID) {
 		res.send(false);
 	} else {
-		handleDatabase(req, res, function (req, res, connection) {
+		db.handleDatabase(req, res, function (req, res, connection) {
 			cancelarEventoDB(req.body, connection, function (status) {
 				res.send(status);
 			});
@@ -252,7 +225,7 @@ app.post("/cadastrar-pontuacao", function (req, res) {
 	if (!req.session.usuarioLogado.ID) {
 		res.send(false);
 	} else {
-		handleDatabase(req, res, function (req, res, connection) {
+		db.handleDatabase(req, res, function (req, res, connection) {
 			cadastrarPontucaoDB(req, req.body, connection, function (status) {
 				res.send(status);
 			});
@@ -267,7 +240,7 @@ app.post("/finalizar-evento", function (req, res) {
 	if (!req.session.usuarioLogado.ID) {
 		res.send(false);
 	} else {
-		handleDatabase(req, res, function (req, res, connection) {
+		db.handleDatabase(req, res, function (req, res, connection) {
 			finalizarEventoDB(req, req.body, connection, function (status) {
 				res.send(status);
 			});
@@ -281,7 +254,7 @@ app.post("/adicionar-lista-negra", function (req, res) {
 	if (!req.session.usuarioLogado.ID) {
 		res.send(false);
 	} else {
-		handleDatabase(req, res, function (req, res, connection) {
+		db.handleDatabase(req, res, function (req, res, connection) {
 			adicionarListaNegraDB(req, req.body, connection, function (status) {
 				res.send(status);
 			});
@@ -294,7 +267,7 @@ app.post("/remover-lista-negra", function (req, res) {
 	if (!req.session.usuarioLogado.ID) {
 		res.send(false);
 	} else {
-		handleDatabase(req, res, function (req, res, connection) {
+		db.handleDatabase(req, res, function (req, res, connection) {
 			removerListaNegraDB(req, req.body, connection, function (status) {
 				res.send(status);
 			});
@@ -308,7 +281,7 @@ app.post("/excluir-evento", function (req, res) {
 	if (!req.session.usuarioLogado.ID) {
 		res.send(false);
 	} else {
-		handleDatabase(req, res, function (req, res, connection) {
+		db.handleDatabase(req, res, function (req, res, connection) {
 			excluirEventoDB(req, req.body, connection, function (status) {
 				res.send(status);
 			});
@@ -322,7 +295,7 @@ app.post("/excluir-usuario", function (req, res) {
 	if (!req.session.usuarioLogado.ID) {
 		res.send(false);
 	} else {
-		handleDatabase(req, res, function (req, res, connection) {
+		db.handleDatabase(req, res, function (req, res, connection) {
 			excluirUsuarioDB(req, req.body, connection, function (status) {
 				res.send(status);
 			});
@@ -336,7 +309,7 @@ app.post("/criar-postagem", function (req, res) {
 	if (!req.session.usuarioLogado.ID) {
 		res.send(false);
 	} else {
-		handleDatabase(req, res, function (req, res, connection) {
+		db.handleDatabase(req, res, function (req, res, connection) {
 			criarPostagemDB(req, req.body, connection, function (status) {
 				res.send(status);
 			});
@@ -349,7 +322,7 @@ app.post("/excluir-postagem", function (req, res) {
 	if (!req.session.usuarioLogado.ID) {
 		res.send(false);
 	} else {
-		handleDatabase(req, res, function (req, res, connection) {
+		db.handleDatabase(req, res, function (req, res, connection) {
 			excluirPostagemDB(req, req.body, connection, function (status) {
 				res.send(status);
 			});
@@ -362,7 +335,7 @@ app.get("/get-postagem", function (req, res) {
 	if (!req.session.usuarioLogado.ID) {
 		res.send(false);
 	} else {
-		handleDatabase(req, res, function (req, res, connection) {
+		db.handleDatabase(req, res, function (req, res, connection) {
 			getPostagemDB(connection, function (status) {
 				res.send(status);
 			});
@@ -375,7 +348,7 @@ app.post("/ranking", function (req, res) {
 	if (!req.session.usuarioLogado.ID) {
 		res.send(false);
 	} else {
-		handleDatabase(req, res, function (req, res, connection) {
+		db.handleDatabase(req, res, function (req, res, connection) {
 			montaRanking(req.body.ano, connection, function callback(rows) {
 				res.send(rows);
 			});
