@@ -33,7 +33,7 @@ app.use(express.static('./', {
 //*****MySQL*****//
 var pool = mysql.createPool({
 	connectionLimit: 10000,
-	host: '172.17.0.2',
+	host: 'localhost',
 	user: 'admin',
 	password: 'coltec',
 	database: 'coltrekking',
@@ -969,7 +969,7 @@ function montaRanking(ano, connection, callback) {
 }
 
 /*************************INICIA SERVIDOR*****************************/
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 80;
 
 app.listen(port, function () {
 	//console.log("Ouvindo na porta " + port);
