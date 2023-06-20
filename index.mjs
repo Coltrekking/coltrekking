@@ -4,10 +4,12 @@ import * as fs		from 'fs'
 import * as url		from 'url'
 import * as path	from 'path'
 import * as moment	from 'moment'
-import * as db		from './db.mjs'
 import express		from 'express'
 import bodyParser	from 'body-parser'
-import session from 'express-session'
+import session 		from 'express-session'
+
+import * as db		from './db.mjs'
+import * as user	from './user.mjs'
 import __dirname	from './root_dir.mjs'
 
 //var aws = require('aws-sdk/lib/maintenance_mode_message').suppress = true;
@@ -33,20 +35,6 @@ app.use(express.static('./', {
 /*********************************PAGINAS********************************/
 var index = '/html/index.html';
 var login = '/html/login/index.html';
-
-/*************************VARIAVEIS DE EXECUCAO**************************/
-//Construtor do usuario
-function Usuario(nome, email, foto, id, fatork, posicao, listaNegra, rg, admin) {
-	this.Nome = nome;
-	this.Email = email;
-	this.Foto = foto;
-	this.ID = id;
-	this.FatorK = fatork;
-	this.Posicao = posicao;
-	this.ListaNegra = listaNegra;
-	this.rg = rg;
-	this.Admin = admin;
-}
 
 /******************************REQUISICOES*******************************/
 //*****Carrega pagina inicial*****//
@@ -370,7 +358,7 @@ app.get("/logout", function (req, res) {
 //*****Adicionar usuario ao DB*****//
 function addDB(req, connection, callback) {
 	//Cria usuario com propriedades do req.session.usuarioLogado
-	var usuario = new Usuario(req.session.usuarioLogado.Nome, req.session.usuarioLogado.Email, req.session.usuarioLogado.Foto, req.session.usuarioLogado.ID, 0, 1, 0, null, 0);
+	var usuario = new user.Usuario(req.session.usuarioLogado.Nome, req.session.usuarioLogado.Email, req.session.usuarioLogado.Foto, req.session.usuarioLogado.ID, 0, 1, 0, null, 0);
 
 	//Adiciona ao DB de Pessoas
 	connection.query('INSERT IGNORE INTO pessoa SET ?', usuario, function (err, rows, fields) {
