@@ -11,6 +11,7 @@ import * as db		from './db.mjs'
 import * as user	from './user.mjs'
 import * as lstNeg	from './blacklist.mjs'
 import * as evento	from './event.mjs'
+import * as postagem	from './postagem.mjs'
 import __dirname	from './root_dir.mjs'
 
 //var aws = require('aws-sdk/lib/maintenance_mode_message').suppress = true;
@@ -299,7 +300,7 @@ app.post("/criar-postagem", function (req, res) {
 		res.send(false);
 	} else {
 		db.handleDatabase(req, res, function (req, res, connection) {
-			criarPostagemDB(req, req.body, connection, function (status) {
+			postagem.criarPostagemDB(req, req.body, connection, function (status) {
 				res.send(status);
 			});
 		});
@@ -312,7 +313,7 @@ app.post("/excluir-postagem", function (req, res) {
 		res.send(false);
 	} else {
 		db.handleDatabase(req, res, function (req, res, connection) {
-			excluirPostagemDB(req, req.body, connection, function (status) {
+			postagem.excluirPostagemDB(req, req.body, connection, function (status) {
 				res.send(status);
 			});
 		});
@@ -325,7 +326,7 @@ app.get("/get-postagem", function (req, res) {
 		res.send(false);
 	} else {
 		db.handleDatabase(req, res, function (req, res, connection) {
-			getPostagemDB(connection, function (status) {
+			postagem.getPostagemDB(connection, function (status) {
 				res.send(status);
 			});
 		});
@@ -472,57 +473,6 @@ function cadastrarPontucaoDB(req, post, connection, callback) {
 			}
 		});
 
-	} else {
-		callback(false);
-	}
-}
-
-//*****Criar Postagem*****//
-function criarPostagemDB(req, data, connection, callback) {
-	if (req.session.usuarioLogado.Admin) {
-		connection.query('INSERT INTO postagem SET ?', data, function (err, rows, fields) {
-			connection.release();
-
-			if (!err) {
-				callback(true);
-			}
-			else {
-				//console.log(err);
-				callback(false);
-			}
-		});
-	} else {
-		callback(false);
-	}
-}
-
-//*****Get Postagem*****//
-function getPostagemDB(connection, callback) {
-	connection.query('SELECT postagem.*, evento.Nome, pessoa.Nome AS AdminNome, pessoa.Foto AS AdminFoto FROM postagem LEFT JOIN evento ON postagem.EventoID = evento.ID LEFT JOIN pessoa ON postagem.AdminID = pessoa.ID', function (err, rows, fields) {
-		connection.release();
-
-		if (!err) {
-			callback(rows);
-		}
-		else {
-			//console.log(err);
-			callback(false);
-		}
-	});
-}
-
-//*****Excluir Postagem*****//
-function excluirPostagemDB(req, post, connection, callback) {
-	if (req.session.usuarioLogado.Admin) {
-		connection.query('DELETE FROM `postagem` WHERE ID = ?', post.ID, function (err, rows, fields) {
-			connection.release();
-
-			if (!err) {
-				callback(true);
-			} else {
-				callback(false);
-			}
-		});
 	} else {
 		callback(false);
 	}
