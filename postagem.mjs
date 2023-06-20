@@ -49,4 +49,21 @@ function excluirPostagemDB(req, post, connection, callback) {
 	}
 }
 
-export { criarPostagemDB, excluirPostagemDB, getPostagemDB }
+//*****Editar Info no DB*****//
+function editarInfoDB(req, data, connection, callback) {
+	if (req.session.usuarioLogado.Admin) {
+		connection.query('UPDATE postagem SET ? WHERE ID = 1', [data], function (err, rows, fields) {
+			connection.release();
+			if (!err) {
+				callback(true);
+			} else {
+				//	console.log(err);
+				callback(false);
+			}
+		});
+	} else {
+		callback(false);
+	}
+}
+
+export { criarPostagemDB, excluirPostagemDB, getPostagemDB, editarInfoDB }

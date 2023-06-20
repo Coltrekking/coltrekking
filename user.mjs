@@ -59,4 +59,17 @@ function pegaInfoUsuarioLogado(req, connection, callback) {
 	});
 }
 
-export { Usuario, addDB, pegaInfoUsuarioLogado }
+//*****Esta Inscrito*****//
+function estaInscrito(post, connection, callback) {
+	connection.query('SELECT * FROM `pessoa-evento` WHERE IDPessoa = ? AND IDEvento = ?', [post.usuario, post.evento], function (err, rows, fields) {
+		if (!err) {
+			//Se esta ou nao inscrito
+			rows.length == 0 ? callback(true) : callback(false);
+		} else {
+			//console.log('Error while performing Query');
+			callback(false);
+		}
+	});
+}
+
+export { Usuario, addDB, pegaInfoUsuarioLogado, estaInscrito }

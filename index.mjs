@@ -129,7 +129,7 @@ app.post("/editar-info", function (req, res) {
 		res.send(false);
 	} else {
 		db.handleDatabase(req, res, function (req, res, connection) {
-			editarInfoDB(req, req.body, connection, function (status) {
+			postagem.editarInfoDB(req, req.body, connection, function (status) {
 				res.send(status);
 			});
 		});
@@ -358,23 +358,6 @@ app.get("/logout", function (req, res) {
 
 /***************************BANCO DE DADOS*****************************/
 
-//*****Editar Info no DB*****//
-function editarInfoDB(req, data, connection, callback) {
-	if (req.session.usuarioLogado.Admin) {
-		connection.query('UPDATE postagem SET ? WHERE ID = 1', [data], function (err, rows, fields) {
-			connection.release();
-			if (!err) {
-				callback(true);
-			} else {
-				//	console.log(err);
-				callback(false);
-			}
-		});
-	} else {
-		callback(false);
-	}
-}
-
 //*****Get Informacoes Iniciais*****//
 function getInformacoesiniciais(connection, callback) {
 	connection.query('SELECT Texto, ComoParticipar, Calendario, Regras FROM postagem WHERE ID = 1', function (err, rows, fields) {
@@ -476,19 +459,6 @@ function cadastrarPontucaoDB(req, post, connection, callback) {
 	} else {
 		callback(false);
 	}
-}
-
-//*****Esta Inscrito*****//
-function estaInscrito(post, connection, callback) {
-	connection.query('SELECT * FROM `pessoa-evento` WHERE IDPessoa = ? AND IDEvento = ?', [post.usuario, post.evento], function (err, rows, fields) {
-		if (!err) {
-			//Se esta ou nao inscrito
-			rows.length == 0 ? callback(true) : callback(false);
-		} else {
-			//console.log('Error while performing Query');
-			callback(false);
-		}
-	});
 }
 
 //*****Monta Ranking*****//
