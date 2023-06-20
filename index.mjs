@@ -223,8 +223,6 @@ app.post("/cadastrar-pontuacao", function (req, res) {
 	}
 });
 
-
-
 //*****Finalizar Evento*****//
 app.post("/finalizar-evento", function (req, res) {
 	if (!req.session.usuarioLogado.ID) {
@@ -237,7 +235,6 @@ app.post("/finalizar-evento", function (req, res) {
 		});
 	}
 });
-
 
 //*****Adicionar usuario na lista negra*****//
 app.post("/adicionar-lista-negra", function (req, res) {
@@ -265,7 +262,6 @@ app.post("/remover-lista-negra", function (req, res) {
 	}
 });
 
-
 //*****Excluir Evento*****//
 app.post("/excluir-evento", function (req, res) {
 	if (!req.session.usuarioLogado.ID) {
@@ -279,7 +275,6 @@ app.post("/excluir-evento", function (req, res) {
 	}
 });
 
-
 //*****Excluir Usuario*****//
 app.post("/excluir-usuario", function (req, res) {
 	if (!req.session.usuarioLogado.ID) {
@@ -292,7 +287,6 @@ app.post("/excluir-usuario", function (req, res) {
 		});
 	}
 });
-
 
 //*****Criar Postagem*****//
 app.post("/criar-postagem", function (req, res) {
@@ -357,7 +351,6 @@ app.get("/logout", function (req, res) {
 });
 
 /***************************BANCO DE DADOS*****************************/
-
 //*****Get Informacoes Iniciais*****//
 function getInformacoesiniciais(connection, callback) {
 	connection.query('SELECT Texto, ComoParticipar, Calendario, Regras FROM postagem WHERE ID = 1', function (err, rows, fields) {
