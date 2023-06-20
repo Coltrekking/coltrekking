@@ -1,3 +1,5 @@
+import * as moment	from 'moment'
+
 //*****Adiciona Evento ao DB*****//
 function criarEventoDB(req, data, connection, callback) {
 	if (req.session.usuarioLogado.Admin) {
