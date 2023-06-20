@@ -54,13 +54,13 @@ app.post("/post-user", function (req, res) {
 
 		//Adiciona usuario ao DB
 		db.handleDatabase(req, res, function (req, res, connection) {
-			addDB(req, connection, function (status) {
+			user.addDB(req, connection, function (status) {
 				if (status) {
 					req.session.loginSucesso = true;
 
 					db.handleDatabase(req, res, function (req, res, connection) {
 						//Pega info como fatork, posicao, etc
-						pegaInfoUsuarioLogado(req, connection, function (status) {
+						user.pegaInfoUsuarioLogado(req, connection, function (status) {
 							if (status) {
 								//Depois de fazer login, manda pagina a ser redirecionado
 								res.send("/main-page");
@@ -285,7 +285,7 @@ app.post("/excluir-usuario", function (req, res) {
 		res.send(false);
 	} else {
 		db.handleDatabase(req, res, function (req, res, connection) {
-			excluirUsuarioDB(req, req.body, connection, function (status) {
+			evento.excluirUsuarioDB(req, req.body, connection, function (status) {
 				res.send(status);
 			});
 		});
@@ -356,53 +356,6 @@ app.get("/logout", function (req, res) {
 });
 
 /***************************BANCO DE DADOS*****************************/
-//*****Adicionar usuario ao DB*****//
-function addDB(req, connection, callback) {
-	//Cria usuario com propriedades do req.session.usuarioLogado
-	var usuario = new user.Usuario(req.session.usuarioLogado.Nome, req.session.usuarioLogado.Email, req.session.usuarioLogado.Foto, req.session.usuarioLogado.ID, 0, 1, 0, null, 0);
-
-	//Adiciona ao DB de Pessoas
-	connection.query('INSERT IGNORE INTO pessoa SET ?', usuario, function (err, rows, fields) {
-		connection.release();
-
-		if (!err) {
-			// console.log(rows);
-			callback(true);
-		}
-		else {
-			// console.log(err);
-			// console.log('Error while performing Query (ADICIONA AO DB PESSOAS)');
-			callback(false);
-		}
-	});
-}
-
-//*****Pega Info do Usuario Logado*****//
-function pegaInfoUsuarioLogado(req, connection, callback) {
-	connection.query('SELECT * FROM pessoa WHERE ID = ?', req.session.usuarioLogado.ID, function (err, rows, fields) {
-		connection.release();
-
-		if (!err) {
-			//Retrieve info do DB
-			try {
-				req.session.usuarioLogado.FatorK = rows[0].FatorK;
-				req.session.usuarioLogado.Posicao = rows[0].Posicao;
-				req.session.usuarioLogado.ListaNegra = rows[0].ListaNegra;
-				req.session.usuarioLogado.rg = rows[0].rg;
-				req.session.usuarioLogado.Admin = rows[0].Admin;
-			} catch (err) {
-				console.log(err.message);
-				callback(false);
-			}
-
-			//Realiza o callback
-			callback(true);
-		} else {
-			callback(false);
-			// console.log('Error while performing Query (PEGA INFO DB)');
-		}
-	});
-}
 
 //*****Editar Info no DB*****//
 function editarInfoDB(req, data, connection, callback) {
@@ -523,25 +476,6 @@ function cadastrarPontucaoDB(req, post, connection, callback) {
 		callback(false);
 	}
 }
-
-//*****Excluir Usuario*****//
-function excluirUsuarioDB(req, post, connection, callback) {
-	if (req.session.usuarioLogado.Admin) {
-		connection.query('DELETE FROM `pessoa-evento` WHERE IDEvento = ? AND IDPessoa = ?', [post.IDEvento, post.ID], function (err, rows, fields) {
-			connection.release();
-
-			if (!err) {
-				callback(true);
-			} else {
-				callback(false);
-			}
-		});
-	} else {
-		callback(false);
-	}
-}
-
-
 
 //*****Criar Postagem*****//
 function criarPostagemDB(req, data, connection, callback) {
