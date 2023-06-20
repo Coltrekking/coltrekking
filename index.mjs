@@ -9,7 +9,7 @@ import session 		from 'express-session'
 
 import * as db		from './db.mjs'
 import * as user	from './user.mjs'
-import * as blacklist	from './blacklist.mjs'
+import * as lstNeg	from './blacklist.mjs'
 import * as evento	from './event.mjs'
 import __dirname	from './root_dir.mjs'
 
@@ -244,7 +244,7 @@ app.post("/adicionar-lista-negra", function (req, res) {
 		res.send(false);
 	} else {
 		db.handleDatabase(req, res, function (req, res, connection) {
-			blacklist.adicionarListaNegraDB(req, req.body, connection, function (status) {
+			lstNeg.adicionarListaNegraDB(req, req.body, connection, function (status) {
 				res.send(status);
 			});
 		});
@@ -257,7 +257,7 @@ app.post("/remover-lista-negra", function (req, res) {
 		res.send(false);
 	} else {
 		db.handleDatabase(req, res, function (req, res, connection) {
-			blacklist.removerListaNegraDB(req, req.body, connection, function (status) {
+			lstNeg.removerListaNegraDB(req, req.body, connection, function (status) {
 				res.send(status);
 			});
 		});
