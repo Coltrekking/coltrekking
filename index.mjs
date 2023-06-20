@@ -216,7 +216,7 @@ app.post("/cadastrar-pontuacao", function (req, res) {
 		res.send(false);
 	} else {
 		db.handleDatabase(req, res, function (req, res, connection) {
-			cadastrarPontucaoDB(req, req.body, connection, function (status) {
+			evento.cadastrarPontucaoDB(req, req.body, connection, function (status) {
 				res.send(status);
 			});
 		});
@@ -339,7 +339,7 @@ app.post("/ranking", function (req, res) {
 		res.send(false);
 	} else {
 		db.handleDatabase(req, res, function (req, res, connection) {
-			montaRanking(req.body.ano, connection, function callback(rows) {
+			evento.montaRanking(req.body.ano, connection, function callback(rows) {
 				res.send(rows);
 			});
 		});
@@ -396,80 +396,6 @@ function getConfirmadosPorMim(data, connection, callback) {
 			callback(rows);
 		} else {
 			//console.log('this.sql', this.sql);
-			//console.log(err);
-			callback(false);
-		}
-	});
-}
-
-//*****Cadastrar Pontuacao*****//
-function cadastrarPontucaoDB(req, post, connection, callback) {
-	var controle = true;
-	if (req.session.usuarioLogado.Admin) {
-		connection.query('UPDATE `evento` SET fatorKevento = ? WHERE ID = ?', [post.fatork, post.eventoID], function (err, rows, fields) {
-			if (!err) {
-				connection.query('UPDATE `evento` SET subdesc = ? WHERE ID = ?', [post.subdesc, post.eventoID], function (err, rows, fields) {
-					if (!err) {
-						connection.query('UPDATE `evento` SET distancia = ? WHERE ID = ?', [post.distancia, post.eventoID], function (err, rows, fields) {
-							if (!err) {
-
-								var promessa = new Promise(function (resolve, reject) {
-									post.pessoas.forEach(function (elem, index, array) {
-										connection.query('UPDATE `pessoa-evento` SET fatorKPessoaEvento = ? WHERE IDEvento = ? AND listaNegraEvento = 0', [post.fatork, post.eventoID], function (err, rows, fields) {
-											if (!err) {
-												//Se for o ultimo, resolve a promessa
-												if (index == (array.length - 1)) {
-													resolve();
-												}
-											} else {
-												controle = false;
-											}
-										});
-									});
-								});
-
-								promessa.then(function () {
-									connection.query('UPDATE `evento` SET Finalizado = 1 WHERE ID = ?', post.eventoID, function (err, rows, fields) {
-										connection.release();
-
-										if (!err) {
-											callback(controle);
-										} else {
-											controle = false;
-										}
-									});
-								});
-
-
-							} else {
-								callback(false);
-							}
-						});
-					}
-					else {
-						callback(false);
-					}
-				});
-			}
-			else {
-				callback(false);
-			}
-		});
-
-	} else {
-		callback(false);
-	}
-}
-
-//*****Monta Ranking*****//
-function montaRanking(ano, connection, callback) {
-	connection.query('SELECT `pessoa-evento`.IDPessoa AS ID, pessoa.Nome AS Nome, SUM(FatorKPessoaEvento) AS FatorK FROM pessoa INNER JOIN `pessoa-evento` ON pessoa.ID = `pessoa-evento`.IDPessoa INNER JOIN evento ON evento.ID = `pessoa-evento`.`IDEvento` WHERE `pessoa-evento`.FatorKPessoaEvento > 0 AND evento.ano = ? GROUP BY `pessoa-evento`.IDPessoa ORDER BY FatorK DESC', ano, function (err, rows, fields) {
-		connection.release();
-
-		if (!err) {
-			callback(rows);
-		}
-		else {
 			//console.log(err);
 			callback(false);
 		}
