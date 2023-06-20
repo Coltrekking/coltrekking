@@ -40,7 +40,7 @@ const enviarUserParaDB      = function(usuario, url)
         },
         error: function (answer, status)
         {
-            reativarBotoes();
+            //reativarBotoes();
             console.log(answer.responseText);
             alert("Erro ao realizar o login! Tente novamente");
         }
