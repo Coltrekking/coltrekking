@@ -39,11 +39,45 @@ var index = '/html/index.html';
 var login = '/html/login/index.html';
 
 /******************************REQUISICOES*******************************/
+
+const execute	= (req, res, func) =>
+{
+	if (req.session.usuarioLogado.ID)
+	{
+		db.handleDatabase(req, res, (req, res, connection) =>
+		{
+			func(req, req.body, connection, (status) => res.send(status));
+		});
+	}
+	else
+		res.send(false);
+}
+
 //*****Carrega pagina inicial*****//
 app.get("/", function (req, res) {
 	req.session.loginSucesso = false;
 	res.sendFile(path.join(__dirname, login));
 });
+
+/* EVENTOS */
+app.post("/criar-evento",			(req, res) => execute(req, res, evento.criarEventoDB));
+app.post("/editar-evento",			(req, res) => execute(req, res, evento.editarEventoDB));
+app.post("/confirmar-evento",		(req, res) => execute(req, res, evento.confirmarEventoDB));
+app.post("/cancelar-evento",		(req, res) => execute(req, res, evento.cancelarEventoDB));
+app.post("/cadastrar-pontuacao",	(req, res) => execute(req, res, evento.cadastrarPontucaoDB));
+app.post("/finalizar-evento",		(req, res) => execute(req, res, evento.finalizarEventoDB));
+app.post("/excluir-evento",			(req, res) => execute(req, res, evento.excluirEventoDB));
+
+/* POSTAGENS */
+app.post("/criar-postagem",			(req, res) => execute(req, res, postagem.criarPostagemDB));
+app.post("/editar-info",			(req, res) => execute(req, res, postagem.editarInfoDB));
+app.post("/get-postagem",			(req, res) => execute(req, res, postagem.getPostagemDB));
+app.post("/excluir-postagem",		(req, res) => execute(req, res, postagem.excluirPostagemDB));
+
+/* LISTA NEGRA */
+app.post("/adicionar-lista-negra",	(req, res) => execute(req, res, lstNeg.adicionarListaNegraDB));
+app.post("/remover-lista-negra",	(req, res) => execute(req, res, lstNeg.removerListaNegraDB));
+app.post("/excluir-usuario",		(req, res) => execute(req, res, evento.excluirUsuarioDB));
 
 //*****Posta usuario logado*****//
 app.post("/post-user", function (req, res) {
@@ -97,45 +131,6 @@ app.get("/get-user", function (req, res) {
 	res.json(req.session.usuarioLogado);
 });
 
-//*****Criar Evento*****//
-app.post("/criar-evento", function (req, res) {
-	if (!req.session.usuarioLogado.ID) {
-		res.send(false);
-	} else {
-		db.handleDatabase(req, res, function (req, res, connection) {
-			evento.criarEventoDB(req, req.body, connection, function (status) {
-				res.send(status);
-			});
-		});
-	}
-});
-
-//*****Editar Evento*****//
-app.post("/editar-evento", function (req, res) {
-	if (!req.session.usuarioLogado.ID) {
-		res.send(false);
-	} else {
-		db.handleDatabase(req, res, function (req, res, connection) {
-			evento.editarEventoDB(req, req.body, connection, function (status) {
-				res.send(status);
-			});
-		});
-	}
-});
-
-//*****Editar Info Inicial*****//
-app.post("/editar-info", function (req, res) {
-	if (!req.session.usuarioLogado.ID) {
-		res.send(false);
-	} else {
-		db.handleDatabase(req, res, function (req, res, connection) {
-			postagem.editarInfoDB(req, req.body, connection, function (status) {
-				res.send(status);
-			});
-		});
-	}
-});
-
 //******Get informacoes iniciais*****//
 app.get("/informacoesiniciais", function (req, res) {
 	db.handleDatabase(req, res, function (req, res, connection) {
@@ -184,149 +179,6 @@ app.post("/confirmados-por-mim", function (req, res) {
 	}
 });
 
-//*****Confirmar Evento*****//
-app.post("/confirmar-evento", function (req, res) {
-	if (!req.session.usuarioLogado.ID) {
-		res.send(false);
-	} else {
-		db.handleDatabase(req, res, function (req, res, connection) {
-			evento.confirmarEventoDB(req.body, connection, function (status) {
-				res.send(status);
-			});
-		});
-	}
-});
-
-//*****Cancelar Evento*****//
-app.post("/cancelar-evento", function (req, res) {
-	if (!req.session.usuarioLogado.ID) {
-		res.send(false);
-	} else {
-		db.handleDatabase(req, res, function (req, res, connection) {
-			evento.cancelarEventoDB(req.body, connection, function (status) {
-				res.send(status);
-			});
-		});
-	}
-});
-
-//*****Cadastrar Pontucao*****//
-app.post("/cadastrar-pontuacao", function (req, res) {
-	if (!req.session.usuarioLogado.ID) {
-		res.send(false);
-	} else {
-		db.handleDatabase(req, res, function (req, res, connection) {
-			evento.cadastrarPontucaoDB(req, req.body, connection, function (status) {
-				res.send(status);
-			});
-		});
-	}
-});
-
-//*****Finalizar Evento*****//
-app.post("/finalizar-evento", function (req, res) {
-	if (!req.session.usuarioLogado.ID) {
-		res.send(false);
-	} else {
-		db.handleDatabase(req, res, function (req, res, connection) {
-			evento.finalizarEventoDB(req, req.body, connection, function (status) {
-				res.send(status);
-			});
-		});
-	}
-});
-
-//*****Adicionar usuario na lista negra*****//
-app.post("/adicionar-lista-negra", function (req, res) {
-	if (!req.session.usuarioLogado.ID) {
-		res.send(false);
-	} else {
-		db.handleDatabase(req, res, function (req, res, connection) {
-			lstNeg.adicionarListaNegraDB(req, req.body, connection, function (status) {
-				res.send(status);
-			});
-		});
-	}
-});
-
-//*****Remover usuario da lista negra*****//
-app.post("/remover-lista-negra", function (req, res) {
-	if (!req.session.usuarioLogado.ID) {
-		res.send(false);
-	} else {
-		db.handleDatabase(req, res, function (req, res, connection) {
-			lstNeg.removerListaNegraDB(req, req.body, connection, function (status) {
-				res.send(status);
-			});
-		});
-	}
-});
-
-//*****Excluir Evento*****//
-app.post("/excluir-evento", function (req, res) {
-	if (!req.session.usuarioLogado.ID) {
-		res.send(false);
-	} else {
-		db.handleDatabase(req, res, function (req, res, connection) {
-			evento.excluirEventoDB(req, req.body, connection, function (status) {
-				res.send(status);
-			});
-		});
-	}
-});
-
-//*****Excluir Usuario*****//
-app.post("/excluir-usuario", function (req, res) {
-	if (!req.session.usuarioLogado.ID) {
-		res.send(false);
-	} else {
-		db.handleDatabase(req, res, function (req, res, connection) {
-			evento.excluirUsuarioDB(req, req.body, connection, function (status) {
-				res.send(status);
-			});
-		});
-	}
-});
-
-//*****Criar Postagem*****//
-app.post("/criar-postagem", function (req, res) {
-	if (!req.session.usuarioLogado.ID) {
-		res.send(false);
-	} else {
-		db.handleDatabase(req, res, function (req, res, connection) {
-			postagem.criarPostagemDB(req, req.body, connection, function (status) {
-				res.send(status);
-			});
-		});
-	}
-});
-
-//*****Excluir Postagem*****//
-app.post("/excluir-postagem", function (req, res) {
-	if (!req.session.usuarioLogado.ID) {
-		res.send(false);
-	} else {
-		db.handleDatabase(req, res, function (req, res, connection) {
-			postagem.excluirPostagemDB(req, req.body, connection, function (status) {
-				res.send(status);
-			});
-		});
-	}
-});
-
-//*****Get Postagem*****//
-app.get("/get-postagem", function (req, res) {
-	if (!req.session.usuarioLogado.ID) {
-		res.send(false);
-	} else {
-		db.handleDatabase(req, res, function (req, res, connection) {
-			postagem.getPostagemDB(connection, function (status) {
-				res.send(status);
-			});
-		});
-	}
-});
-
 //*****Ranking*****//
 app.post("/ranking", function (req, res) {
 	if (!req.session.usuarioLogado.ID) {
@@ -358,7 +210,6 @@ function getInformacoesiniciais(connection, callback) {
 		if (!err) {
 			callback(rows);
 		} else {
-			console.log(err);
 			callback(false);
 		}
 	});
@@ -373,8 +224,6 @@ function getConfirmados(data, connection, callback) {
 		if (!err) {
 			callback(rows);
 		} else {
-			//console.log('this.sql', this.sql);
-			//console.log(err);
 			callback(false);
 		}
 	});
@@ -388,8 +237,6 @@ function getConfirmadosPorMim(data, connection, callback) {
 		if (!err) {
 			callback(rows);
 		} else {
-			//console.log('this.sql', this.sql);
-			//console.log(err);
 			callback(false);
 		}
 	});
@@ -398,6 +245,4 @@ function getConfirmadosPorMim(data, connection, callback) {
 /*************************INICIA SERVIDOR*****************************/
 var port = process.env.PORT || 80;
 
-app.listen(port, function () {
-	//console.log("Ouvindo na porta " + port);
-});
+app.listen(port, () => {} );
