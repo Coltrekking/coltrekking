@@ -1,4 +1,7 @@
-import * as moment	from 'moment'
+import moment		from 'moment'
+import * as user	from './user.mjs'
+
+import 'moment/locale/pt-br.js'
 
 //*****Adiciona Evento ao DB*****//
 function criarEventoDB(req, data, connection, callback) {
@@ -91,7 +94,7 @@ function confirmarEventoDB(data, connection, callback) {
 			//Verifica se o cara ta logado mesmo
 			if (data.usuario) {
 				//Verifica se o cara nao ja esta inscrito
-				estaInscrito(data, connection, function (status) {
+				user.estaInscrito(data, connection, function (status) {
 					//Se nao esta inscrito
 					if (status) {
 						//Datetime eh o horario correto, que ordena a posicao da inscricao
@@ -164,8 +167,6 @@ function cancelarEventoDB(post, connection, callback) {
 				connection.release();
 				callback(true);
 			} else {
-				//console.log('Error while performing Query');
-				//console.log(err);
 				callback(false);
 			}
 		});
@@ -196,7 +197,8 @@ function estaDisponivel(evento, connection, callback) {
 }
 
 //*****Finalizar Evento*****//
-function finalizarEventoDB(req, post, connection, callback) {
+function finalizarEventoDB(req, post, connection, callback)
+{
 	if (req.session.usuarioLogado.Admin) {
 		connection.query('UPDATE `evento` SET Finalizado = 1 WHERE ID = ?', post.eventoID, function (err, rows, fields) {
 			connection.release();
@@ -327,4 +329,4 @@ function montaRanking(ano, connection, callback) {
 	});
 }
 
-export { criarEventoDB, editarEventoDB, getEventos, confirmarEventoDB, cancelarEventoDB, estaDisponivel, excluirEventoDB, excluirUsuarioDB, cadastrarPontucaoDB, montaRanking }
+export { criarEventoDB, editarEventoDB, getEventos, confirmarEventoDB, cancelarEventoDB, estaDisponivel, excluirEventoDB, excluirUsuarioDB, cadastrarPontucaoDB, montaRanking, finalizarEventoDB }
