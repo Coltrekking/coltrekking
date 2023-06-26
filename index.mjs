@@ -6,9 +6,9 @@ import session 		from 'express-session'
 
 import * as db		from './db.mjs'
 import * as user	from './user.mjs'
-import * as lstNeg	from './blacklist.mjs'
+//import * as lstNeg	from './blacklist.mjs'
 import * as evento	from './event.mjs'
-import * as postagem	from './postagem.mjs'
+//import * as postagem	from './postagem.mjs'
 import __dirname	from './root_dir.mjs'
 
 //var aws = require('aws-sdk/lib/maintenance_mode_message').suppress = true;
