@@ -4,99 +4,147 @@ import * as user	from './user.mjs'
 import 'moment/locale/pt-br.js'
 
 //*****Adiciona Evento ao DB*****//
-function criarEventoDB(req, data, connection, callback) {
-	if (req.session.usuarioLogado.Admin) {
-		connection.query('INSERT INTO evento SET ?', data, function (err, rows, fields) {
-			if (!err) {
-				connection.query('UPDATE `pessoa` SET ListaNegra = 0 WHERE ListaNegra = 2', function (err, rows, fields) {
-					if (!err) {
-						connection.query('UPDATE `pessoa` SET ListaNegra = 2 WHERE ListaNegra = 1', function (err, rows, fields) {
-							if (!err) {
-								connection.query('UPDATE `pessoa-evento` SET listaNegraEvento = 3 WHERE listaNegraEvento = 2', function (err, rows, fields) {
-									if (!err) {
-										connection.query('UPDATE `pessoa-evento` SET listaNegraEvento = 2 WHERE listaNegraEvento = 1', function (err, rows, fields) {
+function criarEventoDB(req, res, connection, callback)
+{
+	let data	= req.body
+
+	if (req.session.usuarioLogado.Admin)
+	{
+		connection.query('INSERT INTO evento SET ?', data, function (err, rows, fields)
+		{
+			if (!err)
+			{
+				connection.query('UPDATE `pessoa` SET ListaNegra = 0 WHERE ListaNegra = 2', function (err, rows, fields)
+				{
+					if (!err)
+					{
+						connection.query('UPDATE `pessoa` SET ListaNegra = 2 WHERE ListaNegra = 1', function (err, rows, fields)
+						{
+							if (!err)
+							{
+								connection.query('UPDATE `pessoa-evento` SET listaNegraEvento = 3 WHERE listaNegraEvento = 2', function (err, rows, fields)
+								{
+									if (!err)
+									{
+										connection.query('UPDATE `pessoa-evento` SET listaNegraEvento = 2 WHERE listaNegraEvento = 1', function (err, rows, fields)
+										{
 											connection.release();
 
-											if (!err) {
-												callback(true);
+											if (!err)
+											{
+												callback(res, true);
 											}
-											else {
-												callback(false);
+											else
+											{
+												callback(res, false);
 											}
 										});
-									} else {
-										callback(false);
+									}
+									else
+									{
+										callback(res, false);
 									}
 								});
-							} else {
-								callback(false);
+							}
+							else
+							{
+								callback(res, false);
 							}
 						});
-					} else {
-						callback(false);
+					}
+					else
+					{
+						callback(res, false);
 					}
 				});
-			} else {
-				callback(false);
+			}
+			else
+			{
+				callback(res, false);
 			}
 		});
-	} else {
-		callback(false);
+	}
+	else
+	{
+		callback(res, false);
 	}
 }
 
 //*****Editar Evento no DB*****//
-function editarEventoDB(req, data, connection, callback) {
-	if (req.session.usuarioLogado.Admin) {
-		connection.query('UPDATE evento SET ? WHERE ID = ?', [data, data.ID], function (err, rows, fields) {
+function editarEventoDB(req, res, connection, callback)
+{
+	let data	= req.body
+
+	if (req.session.usuarioLogado.Admin)
+	{
+		connection.query('UPDATE evento SET ? WHERE ID = ?', [data, data.ID], function (err, rows, fields)
+		{
 			connection.release();
 
-			if (!err) {
-				callback(true);
-			} else {
+			if (!err)
+			{
+				callback(res, true);
+			}
+			else
+			{
 				//	console.log(err);
-				callback(false);
+				callback(res, false);
 			}
 		});
-	} else {
-		callback(false);
+	}
+	else
+	{
+		callback(res, false);
 	}
 }
 
 //*****Get Eventos*****//
-function getEventos(connection, callback) {
-	connection.query('SELECT * FROM evento', function (err, rows, fields) {
+function getEventos(req, res, connection, callback)
+{
+	connection.query('SELECT * FROM evento', function (err, rows, fields)
+	{
 		connection.release();
 
-		if (!err) {
-			var retorno = {
+		if (!err)
+		{
+			var retorno =
+			{
 				eventos: rows.reverse(),
 				//Pegar o fuso horario do servidor (para saber se eh +2(horario de verao) ou +3 (horario normal))
 				fusoHorarioServidor: new Date().getTimezoneOffset() * 60000, //Multiplicar com 60000 para converter minutos em milissigundos
 				hora: new Date().getTime()
 			};
-			callback(retorno);
-		} else {
+			callback(res, retorno);
+		}
+		else
+		{
 			//console.log(err);
-			callback(false);
+			callback(res, false);
 		}
 	});
 }
 
 //*****Confirmar Evento DB*****//
-function confirmarEventoDB(data, connection, callback) {
+function confirmarEventoDB(req, res, connection, callback)
+{
+	let data	= req.body
 	var post;
 
 	//Verifica se evento esta disponivel para inscricao
-	estaDisponivel(data.evento, connection, function (status) {
+	estaDisponivel(req, res, connection, (status) =>
+	{
 		//Se esta disponivel
-		if (status) {
+		if (status)
+		{
 			//Verifica se o cara ta logado mesmo
-			if (data.usuario) {
+			if (data.usuario)
+			{
 				//Verifica se o cara nao ja esta inscrito
-				user.estaInscrito(data, connection, function (status) {
+				user.estaInscrito(req, res, connection, (status) =>
+				{
 					//Se nao esta inscrito
-					if (status) {
+					if (status)
+					{
 						//Datetime eh o horario correto, que ordena a posicao da inscricao
 						let fusoHorarioServidor	= -3; //HORARIO DE BRASILIA
 						var datetime = new Date().toISOString();
@@ -113,7 +161,8 @@ function confirmarEventoDB(data, connection, callback) {
 						horarioCerto = moment().add(fusoHorarioServidor, 'hours').format('LLL:ss');
 
 						//Seta o post
-						post = {
+						post =
+						{
 							IDPessoa: data.usuario,
 							IDEvento: data.evento,
 							Colocacao: 0,
@@ -123,62 +172,93 @@ function confirmarEventoDB(data, connection, callback) {
 						};
 
 						//verifica se o usuario nao esta na lista negra
-						if (data.blacklist == 0) {
+						if (data.blacklist == 0)
+						{
 							//Adiciona pessoa ao evento
-							connection.query('INSERT INTO `pessoa-evento` SET ?', post, function (err, rows, fields) {
-								if (!err) {
+							connection.query('INSERT INTO `pessoa-evento` SET ?', post, function (err, rows, fields)
+							{
+								if (!err)
+								{
 									//Adicionar rg do usuario
-									connection.query('UPDATE `pessoa` SET `rg` = ? WHERE ID = ?', [data.rg, post.IDPessoa], function (err, rows, fields) {
-										if (!err) {
+									connection.query('UPDATE `pessoa` SET `rg` = ? WHERE ID = ?', [data.rg, post.IDPessoa], function (err, rows, fields)
+								{
+										if (!err)
+										{
 											connection.release();
-											callback(true);
-										} else {
-											callback(false);
+											callback(res, true);
+										}
+										else
+										{
+											callback(res, false);
 										}
 									});
-								} else {
+								}
+								else
+								{
 									//console.log('this.sql', this.sql);
 									//console.log(err);
-									callback(false);
+									callback(res, false);
 								}
 							});
 						}
-						else {
-							callback(false);
+						else
+						{
+							callback(res, false);
 						}
-					} else {
-						callback(false);
+					}
+					else
+					{
+						callback(res, false);
 					}
 				});
-			} else {
-				callback(false);
 			}
-		} else {
-			callback(false);
+			else
+			{
+				callback(res, false);
+			}
+		}
+		else
+		{
+			callback(res, false);
 		}
 	});
 }
 
 //*****Cancelar Evento*****//
-function cancelarEventoDB(post, connection, callback) {
-	if (post.usuario) {
-		connection.query('DELETE FROM `pessoa-evento` WHERE IDEvento = ? AND IDPessoa = ?', [post.evento, post.usuario], function (err, rows, fields) {
-			if (!err) {
+function cancelarEventoDB(req, res, connection, callback)
+{
+	let post	= req.body
+
+	if (post.usuario)
+	{
+		connection.query('DELETE FROM `pessoa-evento` WHERE IDEvento = ? AND IDPessoa = ?', [post.evento, post.usuario], function (err, rows, fields)
+		{
+			if (!err)
+			{
 				connection.release();
-				callback(true);
-			} else {
-				callback(false);
+				callback(res, true);
+			}
+			else
+			{
+				callback(res, false);
 			}
 		});
-	} else {
-		callback(false);
+	}
+	else
+	{
+		callback(res, false);
 	}
 }
 
 //*****Esta Disponivel*****//
-function estaDisponivel(evento, connection, callback) {
-	connection.query('SELECT DataInscricao, FimInscricao FROM `evento` WHERE ID = ?', evento, function (err, rows, fields) {
-		if (!err) {
+function estaDisponivel(req, res, connection, callback)
+{
+	let evento	= req.body.evento
+
+	connection.query('SELECT DataInscricao, FimInscricao FROM `evento` WHERE ID = ?', evento, function (err, rows, fields)
+	{
+		if (!err)
+		{
 			var dataEvento = rows[0].DataInscricao;
 			var dataFim = rows[0].FimInscricao;
 			var dataCountdown = new Date(dataEvento).getTime();
@@ -187,146 +267,213 @@ function estaDisponivel(evento, connection, callback) {
 			var distancia = dataCountdown - agora;
 			var distancia2 = agora - dataCountdown2;
 
-			(distancia <= 0 && distancia2 <= 0) ? callback(true) : callback(false);
-		} else {
+			(distancia <= 0 && distancia2 <= 0) ? callback(res, true) : callback(res, false);
+		}
+		else
+		{
 			//console.log('Error while performing Query');
 			//console.log(err);
-			callback(false);
+			callback(res, false);
 		}
 	});
 }
 
 //*****Finalizar Evento*****//
-function finalizarEventoDB(req, post, connection, callback)
+function finalizarEventoDB(req, res, connection, callback)
 {
-	if (req.session.usuarioLogado.Admin) {
-		connection.query('UPDATE `evento` SET Finalizado = 1 WHERE ID = ?', post.eventoID, function (err, rows, fields) {
+	let post	= req.body
+
+	if (req.session.usuarioLogado.Admin)
+	{
+		connection.query('UPDATE `evento` SET Finalizado = 1 WHERE ID = ?', post.eventoID, function (err, rows, fields)
+		{
 			connection.release();
 
-			if (!err) {
-				callback(true);
+			if (!err)
+			{
+				callback(res, true);
 			}
-			else {
-				callback(false);
+			else
+			{
+				callback(res, false);
 			}
 		});
-	} else {
-		callback(false);
+	}
+	else
+	{
+		callback(res, false);
 	}
 }
 
 //*****Excluir Evento*****//
-function excluirEventoDB(req, post, connection, callback) {
-	if (req.session.usuarioLogado.Admin) {
-		connection.query('DELETE FROM `evento` WHERE ID = ?', post.ID, function (err, rows, fields) {
-			if (!err) {
-				connection.query('DELETE FROM `pessoa-evento` WHERE IDEvento = ?', post.ID, function (err, rows, fields) {
+function excluirEventoDB(req, res, connection, callback)
+{
+	let post	= req.body
+
+	if (req.session.usuarioLogado.Admin)
+	{
+		connection.query('DELETE FROM `evento` WHERE ID = ?', post.ID, function (err, rows, fields)
+		{
+			if (!err)
+			{
+				connection.query('DELETE FROM `pessoa-evento` WHERE IDEvento = ?', post.ID, function (err, rows, fields)
+				{
 					connection.release();
 
-					if (!err) {
-						callback(true);
-					} else {
-						callback(false);
+					if (!err)
+					{
+						callback(res, true);
+					}
+					else
+					{
+						callback(res, false);
 					}
 				});
-			} else {
-				callback(false);
+			}
+			else
+			{
+				callback(res, false);
 			}
 		});
-	} else {
-		callback(false);
+	}
+	else
+	{
+		callback(res, false);
 	}
 }
 
 //*****Excluir Usuario*****//
-function excluirUsuarioDB(req, post, connection, callback) {
-	if (req.session.usuarioLogado.Admin) {
-		connection.query('DELETE FROM `pessoa-evento` WHERE IDEvento = ? AND IDPessoa = ?', [post.IDEvento, post.ID], function (err, rows, fields) {
+function excluirUsuarioDB(req, post, connection, callback)
+{
+	if (req.session.usuarioLogado.Admin)
+	{
+		connection.query('DELETE FROM `pessoa-evento` WHERE IDEvento = ? AND IDPessoa = ?', [post.IDEvento, post.ID], function (err, rows, fields)
+		{
 			connection.release();
 
-			if (!err) {
-				callback(true);
-			} else {
-				callback(false);
+			if (!err)
+			{
+				callback(res, true);
+			}
+			else
+			{
+				callback(res, false);
 			}
 		});
-	} else {
-		callback(false);
+	}
+	else
+	{
+		callback(res, false);
 	}
 }
 
 //*****Cadastrar Pontuacao*****//
-function cadastrarPontucaoDB(req, post, connection, callback) {
-	var controle = true;
-	if (req.session.usuarioLogado.Admin) {
-		connection.query('UPDATE `evento` SET fatorKevento = ? WHERE ID = ?', [post.fatork, post.eventoID], function (err, rows, fields) {
-			if (!err) {
-				connection.query('UPDATE `evento` SET subdesc = ? WHERE ID = ?', [post.subdesc, post.eventoID], function (err, rows, fields) {
-					if (!err) {
-						connection.query('UPDATE `evento` SET distancia = ? WHERE ID = ?', [post.distancia, post.eventoID], function (err, rows, fields) {
-							if (!err) {
+function cadastrarPontucaoDB(req, res, connection, callback)
+{
+	let post	= req.body
 
-								var promessa = new Promise(function (resolve, reject) {
-									post.pessoas.forEach(function (elem, index, array) {
-										connection.query('UPDATE `pessoa-evento` SET fatorKPessoaEvento = ? WHERE IDEvento = ? AND listaNegraEvento = 0', [post.fatork, post.eventoID], function (err, rows, fields) {
-											if (!err) {
+	var controle = true;
+	if (req.session.usuarioLogado.Admin)
+	{
+		connection.query('UPDATE `evento` SET fatorKevento = ? WHERE ID = ?', [post.fatork, post.eventoID], function (err, rows, fields)
+		{
+			if (!err)
+			{
+				connection.query('UPDATE `evento` SET subdesc = ? WHERE ID = ?', [post.subdesc, post.eventoID], function (err, rows, fields)
+				{
+					if (!err)
+					{
+						connection.query('UPDATE `evento` SET distancia = ? WHERE ID = ?', [post.distancia, post.eventoID], function (err, rows, fields)
+						{
+							if (!err)
+							{
+
+								var promessa = new Promise(function (resolve, reject)
+								{
+									post.pessoas.forEach(function (elem, index, array)
+									{
+										connection.query('UPDATE `pessoa-evento` SET fatorKPessoaEvento = ? WHERE IDEvento = ? AND listaNegraEvento = 0', [post.fatork, post.eventoID], function (err, rows, fields)
+										{
+											if (!err)
+											{
 												//Se for o ultimo, resolve a promessa
-												if (index == (array.length - 1)) {
+												if (index == (array.length - 1))
+												{
 													resolve();
 												}
-											} else {
+											}
+else
+{
 												controle = false;
 											}
 										});
 									});
 								});
 
-								promessa.then(function () {
-									connection.query('UPDATE `evento` SET Finalizado = 1 WHERE ID = ?', post.eventoID, function (err, rows, fields) {
+								promessa.then(function ()
+								{
+									connection.query('UPDATE `evento` SET Finalizado = 1 WHERE ID = ?', post.eventoID, function (err, rows, fields)
+									{
 										connection.release();
 
-										if (!err) {
-											callback(controle);
-										} else {
+										if (!err)
+										{
+											callback(res, controle);
+										}
+										else
+										{
 											controle = false;
 										}
 									});
 								});
 
 
-							} else {
-								callback(false);
+							}
+							else
+							{
+								callback(res, false);
 							}
 						});
 					}
-					else {
-						callback(false);
+					else
+					{
+						callback(res, false);
 					}
 				});
 			}
-			else {
-				callback(false);
+			else
+			{
+				callback(res, false);
 			}
 		});
 
-	} else {
-		callback(false);
+	}
+	else
+	{
+		callback(res, false);
 	}
 }
 
 //*****Monta Ranking*****//
-function montaRanking(ano, connection, callback) {
-	connection.query('SELECT `pessoa-evento`.IDPessoa AS ID, pessoa.Nome AS Nome, SUM(FatorKPessoaEvento) AS FatorK FROM pessoa INNER JOIN `pessoa-evento` ON pessoa.ID = `pessoa-evento`.IDPessoa INNER JOIN evento ON evento.ID = `pessoa-evento`.`IDEvento` WHERE `pessoa-evento`.FatorKPessoaEvento > 0 AND evento.ano = ? GROUP BY `pessoa-evento`.IDPessoa ORDER BY FatorK DESC', ano, function (err, rows, fields) {
+function montaRanking(req, res, connection, callback)
+{
+	let ano	= req.body.ano
+
+	connection.query('SELECT `pessoa-evento`.IDPessoa AS ID, pessoa.Nome AS Nome, SUM(FatorKPessoaEvento) AS FatorK FROM pessoa INNER JOIN `pessoa-evento` ON pessoa.ID = `pessoa-evento`.IDPessoa INNER JOIN evento ON evento.ID = `pessoa-evento`.`IDEvento` WHERE `pessoa-evento`.FatorKPessoaEvento > 0 AND evento.ano = ? GROUP BY `pessoa-evento`.IDPessoa ORDER BY FatorK DESC', ano, function (err, rows, fields)
+	{
 		connection.release();
 
-		if (!err) {
-			callback(rows);
+		if (!err)
+		{
+			callback(res, rows);
 		}
-		else {
+		else
+		{
 			//console.log(err);
-			callback(false);
+			callback(res, false);
 		}
 	});
 }
 
-export { criarEventoDB, editarEventoDB, getEventos, confirmarEventoDB, cancelarEventoDB, estaDisponivel, excluirEventoDB, excluirUsuarioDB, cadastrarPontucaoDB, montaRanking, finalizarEventoDB }
+export
+{ criarEventoDB, editarEventoDB, getEventos, confirmarEventoDB, cancelarEventoDB, estaDisponivel, excluirEventoDB, excluirUsuarioDB, cadastrarPontucaoDB, montaRanking, finalizarEventoDB }
