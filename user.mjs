@@ -12,63 +12,58 @@ function Usuario(nome, email, foto, id, fatork, posicao, listaNegra, rg, admin)
 }
 
 //*****Adicionar usuario ao DB*****//
-function addDB(req, connection, callback) {
-	//Cria usuario com propriedades do req.session.usuarioLogado
+function addDB(req, res, connection, callback) {
 	var usuario = new Usuario(req.session.usuarioLogado.Nome, req.session.usuarioLogado.Email, req.session.usuarioLogado.Foto, req.session.usuarioLogado.ID, 0, 1, 0, null, 0);
 
 	//Adiciona ao DB de Pessoas
-	connection.query('INSERT IGNORE INTO pessoa SET ?', usuario, function (err, rows, fields) {
+	connection.query('INSERT IGNORE INTO pessoa SET ?', usuario, function (err, rows, fields)
+	{
 		connection.release();
-
-		if (!err) {
-			// console.log(rows);
-			callback(true);
-		}
-		else {
-			// console.log(err);
-			// console.log('Error while performing Query (ADICIONA AO DB PESSOAS)');
-			callback(false);
-		}
+		callback(res, !err)
 	});
 }
 
 //*****Pega Info do Usuario Logado*****//
-function pegaInfoUsuarioLogado(req, connection, callback) {
+//Pega info como fatork, posicao, etc
+function pegaInfoUsuarioLogado(req, res, connection, callback) {
 	connection.query('SELECT * FROM pessoa WHERE ID = ?', req.session.usuarioLogado.ID, function (err, rows, fields) {
 		connection.release();
 
 		if (!err) {
 			//Retrieve info do DB
 			try {
-				req.session.usuarioLogado.FatorK = rows[0].FatorK;
-				req.session.usuarioLogado.Posicao = rows[0].Posicao;
-				req.session.usuarioLogado.ListaNegra = rows[0].ListaNegra;
-				req.session.usuarioLogado.rg = rows[0].rg;
-				req.session.usuarioLogado.Admin = rows[0].Admin;
+				req.session.usuarioLogado.FatorK		= rows[0].FatorK;
+				req.session.usuarioLogado.Posicao		= rows[0].Posicao;
+				req.session.usuarioLogado.ListaNegra	= rows[0].ListaNegra;
+				req.session.usuarioLogado.rg			= rows[0].rg;
+				req.session.usuarioLogado.Admin			= rows[0].Admin;
 			} catch (err) {
 				console.log(err.message);
-				callback(false);
+				callback(res, false);
 			}
 
 			//Realiza o callback
-			callback(true);
+			callback(res, true);
 		} else {
-			callback(false);
+			callback(res, false);
 			// console.log('Error while performing Query (PEGA INFO DB)');
 		}
 	});
 }
 
 //*****Esta Inscrito*****//
-function estaInscrito(post, connection, callback) {
-	connection.query('SELECT * FROM `pessoa-evento` WHERE IDPessoa = ? AND IDEvento = ?', [post.usuario, post.evento], function (err, rows, fields) {
-		if (!err) {
-			//Se esta ou nao inscrito
+
+function estaInscrito(req, res, connection, callback)
+{
+	let post	= req.body
+
+	connection.query('SELECT * FROM `pessoa-evento` WHERE IDPessoa = ? AND IDEvento = ?', [post.usuario, post.evento], function (err, rows, fields)
+	{
+		if (!err)
+
 			rows.length == 0 ? callback(true) : callback(false);
-		} else {
-			//console.log('Error while performing Query');
+		else
 			callback(false);
-		}
 	});
 }
 
