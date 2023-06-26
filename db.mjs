@@ -11,24 +11,29 @@ const pool  = mysql.createPool
 });
 
 // Conecta ao DB
-const handleDatabase    = (req, res, call) =>
+const handleDatabase    = (req, res, action, callback) =>
 {
-	pool.getConnection(function (err, connection)
-    {
-		if (err)
-        {
-			res.json({ "code": 100, "status": "Error in connection database" });
-			return false;
-		}
+	if(req.session.usuarioLogado.ID)
+	{
+		pool.getConnection(function (err, connection)
+		{
+			if (err)
+			{
+				res.json({ "code": 100, "status": "Error in connection database" });
+				return false;
+			}
 
-		call(req, res, connection);
+			action(req, res, connection, callback);
 
-		connection.on('error', function (err)
-        {
-			res.json({"code": 100, "status": "Error in query"});
-			return false;
+			connection.on('error', function (err)
+			{
+				res.json({"code": 100, "status": "Error in query"});
+				return false;
+			});
 		});
-	});
+	}
+	else
+		res.send(false)
 }
 
 export { pool, handleDatabase }
