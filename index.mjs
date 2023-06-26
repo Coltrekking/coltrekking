@@ -52,17 +52,17 @@ app.get("/", function (req, res) {
 });
 
 /* EVENTOS */
-app.post("/criar-evento",			(req, res) => db.handleDatabase(req, res, evento.criarEventoDB,			enviaEstado))
-app.post("/editar-evento",			(req, res) => db.handleDatabase(req, res, evento.editarEventoDB,		enviaEstado))
-app.post("/confirmar-evento",		(req, res) => db.handleDatabase(req, res, evento.confirmarEventoDB,		enviaEstado))
-app.post("/cancelar-evento",		(req, res) => db.handleDatabase(req, res, evento.cancelarEventoDB,		enviaEstado))
-app.post("/cadastrar-pontuacao",	(req, res) => db.handleDatabase(req, res, evento.cadastrarPontucaoDB,	enviaEstado))
-app.post("/finalizar-evento",		(req, res) => db.handleDatabase(req, res, evento.finalizarEventoDB, 	enviaEstado))
-app.post("/excluir-evento",			(req, res) => db.handleDatabase(req, res, evento.excluirEventoDB, 		enviaEstado))
-app.get("/eventos",					(req, res) => db.handleDatabase(req, res, evento.getEventos,			enviaLinhas))
-app.post("/confirmados",			(req, res) => db.handleDatabase(req, res, getConfirmados,				enviaLinhas))
-app.post("/confirmados-por-mim",	(req, res) => db.handleDatabase(req, res, getConfirmadosPorMim,			enviaLinhas))
-app.post("/ranking",				(req, res) => db.handleDatabase(req, res, evento.montaRanking,			enviaLinhas))
+app.post("/criar-evento",			(req, res) => db.executa(req, res, evento.criarEventoDB,		enviaEstado))
+app.post("/editar-evento",			(req, res) => db.executa(req, res, evento.editarEventoDB,		enviaEstado))
+app.post("/confirmar-evento",		(req, res) => db.executa(req, res, evento.confirmarEventoDB,	enviaEstado))
+app.post("/cancelar-evento",		(req, res) => db.executa(req, res, evento.cancelarEventoDB,		enviaEstado))
+app.post("/cadastrar-pontuacao",	(req, res) => db.executa(req, res, evento.cadastrarPontucaoDB,	enviaEstado))
+app.post("/finalizar-evento",		(req, res) => db.executa(req, res, evento.finalizarEventoDB, 	enviaEstado))
+app.post("/excluir-evento",			(req, res) => db.executa(req, res, evento.excluirEventoDB, 		enviaEstado))
+app.get("/eventos",					(req, res) => db.executa(req, res, evento.getEventos,			enviaLinhas))
+app.post("/confirmados",			(req, res) => db.executa(req, res, getConfirmados,				enviaLinhas))
+app.post("/confirmados-por-mim",	(req, res) => db.executa(req, res, getConfirmadosPorMim,		enviaLinhas))
+app.post("/ranking",				(req, res) => db.executa(req, res, evento.montaRanking,			enviaLinhas))
 
 /* POSTAGENS */
 /*
@@ -90,13 +90,13 @@ app.post("/post-user", (req, res) =>
 	{
 		req.session.usuarioLogado = req.body;
 
-		db.handleDatabase(req, res, user.addDB,	(res, status) =>
+		db.executa(req, res, user.addDB,	(res, status) =>
 		{
 			if (status)
 			{
 				req.session.loginSucesso = true;
 
-				db.handleDatabase(req, res, user.pegaInfoUsuarioLogado,	(res, status) =>
+				db.executa(req, res, user.pegaInfoUsuarioLogado,	(res, status) =>
 				{
 						if (status)
 

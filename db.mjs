@@ -11,7 +11,7 @@ const pool  = mysql.createPool
 });
 
 // Conecta ao DB
-const handleDatabase    = (req, res, action, callback) =>
+const executa	= (req, res, action, callback) =>
 {
 	if(req.session.usuarioLogado.ID)
 	{
@@ -36,4 +36,4 @@ const handleDatabase    = (req, res, action, callback) =>
 		res.send(false)
 }
 
-export { pool, handleDatabase }
+export { pool, executa }
