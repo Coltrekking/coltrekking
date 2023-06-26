@@ -59,6 +59,10 @@ app.post("/cancelar-evento",		(req, res) => db.handleDatabase(req, res, evento.c
 app.post("/cadastrar-pontuacao",	(req, res) => db.handleDatabase(req, res, evento.cadastrarPontucaoDB,	enviaEstado))
 app.post("/finalizar-evento",		(req, res) => db.handleDatabase(req, res, evento.finalizarEventoDB, 	enviaEstado))
 app.post("/excluir-evento",			(req, res) => db.handleDatabase(req, res, evento.excluirEventoDB, 		enviaEstado))
+app.get("/eventos",					(req, res) => db.handleDatabase(req, res, evento.getEventos,			enviaLinhas))
+app.post("/confirmados",			(req, res) => db.handleDatabase(req, res, getConfirmados,				enviaLinhas))
+app.post("/confirmados-por-mim",	(req, res) => db.handleDatabase(req, res, getConfirmadosPorMim,			enviaLinhas))
+app.post("/ranking",				(req, res) => db.handleDatabase(req, res, evento.montaRanking,			enviaLinhas))
 
 /* POSTAGENS */
 /*
@@ -113,46 +117,6 @@ app.post("/post-user", (req, res) =>
 	}
 })
 
-/*
-app.post("/post-user", function (req, res)
-{
-	if (!req.body.ID || req.body.ID.length < 5)
-	{
-		res.status(500);
-		res.send("Problema com o firebase");
-	}
-	else
-	{
-		req.session.usuarioLogado = req.body;
-
-		//Adiciona usuario ao DB
-		db.handleDatabase(req, res, function (req, res, connection) {
-			user.addDB(req, res, connection, function (status) {
-				if (status) {
-					req.session.loginSucesso = true;
-
-					db.handleDatabase(req, res, function (req, res, connection) {
-						//Pega info como fatork, posicao, etc
-						user.pegaInfoUsuarioLogado(req, res, connection, function (status) {
-							if (status) {
-								//Depois de fazer login, manda pagina a ser redirecionado
-								res.send("/main-page");
-							} else {
-								res.status(500);
-								res.send("Algo inesperado aconteceu");
-							}
-						});
-					});
-				} else {
-					res.status(500);
-					res.send("Problema com o firebase");
-				}
-			});
-		});
-	}
-});
-*/
-
 //*****Redireciona para pagina principal*****//
 app.get("/main-page", function (req, res) {
 	if (req.session.loginSucesso) {
@@ -169,12 +133,6 @@ app.get("/get-user", function (req, res) {
 	res.json(req.session.usuarioLogado);
 });
 
-app.get("/informacoesiniciais",		(req, res) => db.handleDatabase(req, res, getInformacoesiniciais,	enviaLinhas))
-app.get("/eventos",					(req, res) => db.handleDatabase(req, res, evento.getEventos,		enviaLinhas))
-app.post("/confirmados",			(req, res) => db.handleDatabase(req, res, getConfirmados,			enviaLinhas))
-app.post("/confirmados-por-mim",	(req, res) => db.handleDatabase(req, res, getConfirmadosPorMim,		enviaLinhas))
-app.post("/ranking",				(req, res) => db.handleDatabase(req, res, evento.montaRanking,		enviaLinhas))
-
 app.get("/logout", function (req, res) {
 	//Usuario deslogado
 	req.session.loginSucesso = false;
@@ -185,20 +143,7 @@ app.get("/logout", function (req, res) {
 });
 
 /***************************BANCO DE DADOS*****************************/
-//*****Get Informacoes Iniciais*****//
-function getInformacoesiniciais(req, res, connection, callback)
-{
-	connection.query('SELECT Texto, ComoParticipar, Calendario, Regras FROM postagem WHERE ID = 1', function (err, rows, fields) {
-		connection.release();
-		if (!err) {
-			callback(res, rows);
-		} else {
-			callback(res, false);
-		}
-	});
-}
 
-//*****Get Confirmados*****//
 function getConfirmados(req, res, connection, callback)
 {
 	let data	= req.body.IDEvento
