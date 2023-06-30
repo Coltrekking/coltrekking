@@ -1,7 +1,8 @@
-import moment		from 'moment'
+import * as ntp		from 'ntp-time'
 import * as user	from './user.mjs'
+const client_ntp		= new ntp.Client('a.st1.ntp.br', 123, { timeout: 3000 });
 
-import 'moment/locale/pt-br.js'
+let fusoHorarioServidor	= -3	//HORARIO DE BRASILIA
 
 //*****Adiciona Evento ao DB*****//
 function criarEventoDB(req, res, connection, callback)
@@ -145,66 +146,66 @@ function confirmarEventoDB(req, res, connection, callback)
 					//Se nao esta inscrito
 					if (status)
 					{
-						//Datetime eh o horario correto, que ordena a posicao da inscricao
-						let fusoHorarioServidor	= -3; //HORARIO DE BRASILIA
-						var datetime = new Date().toISOString();
-
-						datetime = datetime.split('T');
-						datetime[1] = datetime[1].split('.')[0];
-						datetime[1] = datetime[1].split(':');
-						datetime[1][0] = String(parseInt(datetime[1][0]) + fusoHorarioServidor);
-						datetime[1] = datetime[1].join(':');
-						datetime = datetime.join(' ');
-
-						//Horario certo so funciona para mostrar para o usuario o tempo, ele nao ordena, APENAS a variavel datetime ordena
-						moment.locale("pt-br");
-						horarioCerto = moment().add(fusoHorarioServidor, 'hours').format('LLL:ss');
-
-						//Seta o post
-						post =
-						{
-							IDPessoa: data.usuario,
-							IDEvento: data.evento,
-							Colocacao: 0,
-							ListaEspera: 0,
-							DataInscricao: horarioCerto,
-							DataHoraInscricao: datetime
-						};
-
-						//verifica se o usuario nao esta na lista negra
-						if (data.blacklist == 0)
-						{
-							//Adiciona pessoa ao evento
-							connection.query('INSERT INTO `pessoa-evento` SET ?', post, function (err, rows, fields)
+						client_ntp
+						.syncTime()
+						.then(hora =>
 							{
-								if (!err)
+								//Datetime eh o horario correto, que ordena a posicao da inscricao
+								let datetime
+
+								datetime		= hora.time.toISOString()
+								datetime		= datetime.split('T');
+								datetime[1]		= datetime[1].split('.')[0];
+								datetime[1]		= datetime[1].split(':');
+								datetime[1][0]	= String(parseInt(datetime[1][0]) + fusoHorarioServidor);
+								datetime[1]		= datetime[1].join(':');
+								datetime		= datetime.join(' ');
+
+								post =
 								{
-									//Adicionar rg do usuario
-									connection.query('UPDATE `pessoa` SET `rg` = ? WHERE ID = ?', [data.rg, post.IDPessoa], function (err, rows, fields)
+									IDPessoa: data.usuario,
+									IDEvento: data.evento,
+									Colocacao: 0,
+									ListaEspera: 0,
+									DataInscricao: datetime,
+									DataHoraInscricao: datetime
+								};
+
+								//verifica se o usuario nao esta na lista negra
+								if (data.blacklist == 0)
 								{
+									//Adiciona pessoa ao evento
+									connection.query('INSERT INTO `pessoa-evento` SET ?', post, function (err, rows, fields)
+									{
 										if (!err)
 										{
-											connection.release();
-											callback(res, true);
+											//Adicionar rg do usuario
+											connection.query('UPDATE `pessoa` SET `rg` = ? WHERE ID = ?', [data.rg, post.IDPessoa], function (err, rows, fields)
+										{
+												if (!err)
+												{
+													connection.release();
+													callback(res, true);
+												}
+												else
+												{
+													callback(res, false);
+												}
+											});
 										}
 										else
 										{
+											//console.log('this.sql', this.sql);
+											//console.log(err);
 											callback(res, false);
 										}
 									});
 								}
 								else
 								{
-									//console.log('this.sql', this.sql);
-									//console.log(err);
 									callback(res, false);
 								}
-							});
-						}
-						else
-						{
-							callback(res, false);
-						}
+							})
 					}
 					else
 					{
