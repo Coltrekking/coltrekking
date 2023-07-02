@@ -1,4 +1,4 @@
-import { auth } from '../firebase.js'
+import { auth, servicoAuth } from '../firebase.mjs'
 
 /**********Materialize**********/
 $(document).ready(function() {
@@ -132,7 +132,7 @@ export const verificaTipo = function() {
 /**********LOG OUT**********/
 function logOut()
 {
-	auth.signOut(auth.servico).then(function() {
+	auth.signOut(servicoAuth).then(function() {
 		//SignOut bem-sucedido
 	}, function(error) {
 		//Deu ruim

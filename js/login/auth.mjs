@@ -1,6 +1,6 @@
-import { auth } from '../firebase.js'
+import * as firebase    from '../firebase.mjs'
 
-auth.onAuthStateChanged(auth.servico, (user) =>
+firebase.auth.onAuthStateChanged(firebase.servicoAuth, (user) =>
 {
     const usuarioLogado = obterUserFormatado(user)
 
@@ -40,12 +40,12 @@ const enviarUserParaDB      = function(usuario, url)
         },
         error: function (answer, status)
         {
-            reativarBotoes();
+            //reativarBotoes();
             console.log(answer.responseText);
             alert("Erro ao realizar o login! Tente novamente");
         }
     });
 }
 
-document.getElementById('loginGoogle')          .onclick    = () => auth.signInWithPopup(auth.servico, auth.provedorGmail)
-document.getElementById('loginGoogleMobile')    .onclick    = () => auth.signInWithPopup(auth.servico, auth.provedorGmail)
+document.getElementById('loginGoogle')          .onclick    = () => firebase.auth.signInWithPopup(firebase.servicoAuth, firebase.provedorGmail)
+document.getElementById('loginGoogleMobile')    .onclick    = () => firebase.auth.signInWithPopup(firebase.servicoAuth, firebase.provedorGmail)

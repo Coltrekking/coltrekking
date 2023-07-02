@@ -2,7 +2,7 @@
   "name": "coltrekking",
   "version": "1.0.0",
   "scripts": {
-    "start": "node --trace-warnings index.js"
+    "start": "node --trace-warnings index.mjs"
   },
   "dependencies": {
     "angular": "^1.6.4",
@@ -14,8 +14,7 @@
     "express-session": "^1.17.3",
     "jquery": "^3.2.1",
     "materialize-css": "^0.99",
-    "moment": "^2.22.2",
-    "moment-timezone": "^0.5.21",
+    "ntp-time": "^2.0.2",
     "mysql": "^2.5.4"
   },
   "devDependencies": {
