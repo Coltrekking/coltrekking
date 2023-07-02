@@ -177,6 +177,6 @@ function getConfirmadosPorMim(req, res, connection, callback)
 }
 
 /*************************INICIA SERVIDOR*****************************/
-var port = process.env.PORT || 80;
+var port = process.env.PORT || 3000;
 
 app.listen(port, () => {} );
