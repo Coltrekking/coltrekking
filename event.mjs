@@ -105,14 +105,21 @@ function getEventos(req, res, connection, callback)
 
 		if (!err)
 		{
-			var retorno =
-			{
-				eventos: rows.reverse(),
-				//Pegar o fuso horario do servidor (para saber se eh +2(horario de verao) ou +3 (horario normal))
-				fusoHorarioServidor: new Date().getTimezoneOffset() * 60000, //Multiplicar com 60000 para converter minutos em milissigundos
-				hora: new Date().getTime()
-			};
-			callback(res, retorno);
+			tempo
+			.client_ntp
+			.syncTime()
+			.then(momento =>
+				{
+					const MS_POR_HORA	= 3600000;
+					let retorno		=
+					{
+						eventos:		rows.reverse(),
+						fusoHorarioServidor:	tempo.fusoHorarioServidor * MS_POR_HORA, // h --> ms
+						hora:			momento.time.getTime()
+					}
+
+					callback(res, retorno);
+				})
 		}
 		else
 		{
