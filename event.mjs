@@ -1,8 +1,5 @@
-import * as ntp		from 'ntp-time'
+import * as tempo	from './tempo.mjs'
 import * as user	from './user.mjs'
-const client_ntp		= new ntp.Client('a.st1.ntp.br', 123, { timeout: 3000 });
-
-let fusoHorarioServidor	= -3	//HORARIO DE BRASILIA
 
 //*****Adiciona Evento ao DB*****//
 function criarEventoDB(req, res, connection, callback)
@@ -146,7 +143,8 @@ function confirmarEventoDB(req, res, connection, callback)
 					//Se nao esta inscrito
 					if (status)
 					{
-						client_ntp
+						tempo
+						.client_ntp
 						.syncTime()
 						.then(hora =>
 							{
@@ -157,7 +155,7 @@ function confirmarEventoDB(req, res, connection, callback)
 								datetime		= datetime.split('T');
 								datetime[1]		= datetime[1].split('.')[0];
 								datetime[1]		= datetime[1].split(':');
-								datetime[1][0]	= String(parseInt(datetime[1][0]) + fusoHorarioServidor);
+								datetime[1][0]	= String(parseInt(datetime[1][0]) + tempo.fusoHorarioServidor);
 								datetime[1]		= datetime[1].join(':');
 								datetime		= datetime.join(' ');
 
