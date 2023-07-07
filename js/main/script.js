@@ -130,14 +130,7 @@ export const verificaTipo = function() {
 }
 
 /**********LOG OUT**********/
-function logOut()
-{
-	auth.signOut(servicoAuth).then(function() {
-		//SignOut bem-sucedido
-	}, function(error) {
-		//Deu ruim
-	});
-}
+const logOut	= () => auth.signOut(servicoAuth)
 
 document.getElementById('btn-disponivel')	.onclick	= NAOmostrarBotaoEventosAnteriores
 document.getElementById('btn-finalizados')	.onclick	= botaoMostrarEventosAnteriores
