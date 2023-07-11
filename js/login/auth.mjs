@@ -5,8 +5,15 @@ firebase.auth.onAuthStateChanged(firebase.servicoAuth, (user) =>
     const usuarioLogado = obterUserFormatado(user)
 
     if(usuarioLogado === null)
+    {
 		console.log("Nao tem user")
-	else
+    }
+	else if(usuarioLogado.Email.split('@')[1] !== 'teiacoltec.org')
+    {
+        alert("Erro: dominio de e-mail invalido! Entre utilizando o TeiaColtec.")
+        auth.signOut(firebase.servicoAuth)
+    }
+    else
  		enviarUserParaDB(usuarioLogado, '/post-user')
 })
 

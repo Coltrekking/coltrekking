@@ -1,8 +1,5 @@
-import * as ntp		from 'ntp-time'
+import * as tempo	from './tempo.mjs'
 import * as user	from './user.mjs'
-const client_ntp		= new ntp.Client('a.st1.ntp.br', 123, { timeout: 3000 });
-
-let fusoHorarioServidor	= -3	//HORARIO DE BRASILIA
 
 //*****Adiciona Evento ao DB*****//
 function criarEventoDB(req, res, connection, callback)
@@ -108,14 +105,21 @@ function getEventos(req, res, connection, callback)
 
 		if (!err)
 		{
-			var retorno =
-			{
-				eventos: rows.reverse(),
-				//Pegar o fuso horario do servidor (para saber se eh +2(horario de verao) ou +3 (horario normal))
-				fusoHorarioServidor: new Date().getTimezoneOffset() * 60000, //Multiplicar com 60000 para converter minutos em milissigundos
-				hora: new Date().getTime()
-			};
-			callback(res, retorno);
+			tempo
+			.client_ntp
+			.syncTime()
+			.then(momento =>
+				{
+					const MS_POR_HORA	= 3600000;
+					let retorno		=
+					{
+						eventos:		rows.reverse(),
+						fusoHorarioServidor:	tempo.fusoHorarioServidor * MS_POR_HORA, // h --> ms
+						hora:			momento.time.getTime()
+					}
+
+					callback(res, retorno);
+				})
 		}
 		else
 		{
@@ -146,7 +150,8 @@ function confirmarEventoDB(req, res, connection, callback)
 					//Se nao esta inscrito
 					if (status)
 					{
-						client_ntp
+						tempo
+						.client_ntp
 						.syncTime()
 						.then(hora =>
 							{
@@ -157,7 +162,7 @@ function confirmarEventoDB(req, res, connection, callback)
 								datetime		= datetime.split('T');
 								datetime[1]		= datetime[1].split('.')[0];
 								datetime[1]		= datetime[1].split(':');
-								datetime[1][0]	= String(parseInt(datetime[1][0]) + fusoHorarioServidor);
+								datetime[1][0]	= String(parseInt(datetime[1][0]) + tempo.fusoHorarioServidor);
 								datetime[1]		= datetime[1].join(':');
 								datetime		= datetime.join(' ');
 

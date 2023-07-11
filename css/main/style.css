@@ -104,7 +104,7 @@ nav ul .dropdown-content {
       color: #00c853; }
   nav ul .dropdown-content .nome-usuario {
     font-weight: 500 !important; }
-  nav ul .dropdown-content #sair-button, nav ul .dropdown-content #main-page {
+  nav ul .dropdown-content .sair-button, nav ul .dropdown-content #main-page {
     cursor: pointer; }
 
 nav ul .userImage {
@@ -154,7 +154,7 @@ nav .tabs {
 .side-nav .nome-usuario {
   font-weight: 500 !important; }
 
-.side-nav #sair-button, .side-nav #main-page {
+.side-nav .sair-button, .side-nav #main-page {
   cursor: pointer; }
 
 .side-nav .divider {

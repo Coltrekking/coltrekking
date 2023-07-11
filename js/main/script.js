@@ -130,19 +130,17 @@ export const verificaTipo = function() {
 }
 
 /**********LOG OUT**********/
-function logOut()
-{
-	auth.signOut(servicoAuth).then(function() {
-		//SignOut bem-sucedido
-	}, function(error) {
-		//Deu ruim
-	});
-}
+const logOut	= () => auth.signOut(servicoAuth)
 
-document.getElementById('sair-button')		.onclick	= logOut
 document.getElementById('btn-disponivel')	.onclick	= NAOmostrarBotaoEventosAnteriores
 document.getElementById('btn-finalizados')	.onclick	= botaoMostrarEventosAnteriores
 document.getElementById('btn-eventos')		.onclick	= mostrarEventos
 document.getElementById('btn-lst-negra')	.onclick	= mostrarListaNegra
 document.getElementById('btn-ranking')		.onclick	= mostrarRanking
 document.getElementById('selectBox')		.onchange	= esconderMensagemEscolhaAno
+
+
+let btn_sair	= document.getElementsByClassName('sair-button')
+
+for (let btn = 0; btn < btn_sair.length; btn++)
+	btn_sair.item(btn).onclick	= logOut
