@@ -16,39 +16,68 @@ function addDB(req, res, connection, callback) {
 	var usuario = new Usuario(req.session.usuarioLogado.Nome, req.session.usuarioLogado.Email, req.session.usuarioLogado.Foto, req.session.usuarioLogado.ID, 0, 1, 0, null, 0);
 
 	//Adiciona ao DB de Pessoas
+	connection.post('',
+	{
+		comando: 'cria',
+		parametros:
+		{
+			tabela: 'pessoas',
+			instancia: usuario,
+			chave:
+			{
+				ID: req.session.usuarioLogado.ID
+			}
+		}
+	})
+	.then((answer) => callback(res, true))
+	.catch((erro) => callback(res, false))
+	
+	/*
 	connection.query('INSERT IGNORE INTO pessoa SET ?', usuario, function (err, rows, fields)
 	{
 		connection.release();
 		callback(res, !err)
 	});
+	*/
 }
 
 //*****Pega Info do Usuario Logado*****//
 //Pega info como fatork, posicao, etc
-function pegaInfoUsuarioLogado(req, res, connection, callback) {
-	connection.query('SELECT * FROM pessoa WHERE ID = ?', req.session.usuarioLogado.ID, function (err, rows, fields) {
-		connection.release();
-
-		if (!err) {
-			//Retrieve info do DB
-			try {
-				req.session.usuarioLogado.FatorK		= rows[0].FatorK;
-				req.session.usuarioLogado.Posicao		= rows[0].Posicao;
-				req.session.usuarioLogado.ListaNegra	= rows[0].ListaNegra;
-				req.session.usuarioLogado.rg			= rows[0].rg;
-				req.session.usuarioLogado.Admin			= rows[0].Admin;
-			} catch (err) {
-				console.log(err.message);
-				callback(res, false);
+function pegaInfoUsuarioLogado(req, res, connection, callback)
+{
+	connection.post('',
+	{
+		comando: 'encontra',
+		parametros:
+		{
+			tabela: 'pessoas',
+			umaInstancia: true,
+			chave:
+			{
+				ID: req.session.usuarioLogado.ID
 			}
-
-			//Realiza o callback
-			callback(res, true);
-		} else {
-			callback(res, false);
-			// console.log('Error while performing Query (PEGA INFO DB)');
 		}
-	});
+	})
+	.then((linha) =>
+	{
+		try
+		{
+			req.session.usuarioLogado.FatorK     = linha.FatorK;
+			req.session.usuarioLogado.Posicao	 = linha.Posicao;
+			req.session.usuarioLogado.ListaNegra = linha.ListaNegra;
+			req.session.usuarioLogado.rg         = linha.rg;
+			req.session.usuarioLogado.Admin      = linha.Admin;
+		}
+		catch (err)
+		{
+			console.log(err.message);
+			callback(res, false);
+		}
+
+		//Realiza o callback
+		callback(res, true);
+	})
+	.catch((erro) => callback(res, false))
 }
 
 //*****Esta Inscrito*****//

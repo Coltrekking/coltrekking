@@ -92,6 +92,7 @@ app.post("/post-user", (req, res) =>
 
 		db.executa(req, res, user.addDB,	(res, status) =>
 		{
+			console.log(status)
 			if (status)
 			{
 				req.session.loginSucesso = true;
