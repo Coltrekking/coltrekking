@@ -15,7 +15,8 @@
     "jquery": "^3.2.1",
     "materialize-css": "^0.99",
     "ntp-time": "^2.0.2",
-    "mysql": "^2.5.4"
+    "mysql": "^2.5.4",
+    "axios": "^1.5.1"
   },
   "devDependencies": {
     "browser-sync": "^2.18.8",
