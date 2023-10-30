@@ -8,7 +8,7 @@ import * as db		from './db.mjs'
 import * as user	from './user.mjs'
 //import * as lstNeg	from './blacklist.mjs'
 import * as evento	from './event.mjs'
-//import * as postagem	from './postagem.mjs'
+import * as postagem	from './postagem.mjs'
 import __dirname	from './root_dir.mjs'
 
 //var aws = require('aws-sdk/lib/maintenance_mode_message').suppress = true;
@@ -56,21 +56,21 @@ app.post("/criar-evento",			(req, res) => db.executa(req, res, evento.criarEvent
 app.post("/editar-evento",			(req, res) => db.executa(req, res, evento.editarEventoDB,		enviaEstado))
 app.post("/confirmar-evento",		(req, res) => db.executa(req, res, evento.confirmarEventoDB,	enviaEstado))
 app.post("/cancelar-evento",		(req, res) => db.executa(req, res, evento.cancelarEventoDB,		enviaEstado))
-app.post("/cadastrar-pontuacao",	(req, res) => db.executa(req, res, evento.cadastrarPontucaoDB,	enviaEstado))
+//app.post("/cadastrar-pontuacao",	(req, res) => db.executa(req, res, evento.cadastrarPontucaoDB,	enviaEstado))
 app.post("/finalizar-evento",		(req, res) => db.executa(req, res, evento.finalizarEventoDB, 	enviaEstado))
 app.post("/excluir-evento",			(req, res) => db.executa(req, res, evento.excluirEventoDB, 		enviaEstado))
 app.get("/eventos",					(req, res) => db.executa(req, res, evento.getEventos,			enviaLinhas))
 app.post("/confirmados",			(req, res) => db.executa(req, res, getConfirmados,				enviaLinhas))
 app.post("/confirmados-por-mim",	(req, res) => db.executa(req, res, getConfirmadosPorMim,		enviaLinhas))
-app.post("/ranking",				(req, res) => db.executa(req, res, evento.montaRanking,			enviaLinhas))
+//app.post("/ranking",				(req, res) => db.executa(req, res, evento.montaRanking,			enviaLinhas))
 
 /* POSTAGENS */
 /*
 app.post("/criar-postagem",			(req, res) => execute(req, res, postagem.criarPostagemDB));
 app.post("/editar-info",			(req, res) => execute(req, res, postagem.editarInfoDB));
-app.post("/get-postagem",			(req, res) => execute(req, res, postagem.getPostagemDB));
 app.post("/excluir-postagem",		(req, res) => execute(req, res, postagem.excluirPostagemDB));
 */
+app.get("/get-postagem",			(req, res) => db.executa(req, res, postagem.getPostagemDB, enviaLinhas));
 /* LISTA NEGRA */
 /*
 app.post("/adicionar-lista-negra",	(req, res) => execute(req, res, lstNeg.adicionarListaNegraDB));
@@ -88,11 +88,10 @@ app.post("/post-user", (req, res) =>
 	}
 	else
 	{
-		req.session.usuarioLogado = req.body;
+		req.session.usuarioLogado = req.body
 
 		db.executa(req, res, user.addDB,	(res, status) =>
 		{
-			console.log(status)
 			if (status)
 			{
 				req.session.loginSucesso = true;
@@ -145,20 +144,55 @@ app.get("/logout", function (req, res) {
 
 /***************************BANCO DE DADOS*****************************/
 
+
 function getConfirmados(req, res, connection, callback)
 {
 	let data	= req.body.IDEvento
 
 	//Get os IDs dos confirmados com INNER JOIN
-	connection.query('SELECT ID, Nome, FatorK, rg, `pessoa-evento`.ListaEspera, `pessoa-evento`.IDEvento, `pessoa-evento`.Colocacao, `pessoa-evento`.DataHoraInscricao, `pessoa-evento`.DataInscricao, `pessoa-evento`.listaNegraEvento FROM `pessoa` INNER JOIN `pessoa-evento` ON pessoa.ID = `pessoa-evento`.IDPessoa WHERE `pessoa-evento`.IDEvento = ? ORDER BY `pessoa-evento`.DataHoraInscricao, `pessoa-evento`.Colocacao', data, function (err, rows, fields) {
-		connection.release();
-
-		if (!err) {
-			callback(res, rows);
-		} else {
-			callback(res, false);
+	connection.post('',
+	{
+		comando: 'junta',
+		parametros:
+		{
+			tabelaInicial: { tabela: 'inscricoes', apelido: 'inscricao', chave: { IDEvento: data } },
+			relacionamentos:
+			[
+				{ tabela: 'pessoas', apelido: 'confirmado', origem: 'inscricao.IDPessoa', destino: 'ID' }
+			]
 		}
-	});
+	})
+	.then(resultado =>
+	{
+		resultado = resultado.data
+
+		if(resultado == false)
+		{
+			callback(res, [])
+		}
+		else
+		{
+			const linhas = resultado.map(r =>
+			{
+				let linha = {}
+
+				linha.Nome              = r.confirmado.Nome
+				linha.FatorK            = r.confirmado.FatorK
+				linha.rg                = r.confirmado.rg
+				linha.ListaEspera       = r.inscricao.ListaEspera
+				linha.IDEvento          = r.inscricao.IDEvento
+				linha.Colocacao         = r.inscricao.Colocacao
+				linha.DataHoraInscricao = r.inscricao.DataHoraInscricao
+				linha.DataInscricao     = r.inscricao.DataInscricao
+				linha.listaNegraEvento  = r.inscricao.listaNegraEvento
+
+				return linha
+			})
+
+			callback(res, linhas)
+		}
+	})
+	.catch(erro => callback(res, false))
 }
 
 //*****Get Confirmados Por Mim*****//
@@ -166,15 +200,38 @@ function getConfirmadosPorMim(req, res, connection, callback)
 {
 	let data	= req.body.usuarioID
 
-	connection.query('SELECT ID, Nome FROM `evento` INNER JOIN `pessoa-evento` ON evento.ID = `pessoa-evento`.IDEvento WHERE `pessoa-evento`.IDPessoa = ? ORDER BY ID DESC', data, function (err, rows, fields) {
-		connection.release();
-
-		if (!err) {
-			callback(res, rows);
-		} else {
-			callback(res, false);
+	connection.post('',
+	{
+		comando: 'junta',
+		parametros:
+		{
+			tabelaInicial: { tabela: 'eventos', apelido: 'evt', chave: {} },
+			relacionamentos:
+			[
+				{ tabela: 'inscricoes', apelido: 'ins', origem: 'evt.ID', destino: 'IDEvento' }
+			],
+			chave:
+			{
+				'ins.IDPessoa': data
+			}
 		}
-	});
+	})
+	.then(answer =>
+	{
+		const resultado = answer.data
+		const linhas    = resultado.map(r =>
+		{
+			let linha = {}
+
+			linha.Nome = r.evt.Nome
+			linha.ID   = r.evt.ID
+
+			return linha
+		})
+
+		callback(res, linhas)
+	})
+	.catch(error => callback(res, false))
 }
 
 /*************************INICIA SERVIDOR*****************************/
