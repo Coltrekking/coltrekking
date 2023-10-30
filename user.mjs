@@ -31,14 +31,6 @@ function addDB(req, res, connection, callback) {
 	})
 	.then((answer) => callback(res, true))
 	.catch((erro) => callback(res, false))
-	
-	/*
-	connection.query('INSERT IGNORE INTO pessoa SET ?', usuario, function (err, rows, fields)
-	{
-		connection.release();
-		callback(res, !err)
-	});
-	*/
 }
 
 //*****Pega Info do Usuario Logado*****//
@@ -62,6 +54,7 @@ function pegaInfoUsuarioLogado(req, res, connection, callback)
 	{
 		try
 		{
+			linha                                = linha.data
 			req.session.usuarioLogado.FatorK     = linha.FatorK;
 			req.session.usuarioLogado.Posicao	 = linha.Posicao;
 			req.session.usuarioLogado.ListaNegra = linha.ListaNegra;
@@ -70,7 +63,6 @@ function pegaInfoUsuarioLogado(req, res, connection, callback)
 		}
 		catch (err)
 		{
-			console.log(err.message);
 			callback(res, false);
 		}
 
@@ -81,19 +73,31 @@ function pegaInfoUsuarioLogado(req, res, connection, callback)
 }
 
 //*****Esta Inscrito*****//
-
 function estaInscrito(req, res, connection, callback)
 {
 	let post	= req.body
 
-	connection.query('SELECT * FROM `pessoa-evento` WHERE IDPessoa = ? AND IDEvento = ?', [post.usuario, post.evento], function (err, rows, fields)
+	connection.post('',
 	{
-		if (!err)
+		comando: 'encontra',
+		parametros:
+		{
+			tabela: 'inscricoes',
+			umaInstancia: false,
+			chave:
+			{
+				IDPessoa: post.usuario,
+				IDEvento: post.evento
+			}
+		}
+	})
+	.then(answer =>
+	{
+		let rows = answer.data
 
-			rows.length == 0 ? callback(true) : callback(false);
-		else
-			callback(false);
-	});
+		callback(rows != false)
+	})
+	.catch(error => callback(true))
 }
 
 export { Usuario, addDB, pegaInfoUsuarioLogado, estaInscrito }
