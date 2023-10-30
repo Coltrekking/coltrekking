@@ -1,7 +1,7 @@
 import * as mysql	from 'mysql'
 import axios        from 'axios'
 
-const url_db     = 'https://script.google.com/macros/s/AKfycbwyM12VBUzdDK1ktnwykHN4UKpFoIWxM8O1FR9qBvJ30S_DeMorJ5Oz5Fi7A-oM4ULEnQ/exec'
+const url_db     = 'url'
 const conexao_db = axios.create({ baseURL: url_db })
 
 const pool  = mysql.createPool
