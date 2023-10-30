@@ -18,18 +18,48 @@ function criarPostagemDB(req, data, connection, callback) {
 }
 
 //*****Get Postagem*****//
-function getPostagemDB(connection, callback) {
-	connection.query('SELECT postagem.*, evento.Nome, pessoa.Nome AS AdminNome, pessoa.Foto AS AdminFoto FROM postagem LEFT JOIN evento ON postagem.EventoID = evento.ID LEFT JOIN pessoa ON postagem.AdminID = pessoa.ID', function (err, rows, fields) {
-		connection.release();
+function getPostagemDB(req, res, connection, callback) {
+	connection.post('',
+	{
+		comando: 'junta',
+		parametros:
+		{
+			tabelaInicial: { tabela: 'postagens', apelido: 'post', chave: {} },
+			relacionamentos:
+			[
+				{ tabela: 'eventos', apelido: 'evt', origem: 'post.EventoID', destino: 'ID' },
+				{ tabela: 'pessoas', apelido: 'adm', origem: 'post.AdminID', destino: 'ID' }
+			]
+  		}
+	})
+	.then((answer) =>
+	{
+		answer = answer.data
+		
+		if(answer == false)
+		{
+			callback(res, false)
+		}
+		else
+		{
+			let retorno = answer.map(linha =>
+			{
+				let linhaRetornar = {}
 
-		if (!err) {
-			callback(rows);
+				for(let campo in linha.post)
+
+					linhaRetornar[campo] = linha.post[campo]
+
+				linhaRetornar.Nome      = linha.evt.Nome
+				linhaRetornar.AdminFoto = linha.adm.Foto
+
+				return linhaRetornar
+			})
+
+			callback(res, retorno)
 		}
-		else {
-			//console.log(err);
-			callback(false);
-		}
-	});
+	})
+	.catch((erro) => console.log(erro))
 }
 
 //*****Excluir Postagem*****//
