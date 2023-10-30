@@ -189,6 +189,7 @@
 				//Emite alerta sobre o status da operacao e redireciona
 				if(answer) {
 					Materialize.toast("Informações editadas com sucesso!", 2000);
+					Materialize.toast("Aguarde 30 min para visualizar atualizações.", 2000)
 					$location.url($location.path('/main-page'));
 					setTimeout(function(){ parent.location="javascript:location.reload()";}, 1000)
 				} else {
@@ -202,14 +203,14 @@
 
 	//Login Controller
 	app.controller('LoginController', ['HTTPService', '$rootScope', function(httpService, $rootScope) {
-		var usuarioLogado;
 
 		//Chama Login
 		httpService.get('/get-user', function(answer) {
 			if(answer != null) {
-				this.usuarioLogado = answer;
+				this.usuarioLogado = answer
+				
 				//Salva no rootScope para uso posterior
-				$rootScope.usuario = answer;
+				$rootScope.usuario = answer
 				//Inicializa eventos
 				$rootScope.$broadcast('InicializarEventos', true);
 			}
@@ -252,6 +253,9 @@
 			$scope.params.Tipo = $scope.eventoAttr.tipo;
 			$scope.params.TipoTrekking = $scope.eventoAttr.tipoTrekking;
 			$scope.params.Dificuldade = $scope.eventoAttr.dificuldade;
+
+			//Criand ID unico para o evento
+			$scope.params.ID = Math.floor(Math.random() * (1000000 + 1))
 		}
 		
 		//Inicia
@@ -382,6 +386,7 @@
 				//Emite alerta sobre o status da operacao e redireciona
 				if(answer) {
 					Materialize.toast("Evento criado com sucesso!", 2000);
+					Materialize.toast("Aguarde 30 min para visualizar atualizações.", 2000)
 					$location.path('/');
 					
 					//Recarrega os eventos
@@ -404,6 +409,7 @@
 				//Emite alerta sobre o status da operacao e redireciona
 				if(answer) {
 					Materialize.toast("Evento editado com sucesso!", 2000);
+					Materialize.toast("Aguarde 30 min para visualizar atualizações.", 2000)
 					$location.url($location.path('/main-page'));
 					
 					//Recarrega os eventos
@@ -476,6 +482,10 @@
 					
 					//Para cada evento
 					$scope.eventos.forEach(function(element) {
+						let inicio = new Date(element.DataInicio)
+						let fim    = new Date(element.DataFim)
+						element.dataInicioMostrar = inicio.getDate() + '/' + (inicio.getMonth() + 1) + '/' + inicio.getFullYear()
+						element.dataFimMostrar    = fim.getDate() + '/' + (fim.getMonth() + 1) + '/' + fim.getFullYear()
 						//Seta strings e capa
 						switch(element.Tipo) {
 							case 1:
@@ -564,6 +574,20 @@
 			
 			httpService.post('/confirmados', data, function(answer) {
 				evento.Confirmados = answer;
+				evento.Confirmados.forEach(confirmado =>
+				{
+					const dataHora = new Date(confirmado.DataInscricao)
+
+					//Arruma a data e hora da inscricao
+					hora = (dataHora.getHours() >= 10 ? dataHora.getHours() : "0" + dataHora.getHours())
+					hora += ":" + (dataHora.getMinutes() >= 10 ? dataHora.getMinutes() : "0" + dataHora.getMinutes())
+					hora += ":" + (dataHora.getSeconds() >= 10 ? dataHora.getSeconds() : "0" + dataHora.getSeconds())
+					data = dataHora.getDate() >= 10 ? dataHora.getDate() : "0" + dataHora.getDate();
+					data += "/" + ((dataHora.getMonth() + 1) >= 10 ? (dataHora.getMonth() + 1) : "0" + (dataHora.getMonth() + 1))
+					data += "/" + dataHora.getFullYear()
+
+					confirmado.DataInscricaoMostrar = data + ' as ' + hora
+				})
 			});
 		}
 
@@ -572,7 +596,7 @@
 			$(document).ready(function() {
 				//Select
 				$('select').material_select();
-
+				
 				if($rootScope.usuario.rg) {
 					$(".rgUser").val($rootScope.usuario.rg);
 				}
@@ -584,7 +608,7 @@
 				Materialize.updateTextFields();
 				$('select').material_select();
 			});
-		});
+		}, 3000);
 		// Setar ng-model RG padrao
 		$scope.setarRgPadrao = function(){
 			if($rootScope.usuario.rg) {
@@ -616,6 +640,7 @@
 					//Emite alerta sobre o status da operacao e redireciona
 					if(answer) {
 						Materialize.toast("Inscrição em evento realizada com sucesso!", 3000);
+						Materialize.toast("Aguarde 30 min para visualizar atualizações.", 3000)
 											
 						//Atualiza lista de confirmados
 						$scope.postConfirmado(evento);
@@ -649,6 +674,7 @@
 				//Emite alerta sobre o status da operacao e redireciona
 				if(answer) {
 					Materialize.toast("Cancelamento em evento realizado com sucesso!", 3000);
+					Materialize.toast("Aguarde 30 min para visualizar atualizações.", 3000)
 					
 					//Atualiza lista de confirmados
 					$scope.postConfirmado(evento);
@@ -709,7 +735,8 @@
 			httpService.post('/cadastrar-pontuacao', dataPost, function(answer) {
 				//Emite alerta sobre o status da operacao
 				if(answer) {
-					Materialize.toast("Pontuação cadastrada com sucesso!", 2000);					
+					Materialize.toast("Pontuação cadastrada com sucesso!", 2000);
+					Materialize.toast("Aguarde 30 min para visualizar atualizações.", 3000)
 					$scope.eventosGetter();
 				} else {
 					
@@ -729,7 +756,8 @@
 			httpService.post('/finalizar-evento', dataPost, function(answer) {
 				//Emite alerta sobre o status da operacao
 				if(answer) {
-					Materialize.toast("Evento finalizado com sucesso!", 2000);					
+					Materialize.toast("Evento finalizado com sucesso!", 2000);
+					Materialize.toast("Aguarde 30 min para visualizar atualizações.", 3000)
 					$scope.eventosGetter();
 				} else {
 					Materialize.toast("Erro ao finalizar evento", 3000);
@@ -836,7 +864,8 @@
 			httpService.post('/adicionar-lista-negra', dataPost, function(answer) {
 				//Emite alerta sobre o status da operacao
 				if(answer) {
-					Materialize.toast("Usuario adicionado na lista negra com sucesso!", 2000);					
+					Materialize.toast("Usuario adicionado na lista negra com sucesso!", 2000);
+					Materialize.toast("Aguarde 30 min para visualizar atualizações.", 3000)
 				} else {
 					Materialize.toast("Erro ao adicionar usuario na lista negra", 3000);
 				}
@@ -856,7 +885,8 @@
 			httpService.post('/remover-lista-negra', dataPost, function(answer) {
 				//Emite alerta sobre o status da operacao
 				if(answer) {
-					Materialize.toast("Usuario removido da lista negra com sucesso!", 2000);					
+					Materialize.toast("Usuario removido da lista negra com sucesso!", 2000);
+					Materialize.toast("Aguarde 30 min para visualizar atualizações.", 3000)
 				} else {
 					Materialize.toast("Erro ao remover usuario da lista negra", 3000);
 				}
@@ -876,7 +906,8 @@
 			httpService.post('/excluir-evento', data, function(answer) {
 				//Emite alerta sobre o status da operacao
 				if(answer) {
-					Materialize.toast("Evento excluído com sucesso!", 2000);					
+					Materialize.toast("Evento excluído com sucesso!", 2000);
+					Materialize.toast("Aguarde 30 min para visualizar atualizações.", 3000)
 					$scope.eventosGetter();
 				} else {
 					Materialize.toast("Erro ao excluir o evento!", 3000);
@@ -895,7 +926,8 @@
 			httpService.post('/excluir-usuario', data, function(answer) {
 				//Emite alerta sobre o status da operacao
 				if(answer) {
-					Materialize.toast("Usuário excluído com sucesso!", 2000);					
+					Materialize.toast("Usuário excluído com sucesso!", 2000);
+					Materialize.toast("Aguarde 30 min para visualizar atualizações.", 3000)
 
 				} else {
 					Materialize.toast("Erro ao excluir o usuario!", 3000);
@@ -942,6 +974,7 @@
 				//Emite alerta sobre o status da operacao e redireciona
 				if(answer) {
 					Materialize.toast("Postagem criada com sucesso!", 2000);
+					Materialize.toast("Aguarde 30 min para visualizar atualizações.", 3000)
 					$location.path('/main-page');
 					
 					//Recarrega os posts
@@ -992,6 +1025,7 @@
 				//Emite alerta sobre o status da operacao e redireciona
 				if(answer) {
 					Materialize.toast("Postagem excluída com sucesso!", 2000);
+					Materialize.toast("Aguarde 30 min para visualizar atualizações.", 3000)
 					
 					//Recarrega os posts
 					$rootScope.$broadcast('RecarregarPosts', true);
