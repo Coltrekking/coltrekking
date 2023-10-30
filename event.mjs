@@ -182,17 +182,12 @@ function getEventos(req, res, connection, callback)
 
 function confirmarEventoDB(req, res, connection, callback)
 {
-	console.log('confirmarEventoDB:')
 	let data	= req.body
 	var post;
-	console.log('data = ' + JSON.stringify(data))
 
 	//Verifica se evento esta disponivel para inscricao
 	estaDisponivel(req, res, connection, (res, status) =>
 	{
-		console.log('cowback:')
-		console.log('status = ')
-		console.log(status)
 		//Se esta disponivel
 		if (status)
 		{
@@ -202,8 +197,6 @@ function confirmarEventoDB(req, res, connection, callback)
 				//Verifica se o cara nao ja esta inscrito
 				user.estaInscrito(req, res, connection, (status) =>
 				{
-					console.log('callback 2:')
-					console.log('status = ' + JSON.stringify(status))
 					//Se nao esta inscrito
 					if (status)
 					{
@@ -333,9 +326,7 @@ function cancelarEventoDB(req, res, connection, callback)
 //*****Esta Disponivel*****/
 function estaDisponivel(req, res, connection, callback)
 {
-	console.log('estaDisponivel:')
 	let evento	= req.body.evento
-	console.log('evento = ' + JSON.stringify(evento))
 
 	connection.post('',
 	{
@@ -360,10 +351,6 @@ function estaDisponivel(req, res, connection, callback)
 		var agora          = new Date().getTime();
 		var distancia      = dataCountdown - agora;
 		var distancia2     = agora - dataCountdown2;
-		console.log('resultado = ' + JSON.stringify(resultado))
-		console.log('distancia = ' + JSON.stringify(distancia))
-		console.log('distancia2 = ' + JSON.stringify(distancia2))
-		console.log('conta = ' + JSON.stringify(distancia <= 0 && distancia2 <= 0))
 
 		callback(res, distancia <= 0 && distancia2 <= 0)
 	})
