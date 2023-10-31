@@ -343,12 +343,14 @@ function estaDisponivel(req, res, connection, callback)
 	})
 	.then(answer =>
 	{
+		const FUSO         = -3
+		const MS_POR_HORA  = 60 * 60 * 1000
 		var resultado      = answer.data
 		var dataEvento     = resultado.DataInscricao;
 		var dataFim        = resultado.FimInscricao;
 		var dataCountdown  = new Date(dataEvento).getTime();
 		var dataCountdown2 = new Date(dataFim).getTime();
-		var agora          = new Date().getTime();
+		var agora          = new Date().getTime() + FUSO * MS_POR_HORA;
 		var distancia      = dataCountdown - agora;
 		var distancia2     = agora - dataCountdown2;
 
