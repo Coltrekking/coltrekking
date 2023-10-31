@@ -1,4 +1,8 @@
 import * as mysql	from 'mysql'
+import axios        from 'axios'
+
+const url_db     = 'url'
+const conexao_db = axios.create({ baseURL: url_db })
 
 const pool  = mysql.createPool
 ({
@@ -15,22 +19,7 @@ const executa	= (req, res, action, callback) =>
 {
 	if(req.session.usuarioLogado.ID)
 	{
-		pool.getConnection(function (err, connection)
-		{
-			if (err)
-			{
-				res.json({ "code": 100, "status": "Error in connection database" });
-				return false;
-			}
-
-			action(req, res, connection, callback);
-
-			connection.on('error', function (err)
-			{
-				res.json({"code": 100, "status": "Error in query"});
-				return false;
-			});
-		});
+		action(req, res, conexao_db, callback);
 	}
 	else
 		res.send(false)

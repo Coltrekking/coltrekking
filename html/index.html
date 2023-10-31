@@ -344,14 +344,14 @@
 													<!-- Mostra apenas em acampamento -->
 													<p ng-show="evento.Tipo == 3">
 														<i class="tiny material-icons">today</i>
-														<span class="topico-info"> De</span class="topico-info"> {{evento.DataInicio}}
+														<span class="topico-info"> De</span class="topico-info"> {{evento.dataInicioMostrar}}
 														<span class="topico-info"> a</span class="topico-info"> {{evento.DataFim}}
 													</p>											
 													
 													<!-- Mostra apenas em !acampamento -->
 													<p ng-show="evento.Tipo != 3">
 														<i class="tiny material-icons">today</i>
-														<span class="topico-info"> Dia:</span class="topico-info"> {{evento.DataInicio}}
+														<span class="topico-info"> Dia:</span class="topico-info"> {{evento.dataInicioMostrar}}
 													</p>
 													
 													<p>
@@ -624,14 +624,14 @@
 													<!-- Mostra apenas em acampamento -->
 													<p ng-show="evento.Tipo == 3">
 														<i class="tiny material-icons">today</i>
-														<span class="topico-info"> De</span class="topico-info"> {{evento.DataInicio}}
+														<span class="topico-info"> De</span class="topico-info"> {{evento.dataInicioMostrar}}
 														<span class="topico-info"> a</span class="topico-info"> {{evento.DataFim}}
 													</p>											
 													
 													<!-- Mostra apenas em !acampamento -->
 													<p ng-show="evento.Tipo != 3">
 														<i class="tiny material-icons">today</i>
-														<span class="topico-info"> Dia:</span class="topico-info"> {{evento.DataInicio}}
+														<span class="topico-info"> Dia:</span class="topico-info"> {{evento.dataInicioMostrar}}
 													</p>
 													
 													<p>
@@ -697,7 +697,7 @@
 															<tr ng-repeat="pessoa in evento.Confirmados" ng-class="{espera: $index >= evento.NumeroMax}">
 																<td>{{$index + 1}}º</td>
 																<td>{{pessoa.Nome}}</td>
-																<td class="hide-on-med-and-down">{{pessoa.DataInscricao}}</td>
+																<td class="hide-on-med-and-down">{{pessoa.DataInscricaoMostrar}}</td>
 															</tr>
 														</tbody>
 													</table>

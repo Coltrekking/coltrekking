@@ -1,0 +1,20 @@
+services:
+  my-app:
+    image: node:18-alpine
+    command: sh -c "npm i && npm i -g nodemon && nodemon index.mjs"
+    ports:
+      - 127.0.0.1:3000:80
+    working_dir: /app
+    volumes:
+      - ./:/app
+  my-data:
+    image: mysql
+    working_dir: /db-importada
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: coltrekking
+    volumes:
+      - db:/var/lib/mysql
+      - ./:/db-importada
+volumes:
+  db:
