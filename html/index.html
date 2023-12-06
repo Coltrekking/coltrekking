@@ -224,7 +224,7 @@
 									<div id="exibirEventosFinalizados">
 										<!--Fixacoes-->
 										<div class="container col hide-on-med-and-down l4 right">
-											<a ng-if="usuario.Admin" href="#!/create-news" id="botaoCriarBarraLateral">Nova Barra Lateral</a>
+											<!-- <a ng-if="usuario.Admin" href="#!/create-news" id="botaoCriarBarraLateral">Nova Barra Lateral</a> -->
 											<!--Eventos Cadastrados-->
 											<div class="card">
 												<div class="card-content">
@@ -258,14 +258,18 @@
 				
 											<!--Fixacoes-->
 											<div ng-controller="PostsController">
-												<!-- Posts fixados -->											
+												<!-- Posts fixados -->
 												<div class="card" ng-repeat="post in postagemFixada | filter: {Fixado: 1}">
 													<div class="card-content">
 														<a href="#!" onclick="return false;" ng-click="excluirPostagem(post.ID)">
 															<i ng-if="usuario.Admin" class="material-icons delete-post-fixado">delete</i>
 														</a>
-														<p class="data-post data-post-fixado">{{post.Data}}</p>
-														
+														<p class="data-post data-post-fixado">{{post.DataMostrar}}</p>
+
+														<p class="data-post data-post-fixado">{{post.DataMostrar}}</p>
+														<p class='notificacao_post'><b>{{post.NomeAdm}}</b> escreveu sobre o evento <b>{{post.NomeEvento}}</b>:</p>
+														<hr style='border: 1px solid lightgray;'>
+
 														<!-- Corpo da postagem -->
 														<p ng-bind-html="post.Texto"></p>
 													</div>
@@ -506,15 +510,18 @@
 										<div id="postFixaxoes" style="display: none">
 											<div ng-controller="PostsController">
 												<div class="container col hide-on-med-and-down l4 right">
-													<a ng-if="usuario.Admin" href="#!/create-news" id="botaoCriarBarraLateral">Nova Barra Lateral</a>
-													<!-- Posts fixados -->											
+													<!-- <a ng-if="usuario.Admin" href="#!/create-news" id="botaoCriarBarraLateral">Nova Barra Lateral</a> -->
+													<!-- Posts fixados -->
 													<div class="card" ng-repeat="post in postagemFixada | filter: {Fixado: 1}">
 														<div class="card-content">
 															<a href="#!" onclick="return false;" ng-click="excluirPostagem(post.ID)">
 																<i ng-if="usuario.Admin" class="material-icons delete-post-fixado">delete</i>
 															</a>
-															<p class="data-post data-post-fixado">{{post.Data}}</p>
 															
+															<p class="data-post data-post-fixado">{{post.DataMostrar}}</p>
+															<p class='notificacao_post'><b>{{post.NomeAdm}}</b> escreveu sobre o evento <b>{{post.NomeEvento}}</b>:</p>
+															<hr style='border: 1px solid lightgray;'>
+
 															<!-- Corpo da postagem -->
 															<p ng-bind-html="post.Texto"></p>
 														</div>

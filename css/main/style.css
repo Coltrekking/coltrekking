@@ -605,3 +605,14 @@ aCountdownVermelho {
 
 .btn-wrapper {
   text-align: right; }
+
+.notificacao_post
+{
+  font-size: 15px;
+}
+
+.notificacao_post b
+{
+  color: blue;
+}
+

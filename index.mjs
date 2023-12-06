@@ -98,14 +98,14 @@ app.post("/post-user", (req, res) =>
 
 				db.executa(req, res, user.pegaInfoUsuarioLogado,	(res, status) =>
 				{
-						if (status)
+					if (status)
 
-							res.send("/main-page")
-						else
-						{
-							res.status(500);
-							res.send("Algo inesperado aconteceu");
-						}
+						res.send("/main-page")
+					else
+					{
+						res.status(500);
+						res.send("Algo inesperado aconteceu");
+					}
 				})
 			}
 			else
