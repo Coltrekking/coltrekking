@@ -264,7 +264,6 @@
 														<a href="#!" onclick="return false;" ng-click="excluirPostagem(post.ID)">
 															<i ng-if="usuario.Admin" class="material-icons delete-post-fixado">delete</i>
 														</a>
-														<p class="data-post data-post-fixado">{{post.DataMostrar}}</p>
 
 														<p class="data-post data-post-fixado">{{post.DataMostrar}}</p>
 														<p class='notificacao_post'><b>{{post.NomeAdm}}</b> escreveu sobre o evento <b>{{post.NomeEvento}}</b>:</p>
@@ -349,7 +348,7 @@
 													<p ng-show="evento.Tipo == 3">
 														<i class="tiny material-icons">today</i>
 														<span class="topico-info"> De</span class="topico-info"> {{evento.dataInicioMostrar}}
-														<span class="topico-info"> a</span class="topico-info"> {{evento.DataFim}}
+														<span class="topico-info"> a</span class="topico-info"> {{evento.dataFimMostrar}}
 													</p>											
 													
 													<!-- Mostra apenas em !acampamento -->
@@ -632,7 +631,7 @@
 													<p ng-show="evento.Tipo == 3">
 														<i class="tiny material-icons">today</i>
 														<span class="topico-info"> De</span class="topico-info"> {{evento.dataInicioMostrar}}
-														<span class="topico-info"> a</span class="topico-info"> {{evento.DataFim}}
+														<span class="topico-info"> a</span class="topico-info"> {{evento.dataFimMostrar}}
 													</p>											
 													
 													<!-- Mostra apenas em !acampamento -->
