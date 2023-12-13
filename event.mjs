@@ -143,6 +143,8 @@ function editarEventoDB(req, res, connection, callback)
 /*****Get Eventos*****/
 function getEventos(req, res, connection, callback)
 {
+	let hora
+	
 	connection.post('',
 	{
 		comando: 'encontra',
@@ -159,14 +161,16 @@ function getEventos(req, res, connection, callback)
 		tempo
 		.client_ntp
 		.syncTime()
-		.then(momento =>
+		.then(h => hora = h.time)
+		.catch(e => hora = new Date())
+		.then(() =>
 		{
 			const MS_POR_HORA	= 3600000;
 			let retorno		=
 			{
 				eventos:             rows.reverse(),
 				fusoHorarioServidor: tempo.fusoHorarioServidor * MS_POR_HORA, // h --> ms
-				hora:                momento.time.getTime()
+				hora:                hora.getTime()
 			}
 			callback(res, retorno);
 		})
@@ -188,6 +192,8 @@ function confirmarEventoDB(req, res, connection, callback)
 	//Verifica se evento esta disponivel para inscricao
 	estaDisponivel(req, res, connection, (res, status) =>
 	{
+		let hora
+		
 		//Se esta disponivel
 		if (status)
 		{
@@ -207,12 +213,14 @@ function confirmarEventoDB(req, res, connection, callback)
 						tempo
 						.client_ntp
 						.syncTime()
-						.then(hora =>
+						.then(h => hora = h.time)
+						.catch(e => hora = new Date())
+						.finally(() =>
 							{
 								//Datetime eh o horario correto, que ordena a posicao da inscricao
 								let datetime
 
-								datetime		= hora.time.toISOString()
+								datetime		= hora.toISOString()
 								datetime		= datetime.split('T');
 								datetime[1]		= datetime[1].split('.')[0];
 								datetime[1]		= datetime[1].split(':');
@@ -438,6 +446,53 @@ function excluirEventoDB(req, res, connection, callback)
 	}
 }
 
+const salvaTrilha = (req, res, connection, callback) =>
+{
+	const trilha   = req.body.trilha
+	const evento = req.body.evento
+	
+	connection.post('',
+	{
+		comando: 'muda',
+		parametros:
+		{
+			tabela: 'eventos',
+			umaInstancia: true,
+			chave:
+			{
+				ID: evento
+			},
+			alteracoes:
+			{
+				'trilha': JSON.stringify(trilha)
+			}
+		}
+	})
+	.then(answer => callback(res, true))
+	.catch(error => callback(res, false))
+}
+
+const pegaTrilha = (req, res, connection, callback) =>
+{
+	const evento = req.body.evento
+	
+	connection.post('',
+	{
+		comando: 'encontra',
+		parametros:
+		{
+			tabela: 'eventos',
+			umaInstancia: true,
+			chave:
+			{
+				ID: evento
+			}
+		}
+	})
+	.then(answer => callback(res, answer.data.trilha))
+	.catch(error => callback(res, false))
+}
+
 //*****Excluir Usuario*****/
 /*
 function excluirUsuarioDB(req, post, connection, callback)
@@ -574,5 +629,5 @@ function montaRanking(req, res, connection, callback)
 	});
 }
 */
-export { getEventos, criarEventoDB, confirmarEventoDB, cancelarEventoDB, finalizarEventoDB, excluirEventoDB, editarEventoDB }
+export { getEventos, criarEventoDB, confirmarEventoDB, cancelarEventoDB, finalizarEventoDB, excluirEventoDB, editarEventoDB, salvaTrilha, pegaTrilha }
 //{ criarEventoDB, editarEventoDB, getEventos, confirmarEventoDB, cancelarEventoDB, estaDisponivel, excluirEventoDB, excluirUsuarioDB, cadastrarPontucaoDB, montaRanking, finalizarEventoDB }

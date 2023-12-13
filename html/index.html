@@ -224,7 +224,7 @@
 									<div id="exibirEventosFinalizados">
 										<!--Fixacoes-->
 										<div class="container col hide-on-med-and-down l4 right">
-											<a ng-if="usuario.Admin" href="#!/create-news" id="botaoCriarBarraLateral">Nova Barra Lateral</a>
+											<!-- <a ng-if="usuario.Admin" href="#!/create-news" id="botaoCriarBarraLateral">Nova Barra Lateral</a> -->
 											<!--Eventos Cadastrados-->
 											<div class="card">
 												<div class="card-content">
@@ -258,14 +258,17 @@
 				
 											<!--Fixacoes-->
 											<div ng-controller="PostsController">
-												<!-- Posts fixados -->											
+												<!-- Posts fixados -->
 												<div class="card" ng-repeat="post in postagemFixada | filter: {Fixado: 1}">
 													<div class="card-content">
 														<a href="#!" onclick="return false;" ng-click="excluirPostagem(post.ID)">
 															<i ng-if="usuario.Admin" class="material-icons delete-post-fixado">delete</i>
 														</a>
-														<p class="data-post data-post-fixado">{{post.Data}}</p>
-														
+
+														<p class="data-post data-post-fixado">{{post.DataMostrar}}</p>
+														<p class='notificacao_post'><b>{{post.NomeAdm}}</b> escreveu sobre o evento <b>{{post.NomeEvento}}</b>:</p>
+														<hr style='border: 1px solid lightgray;'>
+
 														<!-- Corpo da postagem -->
 														<p ng-bind-html="post.Texto"></p>
 													</div>
@@ -345,7 +348,7 @@
 													<p ng-show="evento.Tipo == 3">
 														<i class="tiny material-icons">today</i>
 														<span class="topico-info"> De</span class="topico-info"> {{evento.dataInicioMostrar}}
-														<span class="topico-info"> a</span class="topico-info"> {{evento.DataFim}}
+														<span class="topico-info"> a</span class="topico-info"> {{evento.dataFimMostrar}}
 													</p>											
 													
 													<!-- Mostra apenas em !acampamento -->
@@ -506,15 +509,18 @@
 										<div id="postFixaxoes" style="display: none">
 											<div ng-controller="PostsController">
 												<div class="container col hide-on-med-and-down l4 right">
-													<a ng-if="usuario.Admin" href="#!/create-news" id="botaoCriarBarraLateral">Nova Barra Lateral</a>
-													<!-- Posts fixados -->											
+													<!-- <a ng-if="usuario.Admin" href="#!/create-news" id="botaoCriarBarraLateral">Nova Barra Lateral</a> -->
+													<!-- Posts fixados -->
 													<div class="card" ng-repeat="post in postagemFixada | filter: {Fixado: 1}">
 														<div class="card-content">
 															<a href="#!" onclick="return false;" ng-click="excluirPostagem(post.ID)">
 																<i ng-if="usuario.Admin" class="material-icons delete-post-fixado">delete</i>
 															</a>
-															<p class="data-post data-post-fixado">{{post.Data}}</p>
 															
+															<p class="data-post data-post-fixado">{{post.DataMostrar}}</p>
+															<p class='notificacao_post'><b>{{post.NomeAdm}}</b> escreveu sobre o evento <b>{{post.NomeEvento}}</b>:</p>
+															<hr style='border: 1px solid lightgray;'>
+
 															<!-- Corpo da postagem -->
 															<p ng-bind-html="post.Texto"></p>
 														</div>
@@ -625,7 +631,7 @@
 													<p ng-show="evento.Tipo == 3">
 														<i class="tiny material-icons">today</i>
 														<span class="topico-info"> De</span class="topico-info"> {{evento.dataInicioMostrar}}
-														<span class="topico-info"> a</span class="topico-info"> {{evento.DataFim}}
+														<span class="topico-info"> a</span class="topico-info"> {{evento.dataFimMostrar}}
 													</p>											
 													
 													<!-- Mostra apenas em !acampamento -->
@@ -638,7 +644,12 @@
 														<i class="tiny material-icons">location_on</i>
 														<span class="topico-info"> Local:</span class="topico-info"> {{evento.Local}}
 													</p>
-													
+
+													<p ng-show="evento.Tipo != 1">
+														<i class="tiny material-icons">route</i>
+														<span class="topico-info">Trilha: </span class="topico-info"><a ng-attr-href="{{'#!/trilha?id=' + evento.ID}}">Visualize Aqui</a>
+													</p>
+
 													<!-- Numero de Inscritos -->
 													<p>
 														<i class="tiny material-icons">add_circle</i>

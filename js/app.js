@@ -36,6 +36,11 @@
 						$location.path('/');
 					}
 				}
+
+				if(next.templateUrl == "/html/trilha.html")
+				{
+					$location.path('/trilha');
+				}
 			});
 		});
 	}]);
@@ -71,6 +76,12 @@
 			{
 				templateUrl: "../html/finalizados2017.html",
 				controller: "CriarPostsController"
+			}
+		)
+		.when("/trilha",
+			{
+				templateUrl: "/html/trilha.html",
+				controller: "TrilhaController"
 			}
 		)
 		.otherwise(
@@ -217,6 +228,70 @@
 		}.bind(this));
 	}]);
 
+	/* CONTROLADOR DE TRILHAS */
+	app.controller('TrilhaController', ['HTTPService', '$timeout', '$scope', '$location', '$window', '$rootScope', function(httpService, $timeout, $scope, $location, $window, $rootScope)
+	{
+		$scope.param_corretos = !jQuery.isEmptyObject($location.search())
+		let id
+
+		sessionStorage.setItem('edit', JSON.stringify($rootScope.usuario.Admin))
+		console.log(sessionStorage.getItem('edit'))
+		
+		//Parametros enviados por GET
+		if($scope.param_corretos)
+		{
+			$scope.eventoAttr = $location.search()
+			id = $scope.eventoAttr.id
+
+			//Chama o POST Pegar Trilha
+			httpService.post('/pegar-trilha', { evento: id }, answer =>
+			{
+				if(answer)
+				{
+					sessionStorage.setItem('center', JSON.stringify(answer.center))
+					sessionStorage.setItem('figures', JSON.stringify(answer.fig))
+				}
+			})
+		}
+
+		$scope.salvarTrilha = () =>
+		{
+			const trilha =
+			{
+				fig: JSON.parse(sessionStorage.getItem('figures')),
+				center: JSON.parse(sessionStorage.getItem('center'))
+			}
+
+			const dados = { 'trilha': trilha, 'evento': id }
+			
+			//Chama o POST Salvar Trilha
+			httpService.post('/salvar-trilha', dados, answer =>
+			{
+				//Emite alerta sobre o status da operacao e redireciona
+				if(answer)
+				{
+					Materialize.toast("Trilha salva com sucesso!", 2000);
+					Materialize.toast("Aguarde 30 min para visualizar atualizações.", 2000)
+					$location.path('/');
+				}
+				else
+				{
+					Materialize.toast("Erro ao salvar a trilha!", 3000);
+				}
+
+				sessionStorage.removeItem('center')
+				sessionStorage.removeItem('figures')
+			})
+		}
+		
+		$scope.sair = () =>
+		{
+			$location.path('/');
+	
+			sessionStorage.removeItem('center')
+			sessionStorage.removeItem('figures')
+		}
+	}])
 
 	//Route Controller
 	app.controller('RouteController', function($scope, $location) {
@@ -992,7 +1067,9 @@
 		//GET Postagens
 		$scope.postagemGetter = function() {
 			httpService.get('/get-postagem', function(answer) {
+				
 				if(answer) {
+					answer = answer.map(p => { p.DataMostrar = new Date(p.Data).toLocaleString().split(',')[0]; return p })
 					$scope.postagem = answer.reverse();
 					$scope.postagemFixada = answer;
 					
