@@ -644,7 +644,12 @@
 														<i class="tiny material-icons">location_on</i>
 														<span class="topico-info"> Local:</span class="topico-info"> {{evento.Local}}
 													</p>
-													
+
+													<p ng-show="evento.Tipo != 1">
+														<i class="tiny material-icons">route</i>
+														<span class="topico-info">Trilha: </span class="topico-info"><a ng-attr-href="{{'#!/trilha?id=' + evento.ID}}">Visualize Aqui</a>
+													</p>
+
 													<!-- Numero de Inscritos -->
 													<p>
 														<i class="tiny material-icons">add_circle</i>
