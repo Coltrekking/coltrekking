@@ -258,7 +258,7 @@
 				center: JSON.parse(sessionStorage.getItem('center'))
 			}
 
-			const dados = { 'trilha': trilha, 'evento': id }
+			const dados = { 'trilha': trilha, 'evento': $scope.eventoAttr.id }
 			
 			//Chama o POST Salvar Trilha
 			httpService.post('/salvar-trilha', dados, funcionou =>
