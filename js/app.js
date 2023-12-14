@@ -229,29 +229,25 @@
 	}]);
 
 	/* CONTROLADOR DE TRILHAS */
-	app.controller('TrilhaController', ['HTTPService', '$timeout', '$scope', '$location', '$window', '$rootScope', function(httpService, $timeout, $scope, $location, $window, $rootScope)
+	app.controller('TrilhaController', ['HTTPService', 'EventosService', '$scope', '$location', '$rootScope', function(httpService, EventosService, $scope, $location, $rootScope)
 	{
-		$scope.param_corretos = !jQuery.isEmptyObject($location.search())
-		let id
+		let evento
 
+		$scope.param_corretos = !jQuery.isEmptyObject($location.search())
 		sessionStorage.setItem('edit', JSON.stringify($rootScope.usuario.Admin))
-		console.log(sessionStorage.getItem('edit'))
 		
 		//Parametros enviados por GET
 		if($scope.param_corretos)
 		{
 			$scope.eventoAttr = $location.search()
-			id = $scope.eventoAttr.id
-
-			//Chama o POST Pegar Trilha
-			httpService.post('/pegar-trilha', { evento: id }, answer =>
+			evento = EventosService.get().find(e => e.ID == $scope.eventoAttr.id)
+			
+			if(evento && evento.trilha)
 			{
-				if(answer)
-				{
-					sessionStorage.setItem('center', JSON.stringify(answer.center))
-					sessionStorage.setItem('figures', JSON.stringify(answer.fig))
-				}
-			})
+				evento.trilha = JSON.parse(evento.trilha)
+				sessionStorage.setItem('center', JSON.stringify(evento.trilha.center))
+				sessionStorage.setItem('figures', JSON.stringify(evento.trilha.fig))
+			}
 		}
 
 		$scope.salvarTrilha = () =>
@@ -265,10 +261,10 @@
 			const dados = { 'trilha': trilha, 'evento': id }
 			
 			//Chama o POST Salvar Trilha
-			httpService.post('/salvar-trilha', dados, answer =>
+			httpService.post('/salvar-trilha', dados, funcionou =>
 			{
 				//Emite alerta sobre o status da operacao e redireciona
-				if(answer)
+				if(funcionou)
 				{
 					Materialize.toast("Trilha salva com sucesso!", 2000);
 					Materialize.toast("Aguarde 30 min para visualizar atualizações.", 2000)

@@ -472,27 +472,6 @@ const salvaTrilha = (req, res, connection, callback) =>
 	.catch(error => callback(res, false))
 }
 
-const pegaTrilha = (req, res, connection, callback) =>
-{
-	const evento = req.body.evento
-	
-	connection.post('',
-	{
-		comando: 'encontra',
-		parametros:
-		{
-			tabela: 'eventos',
-			umaInstancia: true,
-			chave:
-			{
-				ID: evento
-			}
-		}
-	})
-	.then(answer => callback(res, answer.data.trilha))
-	.catch(error => callback(res, false))
-}
-
 //*****Excluir Usuario*****/
 /*
 function excluirUsuarioDB(req, post, connection, callback)
@@ -629,5 +608,5 @@ function montaRanking(req, res, connection, callback)
 	});
 }
 */
-export { getEventos, criarEventoDB, confirmarEventoDB, cancelarEventoDB, finalizarEventoDB, excluirEventoDB, editarEventoDB, salvaTrilha, pegaTrilha }
+export { getEventos, criarEventoDB, confirmarEventoDB, cancelarEventoDB, finalizarEventoDB, excluirEventoDB, editarEventoDB, salvaTrilha }
 //{ criarEventoDB, editarEventoDB, getEventos, confirmarEventoDB, cancelarEventoDB, estaDisponivel, excluirEventoDB, excluirUsuarioDB, cadastrarPontucaoDB, montaRanking, finalizarEventoDB }

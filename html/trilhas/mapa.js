@@ -27,7 +27,7 @@ setTimeout(() =>
     {
         user_figures = L.geoJSON(JSON.parse(user_figures))
     }
-    console.log(sessionStorage.getItem('edit'))
+    
     if(sessionStorage.getItem('edit') == 'true')
     {
         let draw_ctrl = new L.Control.Draw
@@ -51,4 +51,4 @@ setTimeout(() =>
             sessionStorage.setItem('center', JSON.stringify(map.getCenter()))
         })
 
-}, 4000);
+}, 1000)

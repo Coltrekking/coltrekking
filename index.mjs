@@ -60,7 +60,6 @@ app.post("/cancelar-evento",       (req, res) => db.executa(req, res, evento.can
 app.post("/finalizar-evento",      (req, res) => db.executa(req, res, evento.finalizarEventoDB,   enviaEstado))
 app.post("/excluir-evento",        (req, res) => db.executa(req, res, evento.excluirEventoDB,     enviaEstado))
 app.post("/salvar-trilha",         (req, res) => db.executa(req, res, evento.salvaTrilha,         enviaEstado))
-app.post("/pegar-trilha",          (req, res) => db.executa(req, res, evento.pegaTrilha,          enviaLinhas))
 app.get("/eventos",                (req, res) => db.executa(req, res, evento.getEventos,          enviaLinhas))
 app.post("/confirmados",           (req, res) => db.executa(req, res, getConfirmados,             enviaLinhas))
 app.post("/confirmados-por-mim",   (req, res) => db.executa(req, res, getConfirmadosPorMim,       enviaLinhas))
