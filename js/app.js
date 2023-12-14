@@ -1059,8 +1059,16 @@
 		$scope.postagemGetter = function() {
 			httpService.get('/get-postagem', function(answer) {
 				
-				if(answer) {
-					answer = answer.map(p => { p.DataMostrar = new Date(p.Data).toLocaleString().split(',')[0]; return p })
+				if(answer)
+				{
+					answer = answer.map(p =>
+					{
+						let data = new Date(p.Data)
+						p.DataMostrar = data.getDate() + '/' + (data.getMonth() + 1) + '/' + data.getFullYear()
+
+						return p
+					})
+					
 					$scope.postagem = answer.reverse();
 					$scope.postagemFixada = answer;
 					
