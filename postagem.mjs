@@ -63,19 +63,26 @@ function getPostagemDB(req, res, connection, callback) {
 }
 
 //*****Excluir Postagem*****//
-function excluirPostagemDB(req, post, connection, callback) {
-	if (req.session.usuarioLogado.Admin) {
-		connection.query('DELETE FROM `postagem` WHERE ID = ?', post.ID, function (err, rows, fields) {
-			connection.release();
-
-			if (!err) {
-				callback(true);
-			} else {
-				callback(false);
+function excluirPostagemDB(req, res, connection, callback)
+{
+	if (req.session.usuarioLogado.Admin)
+	{
+		connection.post('',
+		{
+			comando: 'deleta',
+			parametros:
+			{
+				tabela: 'postagens',
+				umaInstancia: true,
+				chave: req.body
 			}
-		});
-	} else {
-		callback(false);
+		})
+		.then(answer => callback(res, true))
+		.catch(erro => callback(res, false))
+	}
+	else
+	{
+		callback(res, false)
 	}
 }
 
