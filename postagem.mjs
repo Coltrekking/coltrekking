@@ -1,19 +1,31 @@
 //*****Criar Postagem*****//
-function criarPostagemDB(req, data, connection, callback) {
-	if (req.session.usuarioLogado.Admin) {
-		connection.query('INSERT INTO postagem SET ?', data, function (err, rows, fields) {
-			connection.release();
+function criarPostagemDB(req, res, connection, callback)
+{
+	const post = req.body
 
-			if (!err) {
-				callback(true);
+	if (req.session.usuarioLogado.Admin)
+	{
+		post.ID = 'unique id'
+
+		connection.post('',
+		{
+			comando: 'cria',
+			parametros:
+			{
+				tabela: 'postagens',
+				instancia: post,
+				chave:
+				{
+					ID: post.ID
+				}
 			}
-			else {
-				//console.log(err);
-				callback(false);
-			}
-		});
-	} else {
-		callback(false);
+		})
+		.then(answer => callback(res, true))
+		.catch(erro => callback(res, false))
+	}
+	else
+	{
+		callback(res, false)
 	}
 }
 

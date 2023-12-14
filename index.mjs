@@ -68,12 +68,12 @@ app.post("/confirmados-por-mim",   (req, res) => db.executa(req, res, getConfirm
 
 /* POSTAGENS */
 /*
-app.post("/criar-postagem",   (req, res) => execute(req, res, postagem.criarPostagemDB));
 app.post("/editar-info",      (req, res) => execute(req, res, postagem.editarInfoDB));
 */
 
-app.post("/excluir-postagem", (req, res) => db.executa(req, res, postagem.excluirPostagemDB, enviaEstado));
-app.get("/get-postagem",      (req, res) => db.executa(req, res, postagem.getPostagemDB,     enviaLinhas));
+app.post("/criar-postagem",   (req, res) => db.executa(req, res, postagem.criarPostagemDB,   enviaEstado))
+app.post("/excluir-postagem", (req, res) => db.executa(req, res, postagem.excluirPostagemDB, enviaEstado))
+app.get("/get-postagem",      (req, res) => db.executa(req, res, postagem.getPostagemDB,     enviaLinhas))
 
 /* LISTA NEGRA */
 /*

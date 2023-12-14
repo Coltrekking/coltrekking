@@ -224,7 +224,7 @@
 									<div id="exibirEventosFinalizados">
 										<!--Fixacoes-->
 										<div class="container col hide-on-med-and-down l4 right">
-											<!-- <a ng-if="usuario.Admin" href="#!/create-news" id="botaoCriarBarraLateral">Nova Barra Lateral</a> -->
+											<a ng-if="usuario.Admin" href="#!/create-news" id="botaoCriarBarraLateral">Nova Postagem</a>
 											<!--Eventos Cadastrados-->
 											<div class="card">
 												<div class="card-content">
@@ -490,9 +490,6 @@
 											</div>
 										</div>
 									</div>
-									
-
-
 
 									<!--Eventos Disponiveis-->
 									<div id="exibirEventosDisponiveis">
@@ -504,12 +501,11 @@
 											<!-- <h3>(canto superior direito)</h3>	 -->
 										</div>
 
-
 										<!--Fixacoes-->
 										<div id="postFixaxoes" style="display: none">
 											<div ng-controller="PostsController">
 												<div class="container col hide-on-med-and-down l4 right">
-													<!-- <a ng-if="usuario.Admin" href="#!/create-news" id="botaoCriarBarraLateral">Nova Barra Lateral</a> -->
+													<a ng-if="usuario.Admin" href="#!/create-news" id="botaoCriarBarraLateral">Nova Postagem</a>
 													<!-- Posts fixados -->
 													<div class="card" ng-repeat="post in postagemFixada | filter: {Fixado: 1}">
 														<div class="card-content">

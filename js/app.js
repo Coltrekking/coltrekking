@@ -947,8 +947,6 @@
 			});
 		}
 
-
-
 		//Remover usuario da lista negra
 		$scope.removerListaNegra = function(id, idevento) {
 			var dataPost = {
@@ -968,9 +966,6 @@
 			});
 		}
 
-
-		
-		
 		//Excluir Evento
 		$scope.excluirEvento = function(eventoID) {
 			var data = {
@@ -1031,17 +1026,18 @@
 			$(document).ready(function() {
 				//Select
 				$('select').material_select();
-				
 			});
 		});
 		
 		$scope.criarPostagem = function(params) {
 			var data = {
-				Texto: "<h5>" + params.TituloPostagem.replace(/\n\r?/g, '<br />') + "</h5><br />" + params.TextoPostagem.replace(/\n\r?/g, '<br />'), //Insere os break-lines
+				Texto: "<h5>" + params.TituloPostagem.replace(/\n\r?/g, '<br>') + "</h5><br>" + params.TextoPostagem.replace(/\n\r?/g, '<br>'), //Insere os break-lines
 				EventoID: params.EventoAtrelado || 0,
-				Fixado: params.Fixado || true,
+				Fixado: 1, // params.Fixado || true,
 				Data: new Date().toString().substring(0, 24), //Pega data em horario local sem lixo
-				AdminID: $rootScope.usuario.ID
+				AdminID: $rootScope.usuario.ID,
+				NomeEvento: $('#evento-postagem option:selected').text(),
+				NomeAdm: $rootScope.usuario.Nome
 			};
 					
 			//POST /criar-postagem
@@ -1060,7 +1056,6 @@
 			});
 		}
 	}]);
-	
 	
 	//PostsController
 	app.controller('PostsController', ['HTTPService', '$timeout', '$scope', '$rootScope', '$location', function(httpService, $timeout, $scope, $rootScope, $location) {
