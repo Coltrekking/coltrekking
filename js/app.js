@@ -494,7 +494,15 @@
 
 
 	//Eventos Controller
-	app.controller('EventosController', ['HTTPService', 'EventosService', '$timeout', '$rootScope', '$scope', '$interval', '$window', '$location',  function(httpService, eventosService, $timeout, $rootScope, $scope, $interval, $window, $location) {
+	app.controller('EventosController', ['HTTPService', 'EventosService', '$timeout', '$rootScope', '$scope', '$interval', '$window', '$location',  function(httpService, eventosService, $timeout, $rootScope, $scope, $interval, $window, $location)
+	{
+		$scope.finalizar =
+		{
+			Kilometragem: 0,
+			subida: 0,
+			descida: 0
+		}
+
 		//Funcao Countdown
 		$scope.funcaoCountdown = function(element, dataCountdown, controle) {
 			// Pegar o fuso horario do usuario em milissegundo
@@ -780,42 +788,45 @@
 		}
 		
 		//Cadastrar pontuacao
-		$scope.cadastrarPontuacao = function(params, eventoID, fatorKAntigo) {
+		//$scope.cadastrarPontuacao = function(params, eventoID, fatorKAntigo)
+		$scope.cadastrarPontuacao = function(eventoID)
+		{
 			//Pega as pessoas marcadas
 			var transformaEventoIDstring = eventoID.toString();
 			transformaEventoIDstring = transformaEventoIDstring + "[]";
-			var pessoas = $("input[name='stringPessoasEventos-"+transformaEventoIDstring+"']").toArray();
-			console.log(pessoas);
-			var pessoasArray = [];
-			var kilometragemParaFloat =  parseFloat(params.Kilometragem.replace(',','.'));
-			var subidaParaFloat = parseFloat(params.subida.replace(',','.'));
-			var descidaParaFloat = parseFloat(params.descida.replace(',','.'));
+			//var pessoas = $("input[name='stringPessoasEventos-"+transformaEventoIDstring+"']").toArray();
+			//console.log(pessoas);
+			//var pessoasArray = [];
+			var kilometragemParaFloat = parseFloat($scope.finalizar.Kilometragem.replace(',','.'));
+			var subidaParaFloat       = parseFloat($scope.finalizar.subida.replace(',','.'));
+			var descidaParaFloat      = parseFloat($scope.finalizar.descida.replace(',','.'));
 						
-			pessoas.forEach(elem => pessoasArray.push(elem.value));
-			var dataPost = {
+			//pessoas.forEach(elem => pessoasArray.push(elem.value));
+			var dataPost =
+			{
 				eventoID: eventoID,
 				//fatorK na verdade eh a pontucao, math.abs eh o modulo do numero
 				fatork: (kilometragemParaFloat * (1+(subidaParaFloat + Math.abs(descidaParaFloat))/1000)),
-				fatorKAntigo: fatorKAntigo,
 				subdesc: 1+(subidaParaFloat + Math.abs(descidaParaFloat))/1000,
-				distancia: kilometragemParaFloat,
-				pessoas: pessoasArray
+				distancia: kilometragemParaFloat
 			};
 			
 			//Chama POST Cadastrar Pontuacao
-			httpService.post('/cadastrar-pontuacao', dataPost, function(answer) {
+			httpService.post('/cadastrar-pontuacao', dataPost, function(answer)
+			{
 				//Emite alerta sobre o status da operacao
-				if(answer) {
+				if(answer)
+				{
 					Materialize.toast("Pontuação cadastrada com sucesso!", 2000);
 					Materialize.toast("Aguarde 30 min para visualizar atualizações.", 3000)
 					$scope.eventosGetter();
-				} else {
-					
+				}
+				else
+				{
+					Materialize.toast("Erro ao cadastrar a pontuação!", 3000)
 				}
 			});
 		}
-
-
 
 		//Finalizar Evento
 		$scope.finalizarEventoPrelecao = function(eventoID) {

@@ -499,6 +499,70 @@ function excluirUsuarioDB(req, post, connection, callback)
 }
 
 //*****Cadastrar Pontuacao*****/
+
+function cadastrarPontuacaoDB(req, res, connection, callback)
+{
+	let post = req.body
+
+	if (req.session.usuarioLogado.Admin)
+	{
+		connection.post('',
+		{
+			comando: 'muda',
+			parametros:
+			{
+				tabela: 'eventos',
+				umaInstancia: true,
+				chave:
+				{
+					ID: post.eventoID
+				},
+				alteracoes:
+				{
+					fatorKevento: post.fatork,
+					subdesc: post.subdesc,
+					distancia: post.distancia
+				}
+			}
+		})
+		.then(resposta =>
+		{
+			if(resposta.data)
+			{
+				connection.post('',
+				{
+					comando: 'muda',
+					parametros:
+					{
+						tabela: 'inscricoes',
+						umaInstancia: false,
+						chave:
+						{
+							IDEvento: post.eventoID,
+							listaNegraEvento: 0
+						},
+						alteracoes:
+						{
+							fatorKPessoaEvento: post.fatork
+						}
+					}
+				})
+				.then(resposta => callback(res, resposta.data))
+				.catch(erro => callback(res, false))
+			}
+			else
+			{
+				callback(res, false)
+			}
+		})
+		.catch(erro => callback(res, false))
+	}
+	else
+	{
+		callback(res, false);
+	}
+}
+
 /*
 function cadastrarPontucaoDB(req, res, connection, callback)
 {
@@ -608,5 +672,5 @@ function montaRanking(req, res, connection, callback)
 	});
 }
 */
-export { getEventos, criarEventoDB, confirmarEventoDB, cancelarEventoDB, finalizarEventoDB, excluirEventoDB, editarEventoDB, salvaTrilha }
+export { getEventos, criarEventoDB, confirmarEventoDB, cancelarEventoDB, finalizarEventoDB, excluirEventoDB, editarEventoDB, salvaTrilha, cadastrarPontuacaoDB }
 //{ criarEventoDB, editarEventoDB, getEventos, confirmarEventoDB, cancelarEventoDB, estaDisponivel, excluirEventoDB, excluirUsuarioDB, cadastrarPontucaoDB, montaRanking, finalizarEventoDB }
