@@ -473,7 +473,38 @@ const salvaTrilha = (req, res, connection, callback) =>
 }
 
 //*****Excluir Usuario*****/
+
+function excluirUsuarioDB(req, res, connection, callback)
+{
+	const post = req.body
+
+	if (req.session.usuarioLogado.Admin)
+	{
+		connection.post('',
+		{
+			comando: 'deleta',
+			parametros:
+			{
+				tabela: 'inscricoes',
+				umaInstancia: true,
+				chave:
+				{
+					IDEvento: post.IDEvento,
+					IDPessoa: post.ID
+				}
+			}
+		})
+		.then(resposta => callback(res, resposta.data))
+		.catch(erro => callback(res, false))
+	}
+	else
+	{
+		callback(res, false)
+	}
+}
+
 /*
+
 function excluirUsuarioDB(req, post, connection, callback)
 {
 	if (req.session.usuarioLogado.Admin)
@@ -563,93 +594,6 @@ function cadastrarPontuacaoDB(req, res, connection, callback)
 	}
 }
 
-/*
-function cadastrarPontucaoDB(req, res, connection, callback)
-{
-	let post	= req.body
-
-	var controle = true;
-	if (req.session.usuarioLogado.Admin)
-	{
-		connection.query('UPDATE `evento` SET fatorKevento = ? WHERE ID = ?', [post.fatork, post.eventoID], function (err, rows, fields)
-		{
-			if (!err)
-			{
-				connection.query('UPDATE `evento` SET subdesc = ? WHERE ID = ?', [post.subdesc, post.eventoID], function (err, rows, fields)
-				{
-					if (!err)
-					{
-						connection.query('UPDATE `evento` SET distancia = ? WHERE ID = ?', [post.distancia, post.eventoID], function (err, rows, fields)
-						{
-							if (!err)
-							{
-
-								var promessa = new Promise(function (resolve, reject)
-								{
-									post.pessoas.forEach(function (elem, index, array)
-									{
-										connection.query('UPDATE `pessoa-evento` SET fatorKPessoaEvento = ? WHERE IDEvento = ? AND listaNegraEvento = 0', [post.fatork, post.eventoID], function (err, rows, fields)
-										{
-											if (!err)
-											{
-												//Se for o ultimo, resolve a promessa
-												if (index == (array.length - 1))
-												{
-													resolve();
-												}
-											}
-											else
-											{
-												controle = false;
-											}
-										});
-									});
-								});
-
-								promessa.then(function ()
-								{
-									connection.query('UPDATE `evento` SET Finalizado = 1 WHERE ID = ?', post.eventoID, function (err, rows, fields)
-									{
-										connection.release();
-
-										if (!err)
-										{
-											callback(res, controle);
-										}
-										else
-										{
-											controle = false;
-										}
-									});
-								});
-
-
-							}
-							else
-							{
-								callback(res, false);
-							}
-						});
-					}
-					else
-					{
-						callback(res, false);
-					}
-				});
-			}
-			else
-			{
-				callback(res, false);
-			}
-		});
-
-	}
-	else
-	{
-		callback(res, false);
-	}
-}
-
 //*****Monta Ranking*****/
 /*
 function montaRanking(req, res, connection, callback)
@@ -672,5 +616,6 @@ function montaRanking(req, res, connection, callback)
 	});
 }
 */
-export { getEventos, criarEventoDB, confirmarEventoDB, cancelarEventoDB, finalizarEventoDB, excluirEventoDB, editarEventoDB, salvaTrilha, cadastrarPontuacaoDB }
+
+export { getEventos, criarEventoDB, confirmarEventoDB, cancelarEventoDB, finalizarEventoDB, excluirEventoDB, editarEventoDB, salvaTrilha, cadastrarPontuacaoDB, excluirUsuarioDB }
 //{ criarEventoDB, editarEventoDB, getEventos, confirmarEventoDB, cancelarEventoDB, estaDisponivel, excluirEventoDB, excluirUsuarioDB, cadastrarPontucaoDB, montaRanking, finalizarEventoDB }

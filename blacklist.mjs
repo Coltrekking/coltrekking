@@ -10,6 +10,67 @@
 	Quando a coluna "listaNegraEvento" for = 2, então a situacao do usuario eh livre
 **/
 //*****Adicionar usuario na lista negra*****//
+function adicionarListaNegraDB(req, res, connection, callback)
+{
+	const post = req.body
+
+	if (req.session.usuarioLogado.Admin)
+	{
+		connection.post('',
+		{
+			comando: 'muda',
+			parametros:
+			{
+				tabela: 'inscricoes',
+				umaInstancia: true,
+				chave:
+				{
+					IDEvento: post.IDEvento,
+					IDPessoa: post.ID
+				},
+				alteracoes:
+				{
+					listaNegraEvento: 1
+				}
+			}
+		})
+		.then(resposta =>
+		{
+			if(resposta.data)
+			{
+				connection.post('',
+				{
+					comando: 'muda',
+					parametros:
+					{
+						tabela: 'pessoas',
+						umaInstancia: true,
+						chave:
+						{
+							ID: post.ID
+						},
+						alteracoes:
+						{
+							ListaNegra: 1
+						}
+					}
+				})
+				.then(resposta => callback(res, resposta.data))
+				.catch(erro => callback(res, false))
+			}
+			else
+			{
+				callback(res, false)
+			}
+		})
+		.catch(erro => callback(res, false))
+	}
+	else
+	{
+		callback(res, false)
+	}
+}
+/*
 function adicionarListaNegraDB(req, post, connection, callback) {
 	if (req.session.usuarioLogado.Admin) {
 		connection.query('UPDATE `pessoa-evento` SET listaNegraEvento = 1 WHERE IDEvento = ? AND IDPessoa = ?', [post.IDEvento, post.ID], function (err, rows, fields) {
@@ -31,11 +92,46 @@ function adicionarListaNegraDB(req, post, connection, callback) {
 		callback(false);
 	}
 }
-
+*/
 
 /**
 	Remover usuario da lista negra
 **/
+
+function removerListaNegraDB(req, res, connection, callback)
+{
+	const post = req.body
+
+	if (req.session.usuarioLogado.Admin)
+	{
+		connection.post('',
+		{
+			comando: 'muda',
+			parametros:
+			{
+				tabela: 'inscricoes',
+				umaInstancia: true,
+				chave:
+				{
+					IDEvento: post.IDEvento,
+					IDPessoa: post.ID
+				},
+				alteracoes:
+				{
+					listaNegraEvento: 0
+				}
+			}
+		})
+		.then(resposta => callback(res, resposta.data))
+		.catch(erro => callback(res, false))
+	}
+	else
+	{
+		callback(res, false)
+	}
+}
+
+/*
 function removerListaNegraDB(req, post, connection, callback) {
 	if (req.session.usuarioLogado.Admin) {
 		connection.query('UPDATE `pessoa-evento` SET listaNegraEvento = 0 WHERE IDEvento = ? AND IDPessoa = ?', [post.IDEvento, post.ID], function (err, rows, fields) {
@@ -57,5 +153,6 @@ function removerListaNegraDB(req, post, connection, callback) {
 		callback(false);
 	}
 }
+*/
 
 export { adicionarListaNegraDB, removerListaNegraDB }
