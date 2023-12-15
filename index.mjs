@@ -63,8 +63,8 @@ app.post("/salvar-trilha",       (req, res) => db.executa(req, res, evento.salva
 app.get("/eventos",              (req, res) => db.executa(req, res, evento.getEventos,           enviaLinhas))
 app.post("/confirmados",         (req, res) => db.executa(req, res, getConfirmados,              enviaLinhas))
 app.post("/confirmados-por-mim", (req, res) => db.executa(req, res, getConfirmadosPorMim,        enviaLinhas))
-app.post("/excluir-usuario",       (req, res) => db.executa(req, res, evento.excluirUsuarioDB,   enviaEstado))
-//app.post("/ranking",           (req, res) => db.executa(req, res, evento.montaRanking,         enviaLinhas))
+app.post("/excluir-usuario",     (req, res) => db.executa(req, res, evento.excluirUsuarioDB,     enviaEstado))
+app.post("/ranking",             (req, res) => db.executa(req, res, evento.montaRanking,         enviaLinhas))
 
 /* POSTAGENS */
 /*

@@ -595,27 +595,56 @@ function cadastrarPontuacaoDB(req, res, connection, callback)
 }
 
 //*****Monta Ranking*****/
-/*
+
 function montaRanking(req, res, connection, callback)
 {
-	let ano	= req.body.ano
+	let ano	    = req.body.ano
+	let ranking = {}
 
-	connection.query('SELECT `pessoa-evento`.IDPessoa AS ID, pessoa.Nome AS Nome, SUM(FatorKPessoaEvento) AS FatorK FROM pessoa INNER JOIN `pessoa-evento` ON pessoa.ID = `pessoa-evento`.IDPessoa INNER JOIN evento ON evento.ID = `pessoa-evento`.`IDEvento` WHERE `pessoa-evento`.FatorKPessoaEvento > 0 AND evento.ano = ? GROUP BY `pessoa-evento`.IDPessoa ORDER BY FatorK DESC', ano, function (err, rows, fields)
+	connection.post('',
 	{
-		connection.release();
-
-		if (!err)
+		comando: 'junta',
+		parametros:
 		{
-			callback(res, rows);
+			tabelaInicial: { tabela: 'pessoas', apelido: 'p', chave: {} },
+			relacionamentos:
+			[
+				{ tabela: 'inscricoes', apelido: 'i', origem: 'p.ID', destino: 'IDPessoa' },
+				{ tabela: 'eventos', apelido: 'e', origem: 'i.IDEvento', destino: 'ID' }
+			],
+			chave:
+			{
+				'e.ano': ano
+			}
+		}
+	})
+	.then(dados =>
+	{
+		if(dados.data)
+		{
+			dados.data.forEach(linha =>
+			{
+				let aluno = linha.p.Nome
+
+				if(!(aluno in ranking))
+				{
+					ranking[aluno] = .0
+				}
+				ranking[aluno] += parseFloat(linha.i.fatorKPessoaEvento)
+			})
+			
+			ranking = Object.keys(ranking).map(aluno => { return { Nome: aluno, FatorK: ranking[aluno] } })
+			ranking = ranking.sort(aluno => aluno.FatorK).reverse()
+
+			callback(res, ranking)
 		}
 		else
 		{
-			//console.log(err);
-			callback(res, false);
+			callback(res, false)
 		}
-	});
+	})
+	.catch(erro => callback(res, false))
 }
-*/
 
-export { getEventos, criarEventoDB, confirmarEventoDB, cancelarEventoDB, finalizarEventoDB, excluirEventoDB, editarEventoDB, salvaTrilha, cadastrarPontuacaoDB, excluirUsuarioDB }
+export { getEventos, criarEventoDB, confirmarEventoDB, cancelarEventoDB, finalizarEventoDB, excluirEventoDB, editarEventoDB, salvaTrilha, cadastrarPontuacaoDB, excluirUsuarioDB, montaRanking }
 //{ criarEventoDB, editarEventoDB, getEventos, confirmarEventoDB, cancelarEventoDB, estaDisponivel, excluirEventoDB, excluirUsuarioDB, cadastrarPontucaoDB, montaRanking, finalizarEventoDB }
