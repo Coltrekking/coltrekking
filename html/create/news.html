@@ -16,6 +16,11 @@
 						<textarea id="texto-postagem" class="materialize-textarea" name="texto-postagem" ng-model="params.TextoPostagem"></textarea>
 						<label for="texto-postagem">Texto do Post</label>
 					</div>
+					<!--Evento da Postagem-->
+					<div class="input-field col s12">
+						<select id="evento-postagem" name="evento-postagem" ng-model="params.EventoAtrelado" ng-options="evento.ID as evento.Nome for evento in eventos"></select>
+						<label for="evento-postagem">Evento do Post</label>
+					</div>
 				</div>
 			</form>
 		</div>

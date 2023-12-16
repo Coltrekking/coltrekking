@@ -193,7 +193,7 @@
 														</a>
 													</td>
 													<td class="listaNegraUsuario">
-														<a ng-if="usuario.Admin" id="btn" href="#!" onClick='parent.location="javascript:location.reload()"' ng-click="removerListaNegra(confirmado.ID, confirmado.IDEvento)"><img id="iconListaNegraERemover" src="../rsc/icon/remover.png"></a>
+														<a ng-if="usuario.Admin" id="btn" href="#!" ng-click="removerListaNegra(confirmado.ID, confirmado.IDEvento)"><img id="iconListaNegraERemover" src="../rsc/icon/remover.png"></a>
 													</td>
 												</tr>
 											</tbody>
@@ -224,7 +224,7 @@
 									<div id="exibirEventosFinalizados">
 										<!--Fixacoes-->
 										<div class="container col hide-on-med-and-down l4 right">
-											<!-- <a ng-if="usuario.Admin" href="#!/create-news" id="botaoCriarBarraLateral">Nova Barra Lateral</a> -->
+											<a ng-if="usuario.Admin" href="#!/create-news" id="botaoCriarBarraLateral">Nova Postagem</a>
 											<!--Eventos Cadastrados-->
 											<div class="card">
 												<div class="card-content">
@@ -298,7 +298,7 @@
 													<ul ng-if="usuario.Admin" ng-attr-id="{{'menu-card' + evento.ID}}" class="dropdown-content">
 														<!-- Nao mostrar Editar Pontuacao em prelecao -->
 														<div ng-if="evento.Disponivel == 2" ng-show="evento.Tipo != 1">
-															<li><a href="#!" class="finalizador" onclick="return false;" ng-click="cadastrarPontuacao(evento.ID)" ng-attr-href="{{'#lista-finalizadora' + evento.ID}}">Editar Pontuação</a></li>
+															<li><a href="#!" class="finalizador" onclick="return false;" ng-attr-href="{{'#lista-finalizadora' + evento.ID}}">Editar Pontuação</a></li>
 														</div>
 														<li><a ng-attr-href="{{'#!/create-event?id=' + evento.ID + '&nome=' + evento.Nome + '&tipo=' + evento.Tipo + '&tipoTrekking=' + evento.TipoTrekking + '&dataInicio=' + evento.DataInicio + '&dataFim=' + evento.DataFim + '&local=' + evento.Local + '&dificuldade=' + evento.Dificuldade + '&numeroMax=' + evento.NumeroMax + '&dataInscricao=' + evento.DataInscricao + '&fimInscricao=' + evento.FimInscricao}}"">Editar evento</a></li>
 														<li class="divider"></li>
@@ -472,8 +472,6 @@
 																<label for="descida-finalizar">Descida (metros)</label>
 															</div>
 														</div>
-														
-														
 													</form>
 												</div>
 												
@@ -481,7 +479,7 @@
 													<!--Botao Cancelar-->
 													<a href="#!" class="modal-action modal-close waves-effect waves-orange btn-flat">Cancelar</a>
 													<!--Botao Submit Finalizar-->
-													<a href="#!" id="btn-finalizar-evento" class="modal-action modal-close waves-effect waves-orange btn-flat" onClick='setTimeout(function(){ parent.location="javascript:location.reload()";}, 3000);' ng-click="cadastrarPontuacao(finalizar, evento.ID, evento.fatorKevento)">Aplicar</a>
+													<a href="#!" id="btn-finalizar-evento" class="modal-action modal-close waves-effect waves-orange btn-flat" ng-click="cadastrarPontuacao(evento.ID)">Aplicar</a>
 													<!-- Pegar pessoas inscritas no evento e jogar na string pessoas -->
 													<div ng-repeat="confirmado in evento.Confirmados">
 														<input type="text" class="removerIDpessoas col s1 l1" ng-attr-name="{{'stringPessoasEventos-' + evento.ID + '[]'}}" ng-attr-id="{{confirmado.ID}}" ng-attr-value="{{confirmado.ID}}"/>														
@@ -490,9 +488,6 @@
 											</div>
 										</div>
 									</div>
-									
-
-
 
 									<!--Eventos Disponiveis-->
 									<div id="exibirEventosDisponiveis">
@@ -504,12 +499,11 @@
 											<!-- <h3>(canto superior direito)</h3>	 -->
 										</div>
 
-
 										<!--Fixacoes-->
 										<div id="postFixaxoes" style="display: none">
 											<div ng-controller="PostsController">
 												<div class="container col hide-on-med-and-down l4 right">
-													<!-- <a ng-if="usuario.Admin" href="#!/create-news" id="botaoCriarBarraLateral">Nova Barra Lateral</a> -->
+													<a ng-if="usuario.Admin" href="#!/create-news" id="botaoCriarBarraLateral">Nova Postagem</a>
 													<!-- Posts fixados -->
 													<div class="card" ng-repeat="post in postagemFixada | filter: {Fixado: 1}">
 														<div class="card-content">

@@ -49,7 +49,8 @@ const enviarUserParaDB      = function(usuario, url)
         {
             //reativarBotoes();
             console.log(answer.responseText);
-            alert("Erro ao realizar o login! Tente novamente");
+            alert("Erro ao realizar o login! Recarregando a página...");
+            location.reload()
         }
     });
 }

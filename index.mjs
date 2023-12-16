@@ -1,15 +1,15 @@
 /********************************SETUP**********************************/
-import * as path	from 'path'
-import express		from 'express'
-import bodyParser	from 'body-parser'
-import session 		from 'express-session'
+import * as path     from 'path'
+import express       from 'express'
+import bodyParser    from 'body-parser'
+import session       from 'express-session'
 
-import * as db		from './db.mjs'
-import * as user	from './user.mjs'
-//import * as lstNeg	from './blacklist.mjs'
-import * as evento	from './event.mjs'
-import * as postagem	from './postagem.mjs'
-import __dirname	from './root_dir.mjs'
+import * as db       from './db.mjs'
+import * as user     from './user.mjs'
+import * as lstNeg   from './blacklist.mjs'
+import * as evento   from './event.mjs'
+import * as postagem from './postagem.mjs'
+import __dirname     from './root_dir.mjs'
 
 //var aws = require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 var app = express();
@@ -52,33 +52,34 @@ app.get("/", function (req, res) {
 });
 
 /* EVENTOS */
-app.post("/criar-evento",			(req, res) => db.executa(req, res, evento.criarEventoDB,		enviaEstado))
-app.post("/editar-evento",			(req, res) => db.executa(req, res, evento.editarEventoDB,		enviaEstado))
-app.post("/confirmar-evento",		(req, res) => db.executa(req, res, evento.confirmarEventoDB,	enviaEstado))
-app.post("/cancelar-evento",		(req, res) => db.executa(req, res, evento.cancelarEventoDB,		enviaEstado))
-//app.post("/cadastrar-pontuacao",	(req, res) => db.executa(req, res, evento.cadastrarPontucaoDB,	enviaEstado))
-app.post("/finalizar-evento",		(req, res) => db.executa(req, res, evento.finalizarEventoDB, 	enviaEstado))
-app.post("/excluir-evento",			(req, res) => db.executa(req, res, evento.excluirEventoDB, 		enviaEstado))
-app.post("/salvar-trilha",	        (req, res) => db.executa(req, res, evento.salvaTrilha,		    enviaEstado))
-app.post("/pegar-trilha",             (req, res) => db.executa(req, res, evento.pegaTrilha,         enviaLinhas))
-app.get("/eventos",					(req, res) => db.executa(req, res, evento.getEventos,			enviaLinhas))
-app.post("/confirmados",			(req, res) => db.executa(req, res, getConfirmados,				enviaLinhas))
-app.post("/confirmados-por-mim",	(req, res) => db.executa(req, res, getConfirmadosPorMim,		enviaLinhas))
-//app.post("/ranking",				(req, res) => db.executa(req, res, evento.montaRanking,			enviaLinhas))
+app.post("/criar-evento",        (req, res) => db.executa(req, res, evento.criarEventoDB,        enviaEstado))
+app.post("/editar-evento",       (req, res) => db.executa(req, res, evento.editarEventoDB,       enviaEstado))
+app.post("/confirmar-evento",    (req, res) => db.executa(req, res, evento.confirmarEventoDB,    enviaEstado))
+app.post("/cancelar-evento",     (req, res) => db.executa(req, res, evento.cancelarEventoDB,     enviaEstado))
+app.post("/cadastrar-pontuacao", (req, res) => db.executa(req, res, evento.cadastrarPontuacaoDB, enviaEstado))
+app.post("/finalizar-evento",    (req, res) => db.executa(req, res, evento.finalizarEventoDB,    enviaEstado))
+app.post("/excluir-evento",      (req, res) => db.executa(req, res, evento.excluirEventoDB,      enviaEstado))
+app.post("/salvar-trilha",       (req, res) => db.executa(req, res, evento.salvaTrilha,          enviaEstado))
+app.get("/eventos",              (req, res) => db.executa(req, res, evento.getEventos,           enviaLinhas))
+app.post("/confirmados",         (req, res) => db.executa(req, res, getConfirmados,              enviaLinhas))
+app.post("/confirmados-por-mim", (req, res) => db.executa(req, res, getConfirmadosPorMim,        enviaLinhas))
+app.post("/excluir-usuario",     (req, res) => db.executa(req, res, evento.excluirUsuarioDB,     enviaEstado))
+app.post("/ranking",             (req, res) => db.executa(req, res, evento.montaRanking,         enviaLinhas))
 
 /* POSTAGENS */
 /*
-app.post("/criar-postagem",			(req, res) => execute(req, res, postagem.criarPostagemDB));
-app.post("/editar-info",			(req, res) => execute(req, res, postagem.editarInfoDB));
-app.post("/excluir-postagem",		(req, res) => execute(req, res, postagem.excluirPostagemDB));
+app.post("/editar-info",      (req, res) => execute(req, res, postagem.editarInfoDB));
 */
-app.get("/get-postagem",			(req, res) => db.executa(req, res, postagem.getPostagemDB, enviaLinhas));
+
+app.post("/criar-postagem",   (req, res) => db.executa(req, res, postagem.criarPostagemDB,   enviaEstado))
+app.post("/excluir-postagem", (req, res) => db.executa(req, res, postagem.excluirPostagemDB, enviaEstado))
+app.get("/get-postagem",      (req, res) => db.executa(req, res, postagem.getPostagemDB,     enviaLinhas))
+
 /* LISTA NEGRA */
-/*
-app.post("/adicionar-lista-negra",	(req, res) => execute(req, res, lstNeg.adicionarListaNegraDB));
-app.post("/remover-lista-negra",	(req, res) => execute(req, res, lstNeg.removerListaNegraDB));
-app.post("/excluir-usuario",		(req, res) => execute(req, res, evento.excluirUsuarioDB));
-*/
+
+app.post("/adicionar-lista-negra", (req, res) => db.executa(req, res, lstNeg.adicionarListaNegraDB, enviaEstado))
+app.post("/remover-lista-negra",   (req, res) => db.executa(req, res, lstNeg.removerListaNegraDB,   enviaEstado))
+
 //*****Posta usuario logado*****//
 
 app.post("/post-user", (req, res) =>
@@ -120,6 +121,7 @@ app.post("/post-user", (req, res) =>
 })
 
 //*****Redireciona para pagina principal*****//
+
 app.get("/main-page", function (req, res) {
 	if (req.session.loginSucesso) {
 		res.sendFile(path.join(__dirname, index));
@@ -145,7 +147,6 @@ app.get("/logout", function (req, res) {
 });
 
 /***************************BANCO DE DADOS*****************************/
-
 
 function getConfirmados(req, res, connection, callback)
 {

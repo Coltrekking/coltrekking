@@ -472,29 +472,39 @@ const salvaTrilha = (req, res, connection, callback) =>
 	.catch(error => callback(res, false))
 }
 
-const pegaTrilha = (req, res, connection, callback) =>
+//*****Excluir Usuario*****/
+
+function excluirUsuarioDB(req, res, connection, callback)
 {
-	const evento = req.body.evento
-	
-	connection.post('',
+	const post = req.body
+
+	if (req.session.usuarioLogado.Admin)
 	{
-		comando: 'encontra',
-		parametros:
+		connection.post('',
 		{
-			tabela: 'eventos',
-			umaInstancia: true,
-			chave:
+			comando: 'deleta',
+			parametros:
 			{
-				ID: evento
+				tabela: 'inscricoes',
+				umaInstancia: true,
+				chave:
+				{
+					IDEvento: post.IDEvento,
+					IDPessoa: post.ID
+				}
 			}
-		}
-	})
-	.then(answer => callback(res, answer.data.trilha))
-	.catch(error => callback(res, false))
+		})
+		.then(resposta => callback(res, resposta.data))
+		.catch(erro => callback(res, false))
+	}
+	else
+	{
+		callback(res, false)
+	}
 }
 
-//*****Excluir Usuario*****/
 /*
+
 function excluirUsuarioDB(req, post, connection, callback)
 {
 	if (req.session.usuarioLogado.Admin)
@@ -520,86 +530,63 @@ function excluirUsuarioDB(req, post, connection, callback)
 }
 
 //*****Cadastrar Pontuacao*****/
-/*
-function cadastrarPontucaoDB(req, res, connection, callback)
-{
-	let post	= req.body
 
-	var controle = true;
+function cadastrarPontuacaoDB(req, res, connection, callback)
+{
+	let post = req.body
+
 	if (req.session.usuarioLogado.Admin)
 	{
-		connection.query('UPDATE `evento` SET fatorKevento = ? WHERE ID = ?', [post.fatork, post.eventoID], function (err, rows, fields)
+		connection.post('',
 		{
-			if (!err)
+			comando: 'muda',
+			parametros:
 			{
-				connection.query('UPDATE `evento` SET subdesc = ? WHERE ID = ?', [post.subdesc, post.eventoID], function (err, rows, fields)
+				tabela: 'eventos',
+				umaInstancia: true,
+				chave:
 				{
-					if (!err)
+					ID: post.eventoID
+				},
+				alteracoes:
+				{
+					fatorKevento: post.fatork,
+					subdesc: post.subdesc,
+					distancia: post.distancia
+				}
+			}
+		})
+		.then(resposta =>
+		{
+			if(resposta.data)
+			{
+				connection.post('',
+				{
+					comando: 'muda',
+					parametros:
 					{
-						connection.query('UPDATE `evento` SET distancia = ? WHERE ID = ?', [post.distancia, post.eventoID], function (err, rows, fields)
+						tabela: 'inscricoes',
+						umaInstancia: false,
+						chave:
 						{
-							if (!err)
-							{
-
-								var promessa = new Promise(function (resolve, reject)
-								{
-									post.pessoas.forEach(function (elem, index, array)
-									{
-										connection.query('UPDATE `pessoa-evento` SET fatorKPessoaEvento = ? WHERE IDEvento = ? AND listaNegraEvento = 0', [post.fatork, post.eventoID], function (err, rows, fields)
-										{
-											if (!err)
-											{
-												//Se for o ultimo, resolve a promessa
-												if (index == (array.length - 1))
-												{
-													resolve();
-												}
-											}
-											else
-											{
-												controle = false;
-											}
-										});
-									});
-								});
-
-								promessa.then(function ()
-								{
-									connection.query('UPDATE `evento` SET Finalizado = 1 WHERE ID = ?', post.eventoID, function (err, rows, fields)
-									{
-										connection.release();
-
-										if (!err)
-										{
-											callback(res, controle);
-										}
-										else
-										{
-											controle = false;
-										}
-									});
-								});
-
-
-							}
-							else
-							{
-								callback(res, false);
-							}
-						});
+							IDEvento: post.eventoID,
+							listaNegraEvento: 0
+						},
+						alteracoes:
+						{
+							fatorKPessoaEvento: post.fatork
+						}
 					}
-					else
-					{
-						callback(res, false);
-					}
-				});
+				})
+				.then(resposta => callback(res, resposta.data))
+				.catch(erro => callback(res, false))
 			}
 			else
 			{
-				callback(res, false);
+				callback(res, false)
 			}
-		});
-
+		})
+		.catch(erro => callback(res, false))
 	}
 	else
 	{
@@ -608,26 +595,56 @@ function cadastrarPontucaoDB(req, res, connection, callback)
 }
 
 //*****Monta Ranking*****/
-/*
+
 function montaRanking(req, res, connection, callback)
 {
-	let ano	= req.body.ano
+	let ano	    = req.body.ano
+	let ranking = {}
 
-	connection.query('SELECT `pessoa-evento`.IDPessoa AS ID, pessoa.Nome AS Nome, SUM(FatorKPessoaEvento) AS FatorK FROM pessoa INNER JOIN `pessoa-evento` ON pessoa.ID = `pessoa-evento`.IDPessoa INNER JOIN evento ON evento.ID = `pessoa-evento`.`IDEvento` WHERE `pessoa-evento`.FatorKPessoaEvento > 0 AND evento.ano = ? GROUP BY `pessoa-evento`.IDPessoa ORDER BY FatorK DESC', ano, function (err, rows, fields)
+	connection.post('',
 	{
-		connection.release();
-
-		if (!err)
+		comando: 'junta',
+		parametros:
 		{
-			callback(res, rows);
+			tabelaInicial: { tabela: 'pessoas', apelido: 'p', chave: {} },
+			relacionamentos:
+			[
+				{ tabela: 'inscricoes', apelido: 'i', origem: 'p.ID', destino: 'IDPessoa' },
+				{ tabela: 'eventos', apelido: 'e', origem: 'i.IDEvento', destino: 'ID' }
+			],
+			chave:
+			{
+				'e.ano': ano
+			}
+		}
+	})
+	.then(dados =>
+	{
+		if(dados.data)
+		{
+			dados.data.forEach(linha =>
+			{
+				let aluno = linha.p.Nome
+
+				if(!(aluno in ranking))
+				{
+					ranking[aluno] = .0
+				}
+				ranking[aluno] += parseFloat(linha.i.fatorKPessoaEvento)
+			})
+			
+			ranking = Object.keys(ranking).map(aluno => { return { Nome: aluno, FatorK: ranking[aluno] } })
+			ranking = ranking.sort(aluno => aluno.FatorK).reverse()
+
+			callback(res, ranking)
 		}
 		else
 		{
-			//console.log(err);
-			callback(res, false);
+			callback(res, false)
 		}
-	});
+	})
+	.catch(erro => callback(res, false))
 }
-*/
-export { getEventos, criarEventoDB, confirmarEventoDB, cancelarEventoDB, finalizarEventoDB, excluirEventoDB, editarEventoDB, salvaTrilha, pegaTrilha }
+
+export { getEventos, criarEventoDB, confirmarEventoDB, cancelarEventoDB, finalizarEventoDB, excluirEventoDB, editarEventoDB, salvaTrilha, cadastrarPontuacaoDB, excluirUsuarioDB, montaRanking }
 //{ criarEventoDB, editarEventoDB, getEventos, confirmarEventoDB, cancelarEventoDB, estaDisponivel, excluirEventoDB, excluirUsuarioDB, cadastrarPontucaoDB, montaRanking, finalizarEventoDB }

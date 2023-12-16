@@ -2,14 +2,15 @@ setTimeout(() =>
 {
     let center = sessionStorage.getItem('center')
 
-    center = center == null ? [-20.0579752, -44.033977] : JSON.parse(center)
+    center = center == null ? [-19.9155966, -43.9822332] : JSON.parse(center)
 
     /* MAP */
     let map = L.map('map').setView(center, 15)
 
     /* LAYERS */
 
-    let g_terrain = L.tileLayer('http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',{
+    let g_terrain = L.tileLayer('http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',
+    {
         maxZoom: 20,
         subdomains:['mt0','mt1','mt2','mt3']
     });
@@ -27,7 +28,7 @@ setTimeout(() =>
     {
         user_figures = L.geoJSON(JSON.parse(user_figures))
     }
-    console.log(sessionStorage.getItem('edit'))
+    
     if(sessionStorage.getItem('edit') == 'true')
     {
         let draw_ctrl = new L.Control.Draw
@@ -51,4 +52,4 @@ setTimeout(() =>
             sessionStorage.setItem('center', JSON.stringify(map.getCenter()))
         })
 
-}, 4000);
+}, 1000)

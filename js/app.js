@@ -229,29 +229,25 @@
 	}]);
 
 	/* CONTROLADOR DE TRILHAS */
-	app.controller('TrilhaController', ['HTTPService', '$timeout', '$scope', '$location', '$window', '$rootScope', function(httpService, $timeout, $scope, $location, $window, $rootScope)
+	app.controller('TrilhaController', ['HTTPService', 'EventosService', '$scope', '$location', '$rootScope', function(httpService, EventosService, $scope, $location, $rootScope)
 	{
-		$scope.param_corretos = !jQuery.isEmptyObject($location.search())
-		let id
+		let evento
 
+		$scope.param_corretos = !jQuery.isEmptyObject($location.search())
 		sessionStorage.setItem('edit', JSON.stringify($rootScope.usuario.Admin))
-		console.log(sessionStorage.getItem('edit'))
 		
 		//Parametros enviados por GET
 		if($scope.param_corretos)
 		{
 			$scope.eventoAttr = $location.search()
-			id = $scope.eventoAttr.id
-
-			//Chama o POST Pegar Trilha
-			httpService.post('/pegar-trilha', { evento: id }, answer =>
+			evento = EventosService.get().find(e => e.ID == $scope.eventoAttr.id)
+			
+			if(evento && evento.trilha)
 			{
-				if(answer)
-				{
-					sessionStorage.setItem('center', JSON.stringify(answer.center))
-					sessionStorage.setItem('figures', JSON.stringify(answer.fig))
-				}
-			})
+				evento.trilha = JSON.parse(evento.trilha)
+				sessionStorage.setItem('center', JSON.stringify(evento.trilha.center))
+				sessionStorage.setItem('figures', JSON.stringify(evento.trilha.fig))
+			}
 		}
 
 		$scope.salvarTrilha = () =>
@@ -262,13 +258,13 @@
 				center: JSON.parse(sessionStorage.getItem('center'))
 			}
 
-			const dados = { 'trilha': trilha, 'evento': id }
+			const dados = { 'trilha': trilha, 'evento': $scope.eventoAttr.id }
 			
 			//Chama o POST Salvar Trilha
-			httpService.post('/salvar-trilha', dados, answer =>
+			httpService.post('/salvar-trilha', dados, funcionou =>
 			{
 				//Emite alerta sobre o status da operacao e redireciona
-				if(answer)
+				if(funcionou)
 				{
 					Materialize.toast("Trilha salva com sucesso!", 2000);
 					Materialize.toast("Aguarde 30 min para visualizar atualizações.", 2000)
@@ -498,7 +494,15 @@
 
 
 	//Eventos Controller
-	app.controller('EventosController', ['HTTPService', 'EventosService', '$timeout', '$rootScope', '$scope', '$interval', '$window', '$location',  function(httpService, eventosService, $timeout, $rootScope, $scope, $interval, $window, $location) {
+	app.controller('EventosController', ['HTTPService', 'EventosService', '$timeout', '$rootScope', '$scope', '$interval', '$window', '$location',  function(httpService, eventosService, $timeout, $rootScope, $scope, $interval, $window, $location)
+	{
+		$scope.finalizar =
+		{
+			Kilometragem: 0,
+			subida: 0,
+			descida: 0
+		}
+
 		//Funcao Countdown
 		$scope.funcaoCountdown = function(element, dataCountdown, controle) {
 			// Pegar o fuso horario do usuario em milissegundo
@@ -784,42 +788,45 @@
 		}
 		
 		//Cadastrar pontuacao
-		$scope.cadastrarPontuacao = function(params, eventoID, fatorKAntigo) {
+		//$scope.cadastrarPontuacao = function(params, eventoID, fatorKAntigo)
+		$scope.cadastrarPontuacao = function(eventoID)
+		{
 			//Pega as pessoas marcadas
 			var transformaEventoIDstring = eventoID.toString();
 			transformaEventoIDstring = transformaEventoIDstring + "[]";
-			var pessoas = $("input[name='stringPessoasEventos-"+transformaEventoIDstring+"']").toArray();
-			console.log(pessoas);
-			var pessoasArray = [];
-			var kilometragemParaFloat =  parseFloat(params.Kilometragem.replace(',','.'));
-			var subidaParaFloat = parseFloat(params.subida.replace(',','.'));
-			var descidaParaFloat = parseFloat(params.descida.replace(',','.'));
+			//var pessoas = $("input[name='stringPessoasEventos-"+transformaEventoIDstring+"']").toArray();
+			//console.log(pessoas);
+			//var pessoasArray = [];
+			var kilometragemParaFloat = parseFloat($scope.finalizar.Kilometragem.replace(',','.'));
+			var subidaParaFloat       = parseFloat($scope.finalizar.subida.replace(',','.'));
+			var descidaParaFloat      = parseFloat($scope.finalizar.descida.replace(',','.'));
 						
-			pessoas.forEach(elem => pessoasArray.push(elem.value));
-			var dataPost = {
+			//pessoas.forEach(elem => pessoasArray.push(elem.value));
+			var dataPost =
+			{
 				eventoID: eventoID,
 				//fatorK na verdade eh a pontucao, math.abs eh o modulo do numero
 				fatork: (kilometragemParaFloat * (1+(subidaParaFloat + Math.abs(descidaParaFloat))/1000)),
-				fatorKAntigo: fatorKAntigo,
 				subdesc: 1+(subidaParaFloat + Math.abs(descidaParaFloat))/1000,
-				distancia: kilometragemParaFloat,
-				pessoas: pessoasArray
+				distancia: kilometragemParaFloat
 			};
 			
 			//Chama POST Cadastrar Pontuacao
-			httpService.post('/cadastrar-pontuacao', dataPost, function(answer) {
+			httpService.post('/cadastrar-pontuacao', dataPost, function(answer)
+			{
 				//Emite alerta sobre o status da operacao
-				if(answer) {
+				if(answer)
+				{
 					Materialize.toast("Pontuação cadastrada com sucesso!", 2000);
 					Materialize.toast("Aguarde 30 min para visualizar atualizações.", 3000)
 					$scope.eventosGetter();
-				} else {
-					
+				}
+				else
+				{
+					Materialize.toast("Erro ao cadastrar a pontuação!", 3000)
 				}
 			});
 		}
-
-
 
 		//Finalizar Evento
 		$scope.finalizarEventoPrelecao = function(eventoID) {
@@ -947,8 +954,6 @@
 			});
 		}
 
-
-
 		//Remover usuario da lista negra
 		$scope.removerListaNegra = function(id, idevento) {
 			var dataPost = {
@@ -968,9 +973,6 @@
 			});
 		}
 
-
-		
-		
 		//Excluir Evento
 		$scope.excluirEvento = function(eventoID) {
 			var data = {
@@ -1031,17 +1033,18 @@
 			$(document).ready(function() {
 				//Select
 				$('select').material_select();
-				
 			});
 		});
 		
 		$scope.criarPostagem = function(params) {
 			var data = {
-				Texto: "<h5>" + params.TituloPostagem.replace(/\n\r?/g, '<br />') + "</h5><br />" + params.TextoPostagem.replace(/\n\r?/g, '<br />'), //Insere os break-lines
+				Texto: "<h5>" + params.TituloPostagem.replace(/\n\r?/g, '<br>') + "</h5><br>" + params.TextoPostagem.replace(/\n\r?/g, '<br>'), //Insere os break-lines
 				EventoID: params.EventoAtrelado || 0,
-				Fixado: params.Fixado || true,
+				Fixado: 1, // params.Fixado || true,
 				Data: new Date().toString().substring(0, 24), //Pega data em horario local sem lixo
-				AdminID: $rootScope.usuario.ID
+				AdminID: $rootScope.usuario.ID,
+				NomeEvento: $('#evento-postagem option:selected').text(),
+				NomeAdm: $rootScope.usuario.Nome
 			};
 					
 			//POST /criar-postagem
@@ -1061,15 +1064,22 @@
 		}
 	}]);
 	
-	
 	//PostsController
 	app.controller('PostsController', ['HTTPService', '$timeout', '$scope', '$rootScope', '$location', function(httpService, $timeout, $scope, $rootScope, $location) {
 		//GET Postagens
 		$scope.postagemGetter = function() {
 			httpService.get('/get-postagem', function(answer) {
 				
-				if(answer) {
-					answer = answer.map(p => { p.DataMostrar = new Date(p.Data).toLocaleString().split(',')[0]; return p })
+				if(answer)
+				{
+					answer = answer.map(p =>
+					{
+						let data = new Date(p.Data)
+						p.DataMostrar = data.getDate() + '/' + (data.getMonth() + 1) + '/' + data.getFullYear()
+
+						return p
+					})
+					
 					$scope.postagem = answer.reverse();
 					$scope.postagemFixada = answer;
 					
