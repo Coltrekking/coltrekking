@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Coltrekking</title>
+    <link rel="shortcut icon" href="src/assets/images/logo.png" type="image/x-icon">
+    <link rel="stylesheet" href="public/css/style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Bebas+Neue&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Anton&display=swap">
+</head>
+
+<body>
+    <div id="app" class="center">
+        <!-- Logo -->
+        <div class="center">
+            <img src="src/assets/images/coltrekkingVertical.png" id="imgLogin" alt="Logo Coltrekking">
+        </div>
+
+        <!-- Conteúdo para Usuários não Logados -->
+        <!-- Alternar para AUTENTICAÇÃO DO GOOGLE-->
+        <h3>
+            <br> Acesse com sua conta Google: <br>
+            <img src="src/assets/images/logoGoogle.png" id="logoGoogle" alt="Logo Google" onclick="signInWithGoogle()">
+        </h3>
+    </div>
+
+    <!-- Recursos do Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/7.8.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.8.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.8.1/firebase-database.js"></script>
+
+    <!-- Scripts -->
+    <!--
+    <script src="../src/config/firebase.js"></script>
+    <script src="../src/js/utils.js"></script>
+    <script src="../src/js/auth.js"></script>
+    -->
+    <script type="module" src="/src/js/main.js"></script>
+</body>
+
+</html>
