@@ -1,0 +1,2788 @@
+{
+  "event": {
+    "-OelvDJOh2MoK6ZDVCG8": {
+      "data": "2025-11-29T07:30",
+      "dataInscricao": "2025-11-24T20:00",
+      "dataPrelecao": "2025-11-25T12:00",
+      "descida": "612",
+      "descricao": "Trekking do dia 29/11/2025",
+      "dificuldade": "Fácil pacas",
+      "distancia": "13",
+      "localEncontro": "Belas Artes",
+      "localPrelecao": "Sala 201",
+      "nome": "2025-Travessia_2Ptes_Chapeu_do_Sol",
+      "subida": "428",
+      "trajeto": "Travessia"
+    },
+    "-Oevqtl_WK8lXez6iIPr": {
+      "data": "2025-12-09T07:00",
+      "dataInscricao": "2025-11-25T20:00",
+      "dataPrelecao": "2025-11-27T11:10",
+      "descida": "",
+      "descricao": "Acampamento 2025 - Dias 09 e 10 de Dezembro! \nMais informações na preleção!",
+      "dificuldade": "Fácil",
+      "distancia": "35",
+      "localEncontro": "Belas Artes",
+      "localPrelecao": "Sala 201",
+      "nome": "Acampamento 2025",
+      "subida": "",
+      "trajeto": "Travessia"
+    },
+    "-OmAiS3kQfwGUwpvJc3y": {
+      "data": "2026-02-28T07:30",
+      "dataInscricao": "2026-02-23T20:00",
+      "dataPrelecao": "2026-02-26T12:15",
+      "descida": "878",
+      "descricao": "O circuito do Travessão será fantástico!",
+      "dificuldade": "Fácil",
+      "distancia": "20.8",
+      "localEncontro": "Escola de Belas Artes da UFMG",
+      "localPrelecao": "Auditório do Coltec",
+      "nome": "2026 - O Circuito do Travessão",
+      "subida": "741",
+      "trajeto": "Circuito"
+    },
+    "-OoRiXN_Nx6y_E4C3F7s": {
+      "data": "2026-03-28T08:30",
+      "dataInscricao": "2026-03-23T20:00",
+      "dataPrelecao": "2026-03-25T12:17",
+      "descida": "768",
+      "descricao": "Mais informações na preleção!",
+      "dificuldade": "Fácil",
+      "distancia": "18",
+      "localEncontro": "Parque das Mangabeiras",
+      "localPrelecao": "Auditório",
+      "nome": "2026 - Pico Belo Horizonte/Túnel",
+      "subida": "672",
+      "trajeto": "Travessia"
+    },
+    "-Oq221orIxPxqsUvWqNX": {
+      "data": "2026-04-20T08:00",
+      "dataInscricao": "2026-04-12T20:00",
+      "dataPrelecao": "2026-04-13T12:00",
+      "descida": "698",
+      "descricao": "vai ser muito legal",
+      "dificuldade": "Fácil",
+      "distancia": "12",
+      "localEncontro": "Hospital da Baleia",
+      "localPrelecao": "auditório",
+      "nome": "2026-Travessia BH/Nova Lima",
+      "subida": "580",
+      "trajeto": "Travessia"
+    }
+  },
+  "inscricoes": {
+    "-OelvDJOh2MoK6ZDVCG8": {
+      "AAwCuWRCd7OZnsA9hyOWrx3mC1D3": {
+        "dataInscricao": 1764082627735,
+        "presenca": false
+      },
+      "AT0ZNoGOr9UrCe8aN21p4e9WB013": {
+        "dataInscricao": 1764028562076,
+        "presenca": true
+      },
+      "CRdAxvbDg4Yfxo2KgRM8NkeQTPU2": {
+        "dataInscricao": 1764082568473,
+        "presenca": false
+      },
+      "GDWPeV20CfURGcg2Z0D6d8oice63": {
+        "dataInscricao": 1764082547000,
+        "presenca": false
+      },
+      "Gs4db8JlCtQtgCNvnYoH8CuBBtq2": {
+        "dataInscricao": 1764025202906,
+        "presenca": true
+      },
+      "Ip4Scv9LOjUUGEcGl1oExxj0ySR2": {
+        "dataInscricao": 1764029661158,
+        "presenca": true
+      },
+      "KHAzsNRyLTgOsARxXYtH7J5Dk6D2": {
+        "dataInscricao": 1764064213334,
+        "presenca": false
+      },
+      "ME40mQZHzZYee0LvOaWl7v3IHNk2": {
+        "dataInscricao": 1764025201085,
+        "presenca": true
+      },
+      "PMXyN4gkUhO9RhKzWym3lzcvHHl2": {
+        "dataInscricao": 1764025691540,
+        "presenca": false
+      },
+      "RzmI1JMoy0UaKGO2LzClQJ6fbgA3": {
+        "dataInscricao": 1764082586523,
+        "presenca": false
+      },
+      "UDeKgB6uQJU3MGEGz1xMAecwdy32": {
+        "dataInscricao": 1764025201392,
+        "presenca": true
+      },
+      "UwFmonsXtfUi5wh35oxEqBvSzG02": {
+        "dataInscricao": 1764025203705,
+        "presenca": true
+      },
+      "V5tp0J62o4SLCordNpLpJvkAY9I2": {
+        "dataInscricao": 1764074235206,
+        "presenca": false
+      },
+      "W9OwmrhNhiW9bKPzVbZbjQr8mua2": {
+        "dataInscricao": 1764025203512,
+        "presenca": false
+      },
+      "Z1FKXKxkX3f3AVtu8ruHNwNDXsG3": {
+        "dataInscricao": 1764082662460,
+        "presenca": false
+      },
+      "c7wslkWEbCfqSnD6F6tKRC5v7zf1": {
+        "dataInscricao": 1764026435044,
+        "presenca": false
+      },
+      "crhsYNTyNrXHIWo5aeLFnqvcB2O2": {
+        "dataInscricao": 1764025224788,
+        "presenca": false
+      },
+      "dLaVmVu4w4gXrSOlPnU3L6UN0UB2": {
+        "dataInscricao": 1764069162254,
+        "presenca": true
+      },
+      "e5hQpXP4ZLP4haesiLfBl5U8vSA2": {
+        "dataInscricao": 1764025204196,
+        "presenca": false
+      },
+      "fDX1ajNJi1YFWvFSve05a2qmcgS2": {
+        "dataInscricao": 1764028274182,
+        "presenca": false
+      },
+      "gCCAAwPeEYQG8nvZeDGhEAdRS0s2": {
+        "dataInscricao": 1764025202097,
+        "presenca": false
+      },
+      "gZXnKmeVQBRrfxdXX2rHPDPVaEK2": {
+        "dataInscricao": 1764025697285,
+        "presenca": true
+      },
+      "h1KpotKKMSRara3s4dnr5T5Uxar2": {
+        "dataInscricao": 1764025527501,
+        "presenca": true
+      },
+      "lZ6h34FbtEbl1mNru24RsBEVl8o1": {
+        "dataInscricao": 1764025201520,
+        "presenca": false
+      },
+      "re9sCSWRpARJHXS6JZq9utoG3602": {
+        "dataInscricao": 1764025448841,
+        "presenca": false
+      },
+      "ruo6flbgzga30JpAQAcdJqNZum32": {
+        "dataInscricao": 1764025212725,
+        "presenca": false
+      },
+      "vuFxmRP6OqZnpvdYqlf1CWhdaAV2": {
+        "dataInscricao": 1764025202857,
+        "presenca": true
+      },
+      "y85GbsKjZohG1M1pVtAjixFbNi93": {
+        "dataInscricao": 1764030781573,
+        "presenca": false
+      },
+      "yxy5EtF58XR5a8eDoZtzIgltUnI3": {
+        "dataInscricao": 1764025201759,
+        "presenca": true
+      },
+      "zUnBLPh8YhObELVN83JEVInKuq63": {
+        "dataInscricao": 1764082227875,
+        "presenca": false
+      }
+    },
+    "-Oevqtl_WK8lXez6iIPr": {
+      "6qi73Yz9sKdRkls3cXgZixIr4Gf2": {
+        "dataInscricao": 1764203572528,
+        "presenca": false
+      },
+      "AT0ZNoGOr9UrCe8aN21p4e9WB013": {
+        "dataInscricao": 1764111604109,
+        "presenca": false
+      },
+      "D3KxmKUBeRPz11zWeIRLK9yWzkP2": {
+        "dataInscricao": 1764113039295,
+        "presenca": false
+      },
+      "Gs4db8JlCtQtgCNvnYoH8CuBBtq2": {
+        "dataInscricao": 1764111603232,
+        "presenca": true
+      },
+      "LMulGrKMZwNVZoU0Rm8aUOcxo2U2": {
+        "dataInscricao": 1764112538603,
+        "presenca": false
+      },
+      "ME40mQZHzZYee0LvOaWl7v3IHNk2": {
+        "dataInscricao": 1764111601183,
+        "presenca": false
+      },
+      "RlaDNaCoKUfBuvm8gxDpGd4tCcE2": {
+        "dataInscricao": 1764111693981,
+        "presenca": true
+      },
+      "TQsrFFYXccZB4JhM4PZMnUaITYl1": {
+        "dataInscricao": 1764111600592,
+        "presenca": false
+      },
+      "V5tp0J62o4SLCordNpLpJvkAY9I2": {
+        "dataInscricao": 1764111604166,
+        "presenca": true
+      },
+      "W9OwmrhNhiW9bKPzVbZbjQr8mua2": {
+        "dataInscricao": 1764111611059,
+        "presenca": false
+      },
+      "crhsYNTyNrXHIWo5aeLFnqvcB2O2": {
+        "dataInscricao": 1764111608380,
+        "presenca": true
+      },
+      "fiTGVZAu9FcmYDUtdiOZEdL9aWc2": {
+        "dataInscricao": 1764111639115,
+        "presenca": false
+      },
+      "h1KpotKKMSRara3s4dnr5T5Uxar2": {
+        "dataInscricao": 1764112682829,
+        "presenca": true
+      },
+      "jHPffzPsOrPpB5vMVOupoUFWKnw2": {
+        "dataInscricao": 1764111602830,
+        "presenca": true
+      },
+      "lZ6h34FbtEbl1mNru24RsBEVl8o1": {
+        "dataInscricao": 1764111602025,
+        "presenca": true
+      },
+      "q86nK0H01Vhdm6KvXuqmqykUpOD2": {
+        "dataInscricao": 1764111638258,
+        "presenca": true
+      },
+      "t19cDEkjraT2hVpmNo2MFOql5Ow1": {
+        "dataInscricao": 1764111604109,
+        "presenca": true
+      },
+      "t2lv2DpFo9XEa6QrpExd46iITOZ2": {
+        "dataInscricao": 1764112068271,
+        "presenca": false
+      },
+      "vuFxmRP6OqZnpvdYqlf1CWhdaAV2": {
+        "dataInscricao": 1764111622377,
+        "presenca": false
+      },
+      "yxy5EtF58XR5a8eDoZtzIgltUnI3": {
+        "dataInscricao": 1764111602172,
+        "presenca": false
+      }
+    },
+    "-OmAiS3kQfwGUwpvJc3y": {
+      "05mxdlvE08V0tBATODPQv56IeEL2": {
+        "dataInscricao": 1771887602805,
+        "presenca": true
+      },
+      "0lG1qIfuNRc5E2EIa3XpRGHZzwd2": {
+        "dataInscricao": 1771937863231,
+        "presenca": false
+      },
+      "1aHTuYkUWeSJjwArVHiE1NFhJn32": {
+        "dataInscricao": 1771887606441,
+        "presenca": true
+      },
+      "8SfkjxTgyVNnTuo6BRVDpSHKgkK2": {
+        "dataInscricao": 1771887624404,
+        "presenca": true
+      },
+      "92V4AoIH13OlPdCzSSKa5gu0ZdJ3": {
+        "dataInscricao": 1771887607001,
+        "presenca": true
+      },
+      "9D3SdewrIYPv4Q9kasRowMiuZ1F2": {
+        "dataInscricao": 1771887602774,
+        "presenca": true
+      },
+      "AAwCuWRCd7OZnsA9hyOWrx3mC1D3": {
+        "dataInscricao": 1771887601363,
+        "presenca": true
+      },
+      "ADuQCWbQ9vZa7ruy3Or3AHL3yKP2": {
+        "dataInscricao": 1771948639411,
+        "presenca": false
+      },
+      "ARAtcpYDMuNwhoEvvpA3e4VHJRr2": {
+        "dataInscricao": 1771887666808,
+        "presenca": false
+      },
+      "BTeijZCNiMWirsKfd8kXNN9pFCo2": {
+        "dataInscricao": 1771887710299,
+        "presenca": false
+      },
+      "BhoAgQUgpaRTl6Lsm2ffD9vTZZj2": {
+        "dataInscricao": 1771887680358,
+        "presenca": false
+      },
+      "GGO9BCT9s3gFC1he4SLtVmPEOGF3": {
+        "dataInscricao": 1771887885954,
+        "presenca": false
+      },
+      "H6w5sglNTtUCYcnD6sn6RJQnJke2": {
+        "dataInscricao": 1771964466689,
+        "presenca": true
+      },
+      "Ip4Scv9LOjUUGEcGl1oExxj0ySR2": {
+        "dataInscricao": 1771887606791,
+        "presenca": false
+      },
+      "JAHl8EyWRHRHovHlEZqpzaIMxCr2": {
+        "dataInscricao": 1771888233307,
+        "presenca": false
+      },
+      "KHAzsNRyLTgOsARxXYtH7J5Dk6D2": {
+        "dataInscricao": 1771887605008,
+        "presenca": true
+      },
+      "KjXA2WiIrfNIqOTpVZy3uTsgzwo1": {
+        "dataInscricao": 1771887603591,
+        "presenca": true
+      },
+      "LsEnckCp6kbZJ2MXapPR81dCCVr1": {
+        "dataInscricao": 1771887606087,
+        "presenca": true
+      },
+      "MmJrw9X3uIW5sZK7lLlf0xjkHo62": {
+        "dataInscricao": 1771887603267,
+        "presenca": true
+      },
+      "O3tpuja7r5hajsIlgWh51GDAv963": {
+        "dataInscricao": 1771887601999,
+        "presenca": false
+      },
+      "Rh9I15XvCmZ3oa903onu2XIV8KG2": {
+        "dataInscricao": 1771887601369,
+        "presenca": false
+      },
+      "RlaDNaCoKUfBuvm8gxDpGd4tCcE2": {
+        "dataInscricao": 1771887603388,
+        "presenca": false
+      },
+      "RzmI1JMoy0UaKGO2LzClQJ6fbgA3": {
+        "dataInscricao": 1771887601618,
+        "presenca": true
+      },
+      "SAyd40i1u7Nidt8uIdmNtXRZDPn1": {
+        "dataInscricao": 1771887770433,
+        "presenca": false
+      },
+      "SPv5In2BnfhNzXNhBZ6q5V7FtQ63": {
+        "dataInscricao": 1771887641166,
+        "presenca": true
+      },
+      "T1aVXs8SusRYwPCZQ5UsPJgixC92": {
+        "dataInscricao": 1771887603859,
+        "presenca": true
+      },
+      "TZNVT7L1F0Wvmy39SS8DUZd7gI63": {
+        "dataInscricao": 1771887767806,
+        "presenca": false
+      },
+      "VKTPTEW1mvU5wJolIvTMUa9Na0B2": {
+        "dataInscricao": 1771887629657,
+        "presenca": true
+      },
+      "XHguM2t3TGQiGenkd3A3ym5Yu8c2": {
+        "dataInscricao": 1771890548717,
+        "presenca": false
+      },
+      "Z0tK7Vd2oQQbF9CZytveqsw8A1C2": {
+        "dataInscricao": 1771887688035,
+        "presenca": true
+      },
+      "ZULLhPImIQan9FxSvfxcNNBPCJ72": {
+        "dataInscricao": 1771887704790,
+        "presenca": true
+      },
+      "b77P8td521XWTBtKR8wNAR9Q4rZ2": {
+        "dataInscricao": 1771887605938,
+        "presenca": true
+      },
+      "cuxWmVdgfgTcQBa5DMwfLxMJcfE3": {
+        "dataInscricao": 1771935555956,
+        "presenca": false
+      },
+      "cwQiI4HM3nTzabD2tHaF4U8jRFS2": {
+        "dataInscricao": 1771887793552,
+        "presenca": false
+      },
+      "e5hQpXP4ZLP4haesiLfBl5U8vSA2": {
+        "dataInscricao": 1771887602152,
+        "presenca": true
+      },
+      "eF0HZtmrHiQY7u7iLNCLBqK2F983": {
+        "dataInscricao": 1771887601601,
+        "presenca": true
+      },
+      "h94AVhqGZPXyewiN0s99SKVDNum2": {
+        "dataInscricao": 1771888963689,
+        "presenca": true
+      },
+      "hTwHp65lhKYDkdWfTndNZPVrt2K2": {
+        "dataInscricao": 1771887668881,
+        "presenca": true
+      },
+      "jHPffzPsOrPpB5vMVOupoUFWKnw2": {
+        "dataInscricao": 1771887614589,
+        "presenca": false
+      },
+      "jkhEjIqC3pZ6ubIb9v6kBzTaTsb2": {
+        "dataInscricao": 1771887600245,
+        "presenca": true
+      },
+      "kunQ6K9w4xgrxvT5XRrlRPqCezD2": {
+        "dataInscricao": 1771887757441,
+        "presenca": true
+      },
+      "l23HdqcQsxTIwsvpVxf3ClMcVIb2": {
+        "dataInscricao": 1771887602184,
+        "presenca": true
+      },
+      "lzHXZsKq9oUzMiICKLLjXGxibRn1": {
+        "dataInscricao": 1771887600645,
+        "presenca": true
+      },
+      "mCTEgVrcr0ezKxv0tpSxcEkqwS92": {
+        "dataInscricao": 1771937684249,
+        "presenca": false
+      },
+      "mQBqgsP5TsZC3x8RqKcZVESIYKG3": {
+        "dataInscricao": 1771887601865,
+        "presenca": true
+      },
+      "n1n4eeoytYOw7INn3xizLDuCGQL2": {
+        "dataInscricao": 1771887643944,
+        "presenca": true
+      },
+      "nCN650aoVxZ7kxKPHaL7W0We3mr1": {
+        "dataInscricao": 1771887603013,
+        "presenca": true
+      },
+      "p3N6tKqKYcYBRJ4X7Ry8KbXQ2O12": {
+        "dataInscricao": 1771887603237,
+        "presenca": true
+      },
+      "pvxLB5SsW0Sxkm3Gee2zYLFjOkF2": {
+        "dataInscricao": 1771888063008,
+        "presenca": false
+      },
+      "uHDR8qKrsmVl7v35L1v2OGup7sr1": {
+        "dataInscricao": 1771888359979,
+        "presenca": false
+      },
+      "v0Asr57iqAY6pq13lG8ct6NffTa2": {
+        "dataInscricao": 1771887601416,
+        "presenca": true
+      },
+      "vxGHb14sP4d0PDfk0WSetFBbUKJ2": {
+        "dataInscricao": 1771887606996,
+        "presenca": true
+      },
+      "x6dqlujXJieBy0NfgGXSmBXZaV63": {
+        "dataInscricao": 1771888288244,
+        "presenca": true
+      },
+      "xPFT9ksUYCOXmzzyc2TyAj8X7aA3": {
+        "dataInscricao": 1771887801549,
+        "presenca": false
+      },
+      "zUnBLPh8YhObELVN83JEVInKuq63": {
+        "dataInscricao": 1771887601370,
+        "presenca": true
+      }
+    },
+    "-OoRiXN_Nx6y_E4C3F7s": {
+      "0lG1qIfuNRc5E2EIa3XpRGHZzwd2": {
+        "dataInscricao": 1774446620444,
+        "presenca": true
+      },
+      "3Z25QJoJUkMadC0OL82uJyt39qV2": {
+        "dataInscricao": 1774306801663,
+        "presenca": true
+      },
+      "92V4AoIH13OlPdCzSSKa5gu0ZdJ3": {
+        "dataInscricao": 1774306802816,
+        "presenca": true
+      },
+      "Dvex8HcFXITvAYjtWo1HiRsO8lU2": {
+        "dataInscricao": 1774306802304,
+        "presenca": true
+      },
+      "Ip4Scv9LOjUUGEcGl1oExxj0ySR2": {
+        "dataInscricao": 1774308059528,
+        "presenca": false
+      },
+      "KjXA2WiIrfNIqOTpVZy3uTsgzwo1": {
+        "dataInscricao": 1774306805003,
+        "presenca": true
+      },
+      "PMXyN4gkUhO9RhKzWym3lzcvHHl2": {
+        "dataInscricao": 1774308075986,
+        "presenca": true
+      },
+      "RzmI1JMoy0UaKGO2LzClQJ6fbgA3": {
+        "dataInscricao": 1774306800589,
+        "presenca": true
+      },
+      "SAyd40i1u7Nidt8uIdmNtXRZDPn1": {
+        "dataInscricao": 1774307200317,
+        "presenca": true
+      },
+      "T1aVXs8SusRYwPCZQ5UsPJgixC92": {
+        "dataInscricao": 1774308474643,
+        "presenca": true
+      },
+      "XOn2Nxb2qegZHn9i2PELO7nzSn42": {
+        "dataInscricao": 1774309311255,
+        "presenca": true
+      },
+      "b77P8td521XWTBtKR8wNAR9Q4rZ2": {
+        "dataInscricao": 1774306801623,
+        "presenca": true
+      },
+      "e5hQpXP4ZLP4haesiLfBl5U8vSA2": {
+        "dataInscricao": 1774306801809,
+        "presenca": true
+      },
+      "eDwN4zrO0wR0y9kmXccpMNrWAkp1": {
+        "dataInscricao": 1774307807054,
+        "presenca": true
+      },
+      "l23HdqcQsxTIwsvpVxf3ClMcVIb2": {
+        "dataInscricao": 1774306835949,
+        "presenca": true
+      },
+      "lzHXZsKq9oUzMiICKLLjXGxibRn1": {
+        "dataInscricao": 1774307102905,
+        "presenca": true
+      },
+      "n1n4eeoytYOw7INn3xizLDuCGQL2": {
+        "dataInscricao": 1774306800840,
+        "presenca": true
+      },
+      "oG5TyPeyT0PmkhrmUZAOuZSuske2": {
+        "dataInscricao": 1774307018396,
+        "presenca": true
+      },
+      "ruo6flbgzga30JpAQAcdJqNZum32": {
+        "dataInscricao": 1774306833974,
+        "presenca": true
+      },
+      "vL8Hw6P71zRYBS3lESSnEtEMcg23": {
+        "dataInscricao": 1774311263098,
+        "presenca": true
+      },
+      "vxGHb14sP4d0PDfk0WSetFBbUKJ2": {
+        "dataInscricao": 1774306801862,
+        "presenca": true
+      },
+      "xPFT9ksUYCOXmzzyc2TyAj8X7aA3": {
+        "dataInscricao": 1774306809508,
+        "presenca": true
+      },
+      "xRzKOTidhtPmpMBdLr5oFOpA65I3": {
+        "dataInscricao": 1774315847536,
+        "presenca": true
+      },
+      "zE3suIieq5ZCIMWxLLwsWsSkL942": {
+        "dataInscricao": 1774306854777,
+        "presenca": true
+      }
+    },
+    "-Oq221orIxPxqsUvWqNX": {
+      "0lG1qIfuNRc5E2EIa3XpRGHZzwd2": {
+        "dataInscricao": 1776035998939,
+        "presenca": false
+      },
+      "3Z25QJoJUkMadC0OL82uJyt39qV2": {
+        "dataInscricao": 1776034824236,
+        "presenca": true
+      },
+      "92V4AoIH13OlPdCzSSKa5gu0ZdJ3": {
+        "dataInscricao": 1776034800948,
+        "presenca": true
+      },
+      "CCKqGM6ff3XOmlB8Oj60wW6PxiH3": {
+        "dataInscricao": 1776034802036,
+        "presenca": false
+      },
+      "Dvex8HcFXITvAYjtWo1HiRsO8lU2": {
+        "dataInscricao": 1776034803060,
+        "presenca": true
+      },
+      "EwXSMkriypOn6noUi8fnIDWsKo02": {
+        "dataInscricao": 1776048641249,
+        "presenca": true
+      },
+      "I5BJ5HQLLSfDK2MHG8eSnSdcxBG3": {
+        "dataInscricao": 1776036732475,
+        "presenca": false
+      },
+      "Ip4Scv9LOjUUGEcGl1oExxj0ySR2": {
+        "dataInscricao": 1776034895608,
+        "presenca": true
+      },
+      "KjXA2WiIrfNIqOTpVZy3uTsgzwo1": {
+        "dataInscricao": 1776034802829,
+        "presenca": false
+      },
+      "MtH9yheKwYbp13c6yBNW8jmLhrp2": {
+        "dataInscricao": 1776040792804,
+        "presenca": false
+      },
+      "RfoyQFdYabhwVcsEqpPa3Kod4BX2": {
+        "dataInscricao": 1776190577773,
+        "presenca": true
+      },
+      "RzmI1JMoy0UaKGO2LzClQJ6fbgA3": {
+        "dataInscricao": 1776034801470,
+        "presenca": false
+      },
+      "ZULLhPImIQan9FxSvfxcNNBPCJ72": {
+        "dataInscricao": 1776035291396,
+        "presenca": true
+      },
+      "b5GUBkgtHsO2anBtO2PGMbqMpdS2": {
+        "dataInscricao": 1776035375924,
+        "presenca": true
+      },
+      "b77P8td521XWTBtKR8wNAR9Q4rZ2": {
+        "dataInscricao": 1776034824503,
+        "presenca": true
+      },
+      "e5hQpXP4ZLP4haesiLfBl5U8vSA2": {
+        "dataInscricao": 1776034878976,
+        "presenca": true
+      },
+      "eDwN4zrO0wR0y9kmXccpMNrWAkp1": {
+        "dataInscricao": 1776092788226,
+        "presenca": false
+      },
+      "fPD6Z8utgsVjzvzro566jRaSzi53": {
+        "dataInscricao": 1776092302558,
+        "presenca": false
+      },
+      "l23HdqcQsxTIwsvpVxf3ClMcVIb2": {
+        "dataInscricao": 1776034803990,
+        "presenca": false
+      },
+      "lzHXZsKq9oUzMiICKLLjXGxibRn1": {
+        "dataInscricao": 1776035214712,
+        "presenca": false
+      },
+      "n1n4eeoytYOw7INn3xizLDuCGQL2": {
+        "dataInscricao": 1776034801890,
+        "presenca": true
+      },
+      "p3N6tKqKYcYBRJ4X7Ry8KbXQ2O12": {
+        "dataInscricao": 1776034802501,
+        "presenca": true
+      },
+      "ruo6flbgzga30JpAQAcdJqNZum32": {
+        "dataInscricao": 1776089429930,
+        "presenca": false
+      },
+      "xPFT9ksUYCOXmzzyc2TyAj8X7aA3": {
+        "dataInscricao": 1776037348876,
+        "presenca": true
+      },
+      "xRzKOTidhtPmpMBdLr5oFOpA65I3": {
+        "dataInscricao": 1776040345608,
+        "presenca": true
+      }
+    }
+  },
+  "photos": {
+    "-OelvDJOh2MoK6ZDVCG8": [
+      "https://bit.ly/4ix4QSg"
+    ],
+    "-Oevqtl_WK8lXez6iIPr": [
+      "https://bit.ly/3KY7GmV"
+    ],
+    "-OmAiS3kQfwGUwpvJc3y": [
+      "https://bit.ly/4rD0Ovk"
+    ],
+    "-OoRiXN_Nx6y_E4C3F7s": [
+      "https://bit.ly/412EEqQ"
+    ]
+  },
+  "users": {
+    "05mxdlvE08V0tBATODPQv56IeEL2": {
+      "able": true,
+      "email": "a2024953365@teiacoltec.org",
+      "nome": "laura rafaela lacerda de souza coltec",
+      "pontos": 54,
+      "role": "user",
+      "uid": "05mxdlvE08V0tBATODPQv56IeEL2",
+      "userClass": "302",
+      "userCourse": "Química",
+      "userId": "13879838658"
+    },
+    "0lG1qIfuNRc5E2EIa3XpRGHZzwd2": {
+      "able": true,
+      "email": "a2024953055@teiacoltec.org",
+      "nome": "arthur souza santos coltec",
+      "pontos": 44,
+      "role": "user",
+      "uid": "0lG1qIfuNRc5E2EIa3XpRGHZzwd2",
+      "userClass": "304",
+      "userCourse": "Automação Industrial",
+      "userId": "01971359602"
+    },
+    "1aHTuYkUWeSJjwArVHiE1NFhJn32": {
+      "able": true,
+      "email": "a2024952539@teiacoltec.org",
+      "nome": "leticia oliveira cunha coltec",
+      "pontos": 54,
+      "role": "user",
+      "uid": "1aHTuYkUWeSJjwArVHiE1NFhJn32",
+      "userClass": "301",
+      "userCourse": "Análises Clínicas",
+      "userId": "11340384612"
+    },
+    "1ndBJzgKcnfYFHUM6GVpOoTSoGA2": {
+      "able": true,
+      "email": "pablocouto250@gmail.com",
+      "nome": "Couto “ ㅤ”",
+      "pontos": 0,
+      "role": "user",
+      "uid": "1ndBJzgKcnfYFHUM6GVpOoTSoGA2"
+    },
+    "1ryaAFdr58eAjdYHE12nY10f12Y2": {
+      "able": true,
+      "email": "furrttado@gmail.com",
+      "nome": "Ricardo Furtado Pinheiro",
+      "pontos": 0,
+      "role": "user",
+      "uid": "1ryaAFdr58eAjdYHE12nY10f12Y2"
+    },
+    "2HHGUDHKZqN9jlJsyLryL0YUIIc2": {
+      "able": true,
+      "email": "rafaelgimenes@teiacoltec.org",
+      "nome": "Rafael Gimenes",
+      "pontos": 0,
+      "role": "user",
+      "uid": "2HHGUDHKZqN9jlJsyLryL0YUIIc2"
+    },
+    "2S0twJ3bNaXaIEtAjxvtveWiCu92": {
+      "able": true,
+      "email": "a2024951826@teiacoltec.org",
+      "nome": "laura guimarães maia coltec",
+      "pontos": 0,
+      "role": "admin",
+      "uid": "2S0twJ3bNaXaIEtAjxvtveWiCu92",
+      "userClass": "305",
+      "userCourse": "Eletrônica",
+      "userId": "14831231622"
+    },
+    "3Z25QJoJUkMadC0OL82uJyt39qV2": {
+      "able": true,
+      "email": "a2024952059@teiacoltec.org",
+      "nome": "frederico santos gonçalves coltec",
+      "pontos": 71,
+      "role": "user",
+      "uid": "3Z25QJoJUkMadC0OL82uJyt39qV2",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "70431301662"
+    },
+    "3q2ontwATWRyXugXNoq0djEIt4u2": {
+      "able": true,
+      "email": "lucascodama98@gmail.com",
+      "nome": "Lucas Codama",
+      "pontos": 0,
+      "role": "user",
+      "uid": "3q2ontwATWRyXugXNoq0djEIt4u2"
+    },
+    "47BuvSXZhMXKjdCMTEPw5rIgazw2": {
+      "able": true,
+      "email": "bernardo.b.vilaca2@gmail.com",
+      "nome": "Bernardo Vilaça",
+      "pontos": 0,
+      "role": "user",
+      "uid": "47BuvSXZhMXKjdCMTEPw5rIgazw2"
+    },
+    "4aBJHKGMZjUOreXtyERD2klvFQE2": {
+      "able": true,
+      "email": "lucasbernardoversiani@gmail.com",
+      "nome": "Lucas Versiani",
+      "pontos": 0,
+      "role": "user",
+      "uid": "4aBJHKGMZjUOreXtyERD2klvFQE2"
+    },
+    "5N0Y7k869CQmy986TEN638BHQ863": {
+      "able": true,
+      "email": "rafaelvaldivio@gmail.com",
+      "nome": "rafa",
+      "pontos": 0,
+      "role": "user",
+      "uid": "5N0Y7k869CQmy986TEN638BHQ863",
+      "userClass": "203",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "111.378.876-30"
+    },
+    "5cHnJrBXrYXDR1jg82KBHTXeY4g1": {
+      "able": true,
+      "email": "sousarafaelaa97@gmail.com",
+      "nome": "Rafaela Sousa",
+      "pontos": 0,
+      "role": "user",
+      "uid": "5cHnJrBXrYXDR1jg82KBHTXeY4g1"
+    },
+    "5iOos9XcY3dsyoaWpanFUoUif912": {
+      "email": "kaiof242@gmail.com",
+      "nome": "Kaio Fernandes",
+      "uid": "5iOos9XcY3dsyoaWpanFUoUif912"
+    },
+    "5x2UGPNjhKRK2cSG9p7BHPD4Vi62": {
+      "able": true,
+      "email": "vitornms@gmail.com",
+      "nome": "Vitor Neuenschwander Mendes da Silva",
+      "pontos": 0,
+      "role": "user",
+      "uid": "5x2UGPNjhKRK2cSG9p7BHPD4Vi62"
+    },
+    "6My7jWeA0lcB95vmgOtFx7i9nYh1": {
+      "able": true,
+      "email": "nicxlas08@gmail.com",
+      "nome": "Nícolas Queiroga Fantauzzi",
+      "pontos": 0,
+      "role": "user",
+      "uid": "6My7jWeA0lcB95vmgOtFx7i9nYh1"
+    },
+    "6h6swvksb3b9S0uqvyapXFJdUtV2": {
+      "able": true,
+      "email": "giulia.botigelli@usp.br",
+      "nome": "Giulia Botigelli",
+      "pontos": 0,
+      "role": "user",
+      "uid": "6h6swvksb3b9S0uqvyapXFJdUtV2"
+    },
+    "6qi73Yz9sKdRkls3cXgZixIr4Gf2": {
+      "able": true,
+      "email": "a2023952535@teiacoltec.org",
+      "nome": "maria eduarda teixeira de souza",
+      "pontos": 0,
+      "role": "user",
+      "uid": "6qi73Yz9sKdRkls3cXgZixIr4Gf2",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "16715115656"
+    },
+    "71xufF3vhzMvmMd3seWtncy83Mp1": {
+      "able": true,
+      "email": "a2024954418@teiacoltec.org",
+      "nome": "Maria Clara Gouveia Costa",
+      "pontos": 0,
+      "role": "user",
+      "uid": "71xufF3vhzMvmMd3seWtncy83Mp1"
+    },
+    "7F03R4lOdFfd11uHFrSSuc45ro23": {
+      "able": true,
+      "email": "a2024952059@teiacoltec.org",
+      "nome": "frederico santos gonçalves coltec",
+      "role": "user",
+      "uid": "7F03R4lOdFfd11uHFrSSuc45ro23",
+      "userClass": "203",
+      "userCourse": "Desenvolvimento de Sistemas"
+    },
+    "7XMDEc35Z0PHQ9ehk7AHShj6Zqf2": {
+      "able": true,
+      "email": "a2022950610@teiacoltec.org",
+      "nome": "Lucas Ferreira Simões (Luquinhas)",
+      "pontos": 0,
+      "role": "admin",
+      "uid": "7XMDEc35Z0PHQ9ehk7AHShj6Zqf2",
+      "userClass": "305",
+      "userCourse": "Eletrônica",
+      "userId": "12248775601"
+    },
+    "8NgNIhfBrqSCmZ6aYPGsjCLg7Rd2": {
+      "able": true,
+      "email": "a2024953390@teiacoltec.org",
+      "nome": "vitória oliveira pessoa coltec",
+      "pontos": 0,
+      "role": "user",
+      "uid": "8NgNIhfBrqSCmZ6aYPGsjCLg7Rd2"
+    },
+    "8SfkjxTgyVNnTuo6BRVDpSHKgkK2": {
+      "able": true,
+      "email": "a2024954353@teiacoltec.org",
+      "nome": "Miguel Oliveira Cunha",
+      "pontos": 54,
+      "role": "user",
+      "uid": "8SfkjxTgyVNnTuo6BRVDpSHKgkK2",
+      "userClass": "305",
+      "userCourse": "Eletrônica",
+      "userId": "11340382679"
+    },
+    "92V4AoIH13OlPdCzSSKa5gu0ZdJ3": {
+      "able": true,
+      "email": "a2024952415@teiacoltec.org",
+      "nome": "miguel de sousa lourenço coltec",
+      "pontos": 125,
+      "role": "user",
+      "uid": "92V4AoIH13OlPdCzSSKa5gu0ZdJ3",
+      "userClass": "301",
+      "userCourse": "Análises Clínicas",
+      "userId": "41427996814"
+    },
+    "9CiIIK40LbWCx5VMklf8AQxcoDv1": {
+      "able": true,
+      "email": "analuizacaetano1409@gmail.com",
+      "nome": "Ana Luiza Caetano",
+      "pontos": 0,
+      "role": "user",
+      "uid": "9CiIIK40LbWCx5VMklf8AQxcoDv1",
+      "userClass": "102",
+      "userCourse": "Química",
+      "userId": "18067894698"
+    },
+    "9Cztp8NRSheOpFmdhzUfQS5rkM03": {
+      "able": true,
+      "email": "a2024953772@teiacoltec.org",
+      "nome": "mateus ramalho góes coltec",
+      "pontos": 0,
+      "role": "user",
+      "uid": "9Cztp8NRSheOpFmdhzUfQS5rkM03",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "13732622657"
+    },
+    "9D3SdewrIYPv4Q9kasRowMiuZ1F2": {
+      "able": true,
+      "email": "a2024953756@teiacoltec.org",
+      "nome": "verônica fernandes silva coltec",
+      "pontos": 54,
+      "role": "user",
+      "uid": "9D3SdewrIYPv4Q9kasRowMiuZ1F2",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "13902961643"
+    },
+    "9esovmasjpNrA5FLByWKnSVv7xC2": {
+      "able": true,
+      "email": "a2026954148@teiacoltec.org",
+      "nome": "Elisa Reis Oliveira",
+      "pontos": 0,
+      "role": "user",
+      "uid": "9esovmasjpNrA5FLByWKnSVv7xC2"
+    },
+    "9oMWRMCxKvRnNyd5VeDZtHRjj9t2": {
+      "able": true,
+      "email": "juliamss07@gmail.com",
+      "nome": "Júlia Souza",
+      "pontos": 87,
+      "role": "user",
+      "uid": "9oMWRMCxKvRnNyd5VeDZtHRjj9t2",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "15549581647"
+    },
+    "9rWnS2Kk1EUAM5ZTV8JzWiF9vB13": {
+      "able": true,
+      "email": "erisgiovanna531@gmail.com",
+      "nome": "Eris Giovanni",
+      "pontos": 0,
+      "role": "user",
+      "uid": "9rWnS2Kk1EUAM5ZTV8JzWiF9vB13"
+    },
+    "AAwCuWRCd7OZnsA9hyOWrx3mC1D3": {
+      "able": true,
+      "email": "a2024951923@teiacoltec.org",
+      "nome": "dierrisson wagner andrade de araújo coltec",
+      "pontos": 54,
+      "role": "user",
+      "uid": "AAwCuWRCd7OZnsA9hyOWrx3mC1D3",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "70115899618"
+    },
+    "ADuQCWbQ9vZa7ruy3Or3AHL3yKP2": {
+      "able": true,
+      "email": "a2024952555@teiacoltec.org",
+      "nome": "gabriela sacramento capuchinho assunção coltec",
+      "pontos": 0,
+      "role": "user",
+      "uid": "ADuQCWbQ9vZa7ruy3Or3AHL3yKP2",
+      "userClass": "301",
+      "userCourse": "Análises Clínicas",
+      "userId": "14746944628"
+    },
+    "ARAtcpYDMuNwhoEvvpA3e4VHJRr2": {
+      "able": true,
+      "email": "a2024951184@teiacoltec.org",
+      "nome": "rikari miguel de barcelos santos coltec",
+      "pontos": 0,
+      "role": "user",
+      "uid": "ARAtcpYDMuNwhoEvvpA3e4VHJRr2",
+      "userClass": "304",
+      "userCourse": "Automação Industrial",
+      "userId": "13410340629"
+    },
+    "AT0ZNoGOr9UrCe8aN21p4e9WB013": {
+      "able": true,
+      "email": "a2023953043@teiacoltec.org",
+      "nome": "Bianca Abatemarco Stein",
+      "pontos": 1,
+      "role": "user",
+      "uid": "AT0ZNoGOr9UrCe8aN21p4e9WB013",
+      "userClass": "302",
+      "userCourse": "Química",
+      "userId": "14664355696"
+    },
+    "BH4RWPH1CrbPwCW5kL7cxDCaagt2": {
+      "able": true,
+      "email": "luiz.nicacio.ef@gmail.com",
+      "nome": "Luiz Nicacio",
+      "pontos": 0,
+      "role": "user",
+      "uid": "BH4RWPH1CrbPwCW5kL7cxDCaagt2"
+    },
+    "BKWJMETbJqcSwzgoWtkg3oP9ZW42": {
+      "able": true,
+      "email": "a2023951059@teiacoltec.org",
+      "nome": "vinicius teixeira braga gomes",
+      "pontos": 0,
+      "role": "user",
+      "uid": "BKWJMETbJqcSwzgoWtkg3oP9ZW42"
+    },
+    "BTeijZCNiMWirsKfd8kXNN9pFCo2": {
+      "able": true,
+      "email": "a2025953032@teiacoltec.org",
+      "nome": "Elen Maria Quintao Macedo",
+      "pontos": 0,
+      "role": "user",
+      "uid": "BTeijZCNiMWirsKfd8kXNN9pFCo2",
+      "userClass": "202",
+      "userCourse": "Química",
+      "userId": "17488548604"
+    },
+    "BhoAgQUgpaRTl6Lsm2ffD9vTZZj2": {
+      "able": true,
+      "email": "a2024953063@teiacoltec.org",
+      "nome": "cecília maria silva martins coltec",
+      "pontos": 0,
+      "role": "user",
+      "uid": "BhoAgQUgpaRTl6Lsm2ffD9vTZZj2",
+      "userClass": "304",
+      "userCourse": "Automação Industrial",
+      "userId": "12803976676"
+    },
+    "BwRtlOGASwa8PvW5wpajLsvjShN2": {
+      "able": true,
+      "email": "a2023952578@teiacoltec.org",
+      "nome": "Kauan Gustavo Braga Dos Santos",
+      "pontos": 0,
+      "role": "user",
+      "uid": "BwRtlOGASwa8PvW5wpajLsvjShN2",
+      "userClass": "203",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "197.943.676-70"
+    },
+    "CCKqGM6ff3XOmlB8Oj60wW6PxiH3": {
+      "able": true,
+      "email": "a2023951288@teiacoltec.org",
+      "nome": "davi kaua otoni bajur",
+      "pontos": 0,
+      "role": "user",
+      "uid": "CCKqGM6ff3XOmlB8Oj60wW6PxiH3",
+      "userClass": "203",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "144.927.836-10"
+    },
+    "CRdAxvbDg4Yfxo2KgRM8NkeQTPU2": {
+      "able": true,
+      "email": "a2024953187@teiacoltec.org",
+      "nome": "sofia gabriele de araújo silva coltec",
+      "pontos": 0,
+      "role": "user",
+      "uid": "CRdAxvbDg4Yfxo2KgRM8NkeQTPU2",
+      "userClass": "203",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "171.692.176-78"
+    },
+    "CZalKR77mzLonBWcSfGKvmIop4t2": {
+      "able": true,
+      "email": "a2024952075@teiacoltec.org",
+      "nome": "lucas santana silva codama coltec",
+      "pontos": 0,
+      "role": "user",
+      "uid": "CZalKR77mzLonBWcSfGKvmIop4t2",
+      "userClass": "203",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "020.265.946-19"
+    },
+    "D3KxmKUBeRPz11zWeIRLK9yWzkP2": {
+      "able": true,
+      "email": "a2023951431@teiacoltec.org",
+      "nome": "pedro inacio rodrigues pontes",
+      "pontos": 0,
+      "role": "user",
+      "uid": "D3KxmKUBeRPz11zWeIRLK9yWzkP2",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "13807562605"
+    },
+    "DJOOlMMmf5NMcbNwIzAUcNDQGOk2": {
+      "able": true,
+      "email": "miguelitolibanio@gmail.com",
+      "nome": "Miguel libanio",
+      "pontos": 0,
+      "role": "user",
+      "uid": "DJOOlMMmf5NMcbNwIzAUcNDQGOk2"
+    },
+    "DrjvMv57oDQk88zUc6bxFEjA2BM2": {
+      "able": true,
+      "email": "a2024953195@teiacoltec.org",
+      "nome": "arthur emanuel ribeiro lopes coltec",
+      "pontos": 0,
+      "role": "user",
+      "uid": "DrjvMv57oDQk88zUc6bxFEjA2BM2"
+    },
+    "Dvex8HcFXITvAYjtWo1HiRsO8lU2": {
+      "able": true,
+      "email": "a2024952083@teiacoltec.org",
+      "nome": "bernardo drummond oliveira penna coltec",
+      "pontos": 71,
+      "role": "user",
+      "uid": "Dvex8HcFXITvAYjtWo1HiRsO8lU2",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "01848042647"
+    },
+    "E4PTolJuHkPz8JYMOnnq5QAmJsr2": {
+      "able": true,
+      "email": "a2024952105@teiacoltec.org",
+      "nome": "maria eduarda meneses santos coltec",
+      "pontos": 0,
+      "role": "admin",
+      "uid": "E4PTolJuHkPz8JYMOnnq5QAmJsr2"
+    },
+    "E8IdVcEYcsXHfW3EvoBz8FUavS93": {
+      "able": true,
+      "email": "a2025950459@teiacoltec.org",
+      "nome": "Arthur Bahia Costa",
+      "pontos": 0,
+      "role": "user",
+      "uid": "E8IdVcEYcsXHfW3EvoBz8FUavS93",
+      "userClass": "205",
+      "userCourse": "Eletrônica",
+      "userId": "14222959669"
+    },
+    "E8dsOP9d6ldz7Klin7QdvnrA7Aj2": {
+      "email": "humberto.honda@gmail.com",
+      "nome": "Humberto Honda",
+      "role": "admin",
+      "uid": "E8dsOP9d6ldz7Klin7QdvnrA7Aj2"
+    },
+    "EG00uNWNCfcjmUlu3AvrnrTekU82": {
+      "able": true,
+      "email": "jp.smolinski05@gmail.com",
+      "nome": "João Smolinski",
+      "pontos": 0,
+      "role": "user",
+      "uid": "EG00uNWNCfcjmUlu3AvrnrTekU82"
+    },
+    "EwXSMkriypOn6noUi8fnIDWsKo02": {
+      "able": true,
+      "email": "a2024953012@teiacoltec.org",
+      "nome": "gustavo lage pimenta coltec",
+      "pontos": 27,
+      "role": "user",
+      "uid": "EwXSMkriypOn6noUi8fnIDWsKo02",
+      "userClass": "204",
+      "userCourse": "Automação Industrial",
+      "userId": "16545759680"
+    },
+    "FKS0c2El4fTqTfnEwVEHYQjLCMD3": {
+      "able": true,
+      "email": "eumarianaabarcelos@gmail.com",
+      "nome": "mariana barcelos",
+      "pontos": 0,
+      "role": "user",
+      "uid": "FKS0c2El4fTqTfnEwVEHYQjLCMD3"
+    },
+    "GDWPeV20CfURGcg2Z0D6d8oice63": {
+      "able": true,
+      "email": "lucasoliveiraneiss@gmail.com",
+      "nome": "Lucas Neiss",
+      "pontos": 0,
+      "role": "user",
+      "uid": "GDWPeV20CfURGcg2Z0D6d8oice63",
+      "userClass": "203",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "11600290671"
+    },
+    "GGO9BCT9s3gFC1he4SLtVmPEOGF3": {
+      "able": true,
+      "email": "a2025951714@teiacoltec.org",
+      "nome": "João Victor Oliveira Dutra",
+      "pontos": 0,
+      "role": "user",
+      "uid": "GGO9BCT9s3gFC1he4SLtVmPEOGF3",
+      "userClass": "202",
+      "userCourse": "Química",
+      "userId": "02204850624"
+    },
+    "GM4eLSLKRPWJVHODv5vFufIJiv72": {
+      "able": true,
+      "email": "miguelcabido2@gmail.com",
+      "nome": "Miguel Cabido",
+      "pontos": 0,
+      "role": "user",
+      "uid": "GM4eLSLKRPWJVHODv5vFufIJiv72"
+    },
+    "Ghmb7PXTnEWwaXpRcbx0iY6nux62": {
+      "able": true,
+      "email": "ojsvieira70@gmail.com",
+      "nome": "Osmario Sousa Vieira",
+      "pontos": 0,
+      "role": "user",
+      "uid": "Ghmb7PXTnEWwaXpRcbx0iY6nux62"
+    },
+    "GnvhpkrU82TjCHn9xZmmzq37yCZ2": {
+      "able": true,
+      "email": "a2024953500@teiacoltec.org",
+      "nome": "André Dias de Paula",
+      "pontos": 0,
+      "role": "user",
+      "uid": "GnvhpkrU82TjCHn9xZmmzq37yCZ2",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "01881830608"
+    },
+    "Gs4db8JlCtQtgCNvnYoH8CuBBtq2": {
+      "able": true,
+      "email": "a2023952560@teiacoltec.org",
+      "nome": "isadora ramos pereira",
+      "pontos": 1,
+      "role": "user",
+      "uid": "Gs4db8JlCtQtgCNvnYoH8CuBBtq2",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "11257845632"
+    },
+    "H6w5sglNTtUCYcnD6sn6RJQnJke2": {
+      "able": true,
+      "email": "a2026954407@teiacoltec.org",
+      "nome": "Lucas Bernardo Alves Versiani",
+      "pontos": 54,
+      "role": "user",
+      "uid": "H6w5sglNTtUCYcnD6sn6RJQnJke2",
+      "userClass": "106",
+      "userCourse": "Automação Industrial",
+      "userId": "14752294613"
+    },
+    "HAaJkDVkKAT87NK9vShhKyePkMA3": {
+      "able": true,
+      "email": "empadao24@gmail.com",
+      "nome": "Raquel Martins",
+      "pontos": 0,
+      "role": "user",
+      "uid": "HAaJkDVkKAT87NK9vShhKyePkMA3"
+    },
+    "I5BJ5HQLLSfDK2MHG8eSnSdcxBG3": {
+      "able": true,
+      "email": "a2026951700@teiacoltec.org",
+      "nome": "Ricardo Matias Bottaro",
+      "pontos": 0,
+      "role": "user",
+      "uid": "I5BJ5HQLLSfDK2MHG8eSnSdcxBG3",
+      "userClass": "103",
+      "userCourse": "Eletrônica",
+      "userId": "13173436628"
+    },
+    "Imwx7NkUDodVJM42e9asIQ4sOUQ2": {
+      "able": true,
+      "email": "a2024953721@teiacoltec.org",
+      "nome": "Samuel Hanry Leal dos Santos",
+      "pontos": 0,
+      "role": "user",
+      "uid": "Imwx7NkUDodVJM42e9asIQ4sOUQ2",
+      "userClass": "203",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "169.977.766-71"
+    },
+    "Ip4Scv9LOjUUGEcGl1oExxj0ySR2": {
+      "able": true,
+      "email": "a2024953837@teiacoltec.org",
+      "nome": "Luís Francisco Barbosa Lima Toivanen COLTEC",
+      "pontos": 28,
+      "role": "user",
+      "uid": "Ip4Scv9LOjUUGEcGl1oExxj0ySR2",
+      "userClass": "6969696969696969",
+      "userCourse": "Química",
+      "userId": "11084716178"
+    },
+    "JAHl8EyWRHRHovHlEZqpzaIMxCr2": {
+      "able": true,
+      "email": "a2025951099@teiacoltec.org",
+      "nome": "Julia Viana De Azevedo",
+      "pontos": 0,
+      "role": "user",
+      "uid": "JAHl8EyWRHRHovHlEZqpzaIMxCr2",
+      "userClass": "201",
+      "userCourse": "Análises Clínicas",
+      "userId": "12212339631"
+    },
+    "JCozaD5jzlajZdBhp5vtbV5Nlsp2": {
+      "email": "a2023951342@teiacoltec.org",
+      "nome": "Washington Barroso dos Santos,",
+      "uid": "JCozaD5jzlajZdBhp5vtbV5Nlsp2"
+    },
+    "JRP66gEKsEcqWAnIbkixrny6rWj1": {
+      "able": true,
+      "email": "a2026951653@teiacoltec.org",
+      "nome": "Kaua Isaac Martins Batista",
+      "pontos": 0,
+      "role": "user",
+      "uid": "JRP66gEKsEcqWAnIbkixrny6rWj1"
+    },
+    "JbpPkWB8l2OFroyAGqa8suu0eU02": {
+      "able": true,
+      "email": "vinicius@charrua.cnt.br",
+      "nome": "Vinicius Fernandes",
+      "pontos": 0,
+      "role": "user",
+      "uid": "JbpPkWB8l2OFroyAGqa8suu0eU02"
+    },
+    "KHAzsNRyLTgOsARxXYtH7J5Dk6D2": {
+      "able": true,
+      "email": "a2024951931@teiacoltec.org",
+      "nome": "arthur david rosa leal maciel coltec",
+      "pontos": 54,
+      "role": "user",
+      "uid": "KHAzsNRyLTgOsARxXYtH7J5Dk6D2",
+      "userClass": "203",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "019.258.476-67"
+    },
+    "KQpFy6bhvkMicVCVWmU9rc68eVO2": {
+      "able": true,
+      "email": "juliamss07@gmail.com",
+      "nome": "Júlia Souza",
+      "pontos": 0,
+      "role": "user",
+      "uid": "KQpFy6bhvkMicVCVWmU9rc68eVO2"
+    },
+    "KjXA2WiIrfNIqOTpVZy3uTsgzwo1": {
+      "able": true,
+      "email": "a2024952881@teiacoltec.org",
+      "nome": "pedro lucena ferreira coltec",
+      "pontos": 98,
+      "role": "user",
+      "uid": "KjXA2WiIrfNIqOTpVZy3uTsgzwo1",
+      "userClass": "302",
+      "userCourse": "Química",
+      "userId": "12113904624"
+    },
+    "Kkg6cbk7QcWlIJ4rHDH0dZ3W0Zt2": {
+      "able": true,
+      "email": "a2024952008@teiacoltec.org",
+      "nome": "gabriel cruz do espírito santo coltec",
+      "pontos": 0,
+      "role": "user",
+      "uid": "Kkg6cbk7QcWlIJ4rHDH0dZ3W0Zt2",
+      "userClass": "203",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "14681073644"
+    },
+    "LMulGrKMZwNVZoU0Rm8aUOcxo2U2": {
+      "able": true,
+      "email": "a2023950729@teiacoltec.org",
+      "nome": "João Henrique Santana Oliveira Campos",
+      "pontos": 0,
+      "role": "user",
+      "uid": "LMulGrKMZwNVZoU0Rm8aUOcxo2U2",
+      "userClass": "304",
+      "userCourse": "Automação Industrial",
+      "userId": "14319534662"
+    },
+    "LmGi8VRFyghIEjCTLJE49V1cfU73": {
+      "able": true,
+      "email": "a2024951206@teiacoltec.org",
+      "nome": "maria luiza henrique sobrinho coltec",
+      "pontos": 0,
+      "role": "user",
+      "uid": "LmGi8VRFyghIEjCTLJE49V1cfU73",
+      "userClass": "304",
+      "userCourse": "Automação Industrial",
+      "userId": "13014279692"
+    },
+    "LsEnckCp6kbZJ2MXapPR81dCCVr1": {
+      "able": true,
+      "email": "a2024951168@teiacoltec.org",
+      "nome": "pedro samuel dionisio maneia coltec",
+      "pontos": 54,
+      "role": "user",
+      "uid": "LsEnckCp6kbZJ2MXapPR81dCCVr1",
+      "userClass": "304",
+      "userCourse": "Automação Industrial",
+      "userId": "14305463601"
+    },
+    "ME40mQZHzZYee0LvOaWl7v3IHNk2": {
+      "able": true,
+      "email": "a2023952250@teiacoltec.org",
+      "nome": "Mariana Caroline de Melo Neves",
+      "pontos": 1,
+      "role": "user",
+      "uid": "ME40mQZHzZYee0LvOaWl7v3IHNk2",
+      "userClass": "302",
+      "userCourse": "Química",
+      "userId": "10949599603"
+    },
+    "MROTcs8VbNXI3M5ugBAzrL60sm12": {
+      "email": "sitecoltrekking@gmail.com",
+      "nome": "Site Coltrekking",
+      "role": "user",
+      "uid": "MROTcs8VbNXI3M5ugBAzrL60sm12",
+      "userClass": "103",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "12345678900"
+    },
+    "MmJrw9X3uIW5sZK7lLlf0xjkHo62": {
+      "able": true,
+      "email": "a2023950958@teiacoltec.org",
+      "nome": "anna luiza vidal rocha",
+      "pontos": 54,
+      "role": "user",
+      "uid": "MmJrw9X3uIW5sZK7lLlf0xjkHo62",
+      "userClass": "305",
+      "userCourse": "Eletrônica",
+      "userId": "02304404600"
+    },
+    "MtH9yheKwYbp13c6yBNW8jmLhrp2": {
+      "able": true,
+      "email": "a2025951633@teiacoltec.org",
+      "nome": "Fernanda Soares Souza",
+      "pontos": 0,
+      "role": "user",
+      "uid": "MtH9yheKwYbp13c6yBNW8jmLhrp2",
+      "userClass": "202",
+      "userCourse": "Química",
+      "userId": "15263781679"
+    },
+    "N2Ryz7eeFcNNLY2DQbv4JWEIuYu2": {
+      "able": true,
+      "email": "a2022951730@teiacoltec.org",
+      "nome": "Vinícius Soares Fernandes Vieira",
+      "pontos": 0,
+      "role": "user",
+      "uid": "N2Ryz7eeFcNNLY2DQbv4JWEIuYu2"
+    },
+    "N8LtN4ij0FMgKBTwZnWroPWFvlJ3": {
+      "able": true,
+      "email": "fernanda.amaro.santana@gmail.com",
+      "nome": "Fernanda Amaro Santana",
+      "pontos": 0,
+      "role": "user",
+      "uid": "N8LtN4ij0FMgKBTwZnWroPWFvlJ3"
+    },
+    "NJ9E7GXMRRM4phOPNGihhvPIt1k2": {
+      "able": true,
+      "email": "a2026952471@teiacoltec.org",
+      "nome": "Ellen Cristiny Marques De Oliveira",
+      "pontos": 0,
+      "role": "user",
+      "uid": "NJ9E7GXMRRM4phOPNGihhvPIt1k2"
+    },
+    "O3tpuja7r5hajsIlgWh51GDAv963": {
+      "able": true,
+      "email": "a2024951990@teiacoltec.org",
+      "nome": "júlia franco dornelas coltec",
+      "pontos": 0,
+      "role": "user",
+      "uid": "O3tpuja7r5hajsIlgWh51GDAv963",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "13566265640"
+    },
+    "ONwPlTIBGIbVZtIxWGg3kun0BCX2": {
+      "able": true,
+      "email": "gabrielodb23@gmail.com",
+      "nome": "Gabriel Oliveira",
+      "pontos": 0,
+      "role": "user",
+      "uid": "ONwPlTIBGIbVZtIxWGg3kun0BCX2"
+    },
+    "PMXyN4gkUhO9RhKzWym3lzcvHHl2": {
+      "able": true,
+      "email": "a2025951242@teiacoltec.org",
+      "nome": "Ana Maria Heringer Schuchter",
+      "pontos": 44,
+      "role": "user",
+      "uid": "PMXyN4gkUhO9RhKzWym3lzcvHHl2",
+      "userClass": "101",
+      "userCourse": "Análises Clínicas",
+      "userId": "11650551630"
+    },
+    "RfoyQFdYabhwVcsEqpPa3Kod4BX2": {
+      "able": true,
+      "email": "a2024951958@teiacoltec.org",
+      "nome": "nícolas queiroga fantauzzi coltecano",
+      "pontos": 27,
+      "role": "user",
+      "uid": "RfoyQFdYabhwVcsEqpPa3Kod4BX2",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "12700276620"
+    },
+    "Rh9I15XvCmZ3oa903onu2XIV8KG2": {
+      "able": true,
+      "email": "a2024951265@teiacoltec.org",
+      "nome": "nathan de carvalho anatolio coltec",
+      "pontos": 0,
+      "role": "user",
+      "uid": "Rh9I15XvCmZ3oa903onu2XIV8KG2",
+      "userClass": "304",
+      "userCourse": "Automação Industrial",
+      "userId": "14637602645"
+    },
+    "RjcOponUHDWJb85WZ2Thb9uc52S2": {
+      "able": true,
+      "email": "a2024952148@teiacoltec.org",
+      "nome": "lucas oliveira neiss coltec",
+      "pontos": 0,
+      "role": "user",
+      "uid": "RjcOponUHDWJb85WZ2Thb9uc52S2",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "11600290671"
+    },
+    "RlaDNaCoKUfBuvm8gxDpGd4tCcE2": {
+      "able": true,
+      "email": "a2022951676@teiacoltec.org",
+      "nome": "Vitor Hugo De Paula Machado Aleixo",
+      "pontos": 0,
+      "role": "user",
+      "uid": "RlaDNaCoKUfBuvm8gxDpGd4tCcE2",
+      "userClass": "202",
+      "userCourse": "Química",
+      "userId": "15279507601"
+    },
+    "RpptiG1ZojYB56TrleTBvM4HPW12": {
+      "able": true,
+      "email": "hh@teiacoltec.org",
+      "nome": "Humberto Honda",
+      "pontos": 0,
+      "role": "admin",
+      "uid": "RpptiG1ZojYB56TrleTBvM4HPW12",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "116.385.658-48"
+    },
+    "RzmI1JMoy0UaKGO2LzClQJ6fbgA3": {
+      "able": true,
+      "email": "a2024952040@teiacoltec.org",
+      "nome": "rafael valdivio siqueira santos coltec",
+      "pontos": 98,
+      "role": "user",
+      "uid": "RzmI1JMoy0UaKGO2LzClQJ6fbgA3",
+      "userClass": "203",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "111.378.876-30"
+    },
+    "SAyd40i1u7Nidt8uIdmNtXRZDPn1": {
+      "able": true,
+      "email": "a2024954388@teiacoltec.org",
+      "nome": "Gustavo Guedes Rocha",
+      "pontos": 44,
+      "role": "user",
+      "uid": "SAyd40i1u7Nidt8uIdmNtXRZDPn1",
+      "userClass": "203",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "12849485608"
+    },
+    "SPv5In2BnfhNzXNhBZ6q5V7FtQ63": {
+      "able": true,
+      "email": "a2023952527@teiacoltec.org",
+      "nome": "júlia cruz menezes",
+      "pontos": 54,
+      "role": "user",
+      "uid": "SPv5In2BnfhNzXNhBZ6q5V7FtQ63",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "14264469694"
+    },
+    "T1aVXs8SusRYwPCZQ5UsPJgixC92": {
+      "able": true,
+      "email": "a2024952024@teiacoltec.org",
+      "nome": "joão vitor figueiredo guerra coltec",
+      "pontos": 98,
+      "role": "user",
+      "uid": "T1aVXs8SusRYwPCZQ5UsPJgixC92",
+      "userClass": "203",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "15044735663"
+    },
+    "TMxV3wEsSIOAZRLbMHH49hAlBPJ3": {
+      "able": true,
+      "email": "a2025950548@teiacoltec.org",
+      "nome": "Lucas Almeida Azevedo",
+      "pontos": 0,
+      "role": "user",
+      "uid": "TMxV3wEsSIOAZRLbMHH49hAlBPJ3",
+      "userClass": "205",
+      "userCourse": "Eletrônica",
+      "userId": "12836411600"
+    },
+    "TQsrFFYXccZB4JhM4PZMnUaITYl1": {
+      "able": true,
+      "email": "danielcaeso@gmail.com",
+      "nome": "DaniCaeSO",
+      "pontos": 0,
+      "role": "user",
+      "uid": "TQsrFFYXccZB4JhM4PZMnUaITYl1",
+      "userClass": "205",
+      "userCourse": "Eletrônica",
+      "userId": "16815074633"
+    },
+    "TZ5CsCfcRTROH3Dpz3g8ltPj4oA2": {
+      "able": true,
+      "email": "a2024953764@teiacoltec.org",
+      "nome": "joão pedro araujo corni de lima coltec",
+      "pontos": 0,
+      "role": "user",
+      "uid": "TZ5CsCfcRTROH3Dpz3g8ltPj4oA2"
+    },
+    "TZNVT7L1F0Wvmy39SS8DUZd7gI63": {
+      "able": true,
+      "email": "a2024951478@teiacoltec.org",
+      "nome": "Letícia Alletenga Ferreira",
+      "pontos": 0,
+      "role": "user",
+      "uid": "TZNVT7L1F0Wvmy39SS8DUZd7gI63",
+      "userClass": "304",
+      "userCourse": "Automação Industrial",
+      "userId": "11656358603"
+    },
+    "TuFuSz4178Mt7B8Vlj2TfN9fQpa2": {
+      "able": true,
+      "email": "a2025952648@teiacoltec.org",
+      "nome": "Miguel Henrique Araujo Minelli Campos",
+      "pontos": 0,
+      "role": "user",
+      "uid": "TuFuSz4178Mt7B8Vlj2TfN9fQpa2",
+      "userClass": "205",
+      "userCourse": "Eletrônica",
+      "userId": "15192848610"
+    },
+    "UDeKgB6uQJU3MGEGz1xMAecwdy32": {
+      "able": true,
+      "email": "a2023951199@teiacoltec.org",
+      "nome": "luiza de moro moura",
+      "pontos": 1,
+      "role": "user",
+      "uid": "UDeKgB6uQJU3MGEGz1xMAecwdy32",
+      "userClass": "305",
+      "userCourse": "Eletrônica",
+      "userId": "14525028629"
+    },
+    "URRQZw8YQ5YdtdPu9tdZi9q3lf92": {
+      "email": "a2024951907@teiacoltec.org",
+      "nome": "henrique arêdes ferreira dutra coltec",
+      "uid": "URRQZw8YQ5YdtdPu9tdZi9q3lf92",
+      "userClass": "203",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "01981495657"
+    },
+    "UiELh9stUTUtM5td1oxDxdQC5Gm2": {
+      "able": true,
+      "email": "a2023952390@teiacoltec.org",
+      "nome": "sergio amaral de souza",
+      "pontos": 0,
+      "role": "user",
+      "uid": "UiELh9stUTUtM5td1oxDxdQC5Gm2",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "14937281640"
+    },
+    "UwFmonsXtfUi5wh35oxEqBvSzG02": {
+      "able": true,
+      "email": "a2023952934@teiacoltec.org",
+      "nome": "Eris Giovanni Vieira",
+      "pontos": 1,
+      "role": "user",
+      "uid": "UwFmonsXtfUi5wh35oxEqBvSzG02",
+      "userClass": "305",
+      "userCourse": "Eletrônica",
+      "userId": "14333079608"
+    },
+    "V5tp0J62o4SLCordNpLpJvkAY9I2": {
+      "able": true,
+      "email": "a2023952608@teiacoltec.org",
+      "nome": "vitor neuenschwander mendes da silva",
+      "pontos": 0,
+      "role": "user",
+      "uid": "V5tp0J62o4SLCordNpLpJvkAY9I2",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "02306537666"
+    },
+    "VJ7lADa0IUZzJ96wPJorLrpneLs1": {
+      "able": true,
+      "email": "euelisareis@gmail.com",
+      "nome": "Elisa Reis",
+      "pontos": 0,
+      "role": "user",
+      "uid": "VJ7lADa0IUZzJ96wPJorLrpneLs1"
+    },
+    "VKTPTEW1mvU5wJolIvTMUa9Na0B2": {
+      "able": true,
+      "email": "a2023950583@teiacoltec.org",
+      "nome": "alicia dias monteiro",
+      "pontos": 54,
+      "role": "user",
+      "uid": "VKTPTEW1mvU5wJolIvTMUa9Na0B2",
+      "userClass": "305",
+      "userCourse": "Eletrônica",
+      "userId": "16584851656"
+    },
+    "W5OyIPdVHmM4yarDW965E4LDu4x2": {
+      "able": true,
+      "email": "julia.mmeezes@gmail.com",
+      "nome": "julia Menezes",
+      "pontos": 0,
+      "role": "user",
+      "uid": "W5OyIPdVHmM4yarDW965E4LDu4x2"
+    },
+    "W9OwmrhNhiW9bKPzVbZbjQr8mua2": {
+      "able": true,
+      "email": "a2023951512@teiacoltec.org",
+      "nome": "vitor paixao damasceno",
+      "pontos": 0,
+      "role": "user",
+      "uid": "W9OwmrhNhiW9bKPzVbZbjQr8mua2",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "15111538658"
+    },
+    "WrJOBGjsZXaWYh3uAFs97oa4LZN2": {
+      "able": true,
+      "email": "a2025951269@teiacoltec.org",
+      "nome": "Nataly Machado Silva",
+      "pontos": 0,
+      "role": "user",
+      "uid": "WrJOBGjsZXaWYh3uAFs97oa4LZN2"
+    },
+    "XHguM2t3TGQiGenkd3A3ym5Yu8c2": {
+      "able": true,
+      "email": "a2024953578@teiacoltec.org",
+      "nome": "bento d'agostino bortoloti coltec",
+      "pontos": 0,
+      "role": "user",
+      "uid": "XHguM2t3TGQiGenkd3A3ym5Yu8c2",
+      "userClass": "304",
+      "userCourse": "Automação Industrial",
+      "userId": "23753028851"
+    },
+    "XOn2Nxb2qegZHn9i2PELO7nzSn42": {
+      "able": true,
+      "email": "a2025953253@teiacoltec.org",
+      "nome": "Maria Fernanda Pires Cachiado",
+      "pontos": 44,
+      "role": "user",
+      "uid": "XOn2Nxb2qegZHn9i2PELO7nzSn42",
+      "userClass": "102",
+      "userCourse": "Química",
+      "userId": "13785726619"
+    },
+    "Yp4uy4frRCTDP0jcpDFRp0pdH5t2": {
+      "able": true,
+      "email": "a2026954393@teiacoltec.org",
+      "nome": "Joao Gabriel Dos Santos Brasileiro",
+      "pontos": 0,
+      "role": "user",
+      "uid": "Yp4uy4frRCTDP0jcpDFRp0pdH5t2",
+      "userClass": "103",
+      "userCourse": "Automação Industrial",
+      "userId": "02058061632"
+    },
+    "Z0tK7Vd2oQQbF9CZytveqsw8A1C2": {
+      "able": true,
+      "email": "a2024952121@teiacoltec.org",
+      "nome": "francisco almeida lopes coltec",
+      "pontos": 54,
+      "role": "user",
+      "uid": "Z0tK7Vd2oQQbF9CZytveqsw8A1C2",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "12681293642"
+    },
+    "Z1FKXKxkX3f3AVtu8ruHNwNDXsG3": {
+      "able": true,
+      "email": "a2024951630@teiacoltec.org",
+      "nome": "felipe vieira de sousa coltec",
+      "pontos": 0,
+      "role": "user",
+      "uid": "Z1FKXKxkX3f3AVtu8ruHNwNDXsG3",
+      "userClass": "205",
+      "userCourse": "Eletrônica",
+      "userId": "11290392692"
+    },
+    "Z4yEb2EnAeXbat1YKF5b40gOrfs1": {
+      "able": true,
+      "email": "a2026953060@teiacoltec.org",
+      "nome": "WESLEY SANTOS MELO",
+      "pontos": 0,
+      "role": "user",
+      "uid": "Z4yEb2EnAeXbat1YKF5b40gOrfs1"
+    },
+    "ZULLhPImIQan9FxSvfxcNNBPCJ72": {
+      "able": true,
+      "email": "a2024952261@teiacoltec.org",
+      "nome": "ana carolina santos ribeiro coltec",
+      "pontos": 81,
+      "role": "user",
+      "uid": "ZULLhPImIQan9FxSvfxcNNBPCJ72",
+      "userClass": "301",
+      "userCourse": "Análises Clínicas",
+      "userId": "02102383644"
+    },
+    "ZuYpGCgSWWT13K6r9ak9JJjbOcd2": {
+      "able": true,
+      "email": "gabrielpitoco1234@gmail.com",
+      "nome": "Gabriel Magalhães",
+      "pontos": 0,
+      "role": "user",
+      "uid": "ZuYpGCgSWWT13K6r9ak9JJjbOcd2"
+    },
+    "a83Y1Dr5TmNQKeQMLiG2KNujig63": {
+      "able": true,
+      "email": "alisson.davi0411@gmail.com",
+      "nome": "Alisson Aguiar",
+      "pontos": 0,
+      "role": "user",
+      "uid": "a83Y1Dr5TmNQKeQMLiG2KNujig63"
+    },
+    "aSUtwSrNQIQo1zD4xeyk5Hyj9K82": {
+      "able": true,
+      "email": "a2023951261@teiacoltec.org",
+      "nome": "izabela cassiano de paula",
+      "pontos": 0,
+      "role": "user",
+      "uid": "aSUtwSrNQIQo1zD4xeyk5Hyj9K82",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "17094268610"
+    },
+    "afmzta2DuaTGkIca3SOMYgB7D4z1": {
+      "able": true,
+      "email": "cadumelo290908@gmail.com",
+      "nome": "Carlos Eduardo",
+      "pontos": 0,
+      "role": "user",
+      "uid": "afmzta2DuaTGkIca3SOMYgB7D4z1"
+    },
+    "awYW30yQSWU5tXS1GvtetPFVAKf1": {
+      "able": true,
+      "email": "eduardo.militao1410@gmail.com",
+      "nome": "Eduardo Fernandes",
+      "role": "user",
+      "uid": "awYW30yQSWU5tXS1GvtetPFVAKf1"
+    },
+    "b5GUBkgtHsO2anBtO2PGMbqMpdS2": {
+      "able": true,
+      "email": "a2024951885@teiacoltec.org",
+      "nome": "arthur fernando d'alessandro morais coltec",
+      "pontos": 27,
+      "role": "user",
+      "uid": "b5GUBkgtHsO2anBtO2PGMbqMpdS2",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "70390580651"
+    },
+    "b77P8td521XWTBtKR8wNAR9Q4rZ2": {
+      "able": true,
+      "email": "a2024953373@teiacoltec.org",
+      "nome": "davi mateus lopes da costa heringer coltec",
+      "pontos": 125,
+      "role": "user",
+      "uid": "b77P8td521XWTBtKR8wNAR9Q4rZ2",
+      "userClass": "302-B",
+      "userCourse": "Química",
+      "userId": "12210441684"
+    },
+    "bbSp9LmYq4bVNC2bU1zOEMBbWHY2": {
+      "able": true,
+      "email": "joaopsantoslemes@gmail.com",
+      "nome": "João Paulo",
+      "pontos": 0,
+      "role": "user",
+      "uid": "bbSp9LmYq4bVNC2bU1zOEMBbWHY2"
+    },
+    "c7wslkWEbCfqSnD6F6tKRC5v7zf1": {
+      "able": true,
+      "email": "lauramaialm.gm@gmail.com",
+      "nome": "laura Guimarães",
+      "pontos": 0,
+      "role": "user",
+      "uid": "c7wslkWEbCfqSnD6F6tKRC5v7zf1",
+      "userClass": "205",
+      "userCourse": "Eletrônica",
+      "userId": "14831231622"
+    },
+    "cDc2VRhIXdOGaTqMfb6BhEfnWTy1": {
+      "able": true,
+      "email": "welmo.nuvem@gmail.com",
+      "nome": "welmo oliveira",
+      "pontos": 0,
+      "role": "user",
+      "uid": "cDc2VRhIXdOGaTqMfb6BhEfnWTy1"
+    },
+    "clAtbo5HWCOamd6j1GgROlLIJIG2": {
+      "able": true,
+      "email": "infinytexilli@gmail.com",
+      "nome": "Joao",
+      "pontos": 0,
+      "role": "user",
+      "uid": "clAtbo5HWCOamd6j1GgROlLIJIG2"
+    },
+    "crhsYNTyNrXHIWo5aeLFnqvcB2O2": {
+      "able": true,
+      "email": "a2023951563@teiacoltec.org",
+      "nome": "arthur magno castanha so",
+      "pontos": 0,
+      "role": "user",
+      "uid": "crhsYNTyNrXHIWo5aeLFnqvcB2O2",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "15099746608"
+    },
+    "cuxWmVdgfgTcQBa5DMwfLxMJcfE3": {
+      "able": true,
+      "email": "a2024953870@teiacoltec.org",
+      "nome": "lucas soares rodrigues coltec",
+      "pontos": 0,
+      "role": "user",
+      "uid": "cuxWmVdgfgTcQBa5DMwfLxMJcfE3",
+      "userClass": "302",
+      "userCourse": "Química",
+      "userId": "16863101610"
+    },
+    "cwQiI4HM3nTzabD2tHaF4U8jRFS2": {
+      "able": true,
+      "email": "a2025950823@teiacoltec.org",
+      "nome": "Marilia Oliveira Chaves",
+      "pontos": 0,
+      "role": "user",
+      "uid": "cwQiI4HM3nTzabD2tHaF4U8jRFS2",
+      "userClass": "203",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "11999976681"
+    },
+    "d9tdcCTTCjdteyXcKAq38ATWwc72": {
+      "able": true,
+      "email": "vitorhugodepaula2909@gmail.com",
+      "nome": "Vitor Hugo",
+      "pontos": 0,
+      "role": "user",
+      "uid": "d9tdcCTTCjdteyXcKAq38ATWwc72"
+    },
+    "dLaVmVu4w4gXrSOlPnU3L6UN0UB2": {
+      "able": true,
+      "email": "a2022950652@teiacoltec.org",
+      "nome": "luiz felipe lelis scanarotti coltecano",
+      "pontos": 1,
+      "role": "user",
+      "uid": "dLaVmVu4w4gXrSOlPnU3L6UN0UB2",
+      "userClass": "305",
+      "userCourse": "Eletrônica",
+      "userId": "10542865661"
+    },
+    "e5hQpXP4ZLP4haesiLfBl5U8vSA2": {
+      "able": true,
+      "email": "a2025952869@teiacoltec.org",
+      "nome": "Milene Aparecida Caetano",
+      "pontos": 125,
+      "role": "user",
+      "uid": "e5hQpXP4ZLP4haesiLfBl5U8vSA2",
+      "userClass": "201",
+      "userCourse": "Análises Clínicas",
+      "userId": "11947585681"
+    },
+    "eBoP7iT1aPezNMFAkRTr19MRRbz2": {
+      "able": true,
+      "email": "gabrielaguerra@teiacoltec.org",
+      "nome": "Gabriela Guerra Almeida",
+      "pontos": 0,
+      "role": "user",
+      "uid": "eBoP7iT1aPezNMFAkRTr19MRRbz2",
+      "userClass": "Professora Substituta de Artes",
+      "userCourse": "Química",
+      "userId": "06499808679"
+    },
+    "eDwN4zrO0wR0y9kmXccpMNrWAkp1": {
+      "able": true,
+      "email": "a2024951940@teiacoltec.org",
+      "nome": "gabriel fernandes nogueira coltec",
+      "pontos": 44,
+      "role": "user",
+      "uid": "eDwN4zrO0wR0y9kmXccpMNrWAkp1",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "12856073689"
+    },
+    "eF0HZtmrHiQY7u7iLNCLBqK2F983": {
+      "able": true,
+      "email": "a2024952580@teiacoltec.org",
+      "nome": "thales fellipe souza da silva coltec",
+      "pontos": 54,
+      "role": "user",
+      "uid": "eF0HZtmrHiQY7u7iLNCLBqK2F983",
+      "userClass": "302A",
+      "userCourse": "Química",
+      "userId": "17180887609"
+    },
+    "eJpKBGhzQNZ3nmMCzFvj93UDmfx1": {
+      "able": true,
+      "email": "viniciusteixeirabragagomes@gmail.com",
+      "nome": "vinicius gomes",
+      "pontos": 0,
+      "role": "user",
+      "uid": "eJpKBGhzQNZ3nmMCzFvj93UDmfx1",
+      "userClass": "305",
+      "userCourse": "Eletrônica",
+      "userId": "11805362666"
+    },
+    "eK5OiFmFhrY6w77abjMkn12eqTF2": {
+      "able": true,
+      "email": "lucasoliveiraneiss@gmail.com",
+      "nome": "Lucas Neiss",
+      "pontos": 0,
+      "uid": "eK5OiFmFhrY6w77abjMkn12eqTF2",
+      "userClass": "203",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "11600290671"
+    },
+    "esn88mCvTfNVqPLgMGh5A3MGxLl1": {
+      "able": true,
+      "email": "a2025954373@teiacoltec.org",
+      "nome": "Bernardo Luiz Guido de Souza",
+      "pontos": 0,
+      "role": "user",
+      "uid": "esn88mCvTfNVqPLgMGh5A3MGxLl1"
+    },
+    "fDX1ajNJi1YFWvFSve05a2qmcgS2": {
+      "able": true,
+      "email": "a2023952306@teiacoltec.org",
+      "nome": "miguel amaral santos",
+      "pontos": 0,
+      "role": "user",
+      "uid": "fDX1ajNJi1YFWvFSve05a2qmcgS2",
+      "userClass": "304",
+      "userCourse": "Automação Industrial",
+      "userId": "11342452623"
+    },
+    "fLwi3C8mvdYEeDmXnVsudaF81Ot1": {
+      "able": true,
+      "email": "rubyane.ssantos@gmail.com",
+      "nome": "Rubyane Gabrielle",
+      "pontos": 0,
+      "role": "user",
+      "uid": "fLwi3C8mvdYEeDmXnVsudaF81Ot1"
+    },
+    "fPD6Z8utgsVjzvzro566jRaSzi53": {
+      "able": true,
+      "email": "a2026951815@teiacoltec.org",
+      "nome": "Vinicios Henrique De Freitas Silva",
+      "pontos": 0,
+      "role": "user",
+      "uid": "fPD6Z8utgsVjzvzro566jRaSzi53",
+      "userClass": "103",
+      "userCourse": "Eletrônica",
+      "userId": "14246532665"
+    },
+    "fiTGVZAu9FcmYDUtdiOZEdL9aWc2": {
+      "able": true,
+      "email": "a2023950680@teiacoltec.org",
+      "nome": "guilherme pinheiro reis",
+      "pontos": 0,
+      "role": "user",
+      "uid": "fiTGVZAu9FcmYDUtdiOZEdL9aWc2",
+      "userClass": "304",
+      "userCourse": "Automação Industrial",
+      "userId": "10467948682"
+    },
+    "fyWpPkVgBlbv7wctCHrqwBurtYm2": {
+      "able": true,
+      "email": "a2024951770@teiacoltec.org",
+      "nome": "sílvia maria ferreira manhães coltec",
+      "pontos": 0,
+      "role": "user",
+      "uid": "fyWpPkVgBlbv7wctCHrqwBurtYm2",
+      "userClass": "305",
+      "userCourse": "Eletrônica",
+      "userId": "12360278681"
+    },
+    "gCCAAwPeEYQG8nvZeDGhEAdRS0s2": {
+      "able": true,
+      "email": "a2024952440@teiacoltec.org",
+      "nome": "laura araújo resende guimarães pereira coltec",
+      "pontos": 0,
+      "role": "user",
+      "uid": "gCCAAwPeEYQG8nvZeDGhEAdRS0s2",
+      "userClass": "201",
+      "userCourse": "Análises Clínicas",
+      "userId": "02066837660"
+    },
+    "gVN9RZktQZRuLNtYOIuaEvcwCdE2": {
+      "able": true,
+      "email": "humberto.honda@gmail.com",
+      "nome": "Humberto Honda",
+      "pontos": 0,
+      "role": "admin",
+      "uid": "gVN9RZktQZRuLNtYOIuaEvcwCdE2",
+      "userClass": "235",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "11638565848"
+    },
+    "gZXnKmeVQBRrfxdXX2rHPDPVaEK2": {
+      "able": true,
+      "email": "a2023952489@teiacoltec.org",
+      "nome": "pamela eduarda santana",
+      "pontos": 1,
+      "role": "user",
+      "uid": "gZXnKmeVQBRrfxdXX2rHPDPVaEK2",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "12712556690"
+    },
+    "gnu0dS7zq7TTW24bYmBuEz1D27w1": {
+      "able": true,
+      "email": "gabrielbhabreu@gmail.com",
+      "nome": "Gabriel",
+      "pontos": 0,
+      "role": "user",
+      "uid": "gnu0dS7zq7TTW24bYmBuEz1D27w1"
+    },
+    "h1KpotKKMSRara3s4dnr5T5Uxar2": {
+      "able": true,
+      "email": "a2023951075@teiacoltec.org",
+      "nome": "mariana grossi pereira leite",
+      "pontos": 1,
+      "role": "user",
+      "uid": "h1KpotKKMSRara3s4dnr5T5Uxar2",
+      "userClass": "305",
+      "userCourse": "Eletrônica",
+      "userId": "10701007656"
+    },
+    "h94AVhqGZPXyewiN0s99SKVDNum2": {
+      "able": true,
+      "email": "a2023952845@teiacoltec.org",
+      "nome": "carlos alberto daniel torta pereira",
+      "pontos": 54,
+      "role": "user",
+      "uid": "h94AVhqGZPXyewiN0s99SKVDNum2",
+      "userClass": "305",
+      "userCourse": "Eletrônica",
+      "userId": "14126725628"
+    },
+    "hFCLcXlsz4dsoOCI8JEl2uU8PxO2": {
+      "able": true,
+      "email": "a2025954179@teiacoltec.org",
+      "nome": "Julia Emanuelly Rodrigues",
+      "pontos": 0,
+      "role": "user",
+      "uid": "hFCLcXlsz4dsoOCI8JEl2uU8PxO2"
+    },
+    "hM3Ficcjn9Y9xSSs0J37uTlY7Cy2": {
+      "able": true,
+      "email": "a2023952780@teiacoltec.org",
+      "nome": "Samuel Silva Zica Soares",
+      "pontos": 0,
+      "role": "user",
+      "uid": "hM3Ficcjn9Y9xSSs0J37uTlY7Cy2"
+    },
+    "hTwHp65lhKYDkdWfTndNZPVrt2K2": {
+      "able": true,
+      "email": "a2023951946@teiacoltec.org",
+      "nome": "Maria Clara Vital de Andrade Roque",
+      "pontos": 54,
+      "role": "user",
+      "uid": "hTwHp65lhKYDkdWfTndNZPVrt2K2",
+      "userClass": "302",
+      "userCourse": "Química",
+      "userId": "15065149607"
+    },
+    "j18DxjorqZZaMl1DvQ206Bs5hWC3": {
+      "able": true,
+      "email": "a2024953241@teiacoltec.org",
+      "nome": "Arthur Augusto Lara Matos Coltec",
+      "role": "user",
+      "uid": "j18DxjorqZZaMl1DvQ206Bs5hWC3",
+      "userClass": "203",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "114.579.546-30"
+    },
+    "jHPffzPsOrPpB5vMVOupoUFWKnw2": {
+      "able": true,
+      "email": "a2025951749@teiacoltec.org",
+      "nome": "Maysa Ramos Dos Santos",
+      "pontos": 0,
+      "role": "user",
+      "uid": "jHPffzPsOrPpB5vMVOupoUFWKnw2",
+      "userClass": "102",
+      "userCourse": "Química",
+      "userId": "70573193630"
+    },
+    "jhLhglvwoxbT7QCzcu56yPj3KJY2": {
+      "able": true,
+      "email": "a2023952926@teiacoltec.org",
+      "nome": "Helena Taveira Maia",
+      "pontos": 0,
+      "role": "admin",
+      "uid": "jhLhglvwoxbT7QCzcu56yPj3KJY2",
+      "userClass": "305",
+      "userCourse": "Eletrônica",
+      "userId": "12588094600"
+    },
+    "jkhEjIqC3pZ6ubIb9v6kBzTaTsb2": {
+      "able": true,
+      "email": "a2024952989@teiacoltec.org",
+      "nome": "arthur araujo hott coltec",
+      "pontos": 54,
+      "role": "user",
+      "uid": "jkhEjIqC3pZ6ubIb9v6kBzTaTsb2",
+      "userClass": "304",
+      "userCourse": "Automação Industrial",
+      "userId": "15554964664"
+    },
+    "ktX59anmKXWNvp9116LWICiaHkg2": {
+      "able": true,
+      "email": "a2024951982@teiacoltec.org",
+      "nome": "marcelo rodrigues pezzini teixeira coltec",
+      "pontos": 0,
+      "role": "user",
+      "uid": "ktX59anmKXWNvp9116LWICiaHkg2",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "17280050603"
+    },
+    "kunQ6K9w4xgrxvT5XRrlRPqCezD2": {
+      "able": true,
+      "email": "a2024951176@teiacoltec.org",
+      "nome": "alejandro viegas monteiro de castro coltec",
+      "pontos": 54,
+      "role": "user",
+      "uid": "kunQ6K9w4xgrxvT5XRrlRPqCezD2",
+      "userClass": "304",
+      "userCourse": "Automação Industrial",
+      "userId": "14965130618"
+    },
+    "l23HdqcQsxTIwsvpVxf3ClMcVIb2": {
+      "able": true,
+      "email": "a2024952350@teiacoltec.org",
+      "nome": "daniel lopes mercini coltec",
+      "pontos": 98,
+      "role": "user",
+      "uid": "l23HdqcQsxTIwsvpVxf3ClMcVIb2",
+      "userClass": "302",
+      "userCourse": "Química",
+      "userId": "19133678600"
+    },
+    "lZ6h34FbtEbl1mNru24RsBEVl8o1": {
+      "able": true,
+      "email": "a2023951067@teiacoltec.org",
+      "nome": "Victor Phillipe Almeida da Silva",
+      "pontos": 0,
+      "role": "user",
+      "uid": "lZ6h34FbtEbl1mNru24RsBEVl8o1",
+      "userClass": "305",
+      "userCourse": "Eletrônica",
+      "userId": "14575206644"
+    },
+    "lvj15mStJHTsCLpFAjG88C0CXrm2": {
+      "able": true,
+      "email": "a2024951982@teiacoltec.org",
+      "nome": "marcelo rodrigues pezzini teixeira coltec",
+      "pontos": 0,
+      "role": "user",
+      "uid": "lvj15mStJHTsCLpFAjG88C0CXrm2",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "17280050603"
+    },
+    "lzHXZsKq9oUzMiICKLLjXGxibRn1": {
+      "able": true,
+      "email": "a2024954370@teiacoltec.org",
+      "nome": "Gustavo Bragança Santos",
+      "pontos": 113,
+      "role": "user",
+      "uid": "lzHXZsKq9oUzMiICKLLjXGxibRn1",
+      "userClass": "203",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "168.325.396-57"
+    },
+    "m9IXQprUwhYgnTvftQjEMn49Hyg2": {
+      "able": true,
+      "email": "a2026954202@teiacoltec.org",
+      "nome": "Alice Sophia Concesso Machado Rocha",
+      "pontos": 0,
+      "role": "user",
+      "uid": "m9IXQprUwhYgnTvftQjEMn49Hyg2"
+    },
+    "mCTEgVrcr0ezKxv0tpSxcEkqwS92": {
+      "able": true,
+      "email": "a2026951238@teiacoltec.org",
+      "nome": "Gabriel Lima De Assis",
+      "pontos": 0,
+      "role": "user",
+      "uid": "mCTEgVrcr0ezKxv0tpSxcEkqwS92",
+      "userClass": "105",
+      "userCourse": "Automação Industrial",
+      "userId": "17756449606"
+    },
+    "mQBqgsP5TsZC3x8RqKcZVESIYKG3": {
+      "able": true,
+      "email": "a2023950532@teiacoltec.org",
+      "nome": "camilly bittencourt da silva",
+      "pontos": 54,
+      "role": "user",
+      "uid": "mQBqgsP5TsZC3x8RqKcZVESIYKG3",
+      "userClass": "305",
+      "userCourse": "Eletrônica",
+      "userId": "15349801643"
+    },
+    "mYOzjYzyA9TvoG33PQ8jiFNWLf02": {
+      "email": "a2024951915@teiacoltec.org",
+      "nome": "Pedro Silva Freitas",
+      "uid": "mYOzjYzyA9TvoG33PQ8jiFNWLf02",
+      "userClass": "203",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "15013730643"
+    },
+    "mf7Idp2oC7TY7ZWdNKdqdoM00Dj1": {
+      "able": true,
+      "email": "juliaemanuellyjosi@gmail.com",
+      "nome": "Julia Emanuelly",
+      "pontos": 0,
+      "role": "user",
+      "uid": "mf7Idp2oC7TY7ZWdNKdqdoM00Dj1"
+    },
+    "n1n4eeoytYOw7INn3xizLDuCGQL2": {
+      "able": true,
+      "email": "a2023951334@teiacoltec.org",
+      "nome": "arthur guedes rocha",
+      "pontos": 125,
+      "role": "user",
+      "uid": "n1n4eeoytYOw7INn3xizLDuCGQL2",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "12849488623"
+    },
+    "nB8LOtd8ymc72y9QiI7pcJApbyf1": {
+      "able": true,
+      "email": "a2024952199@teiacoltec.org",
+      "nome": "kaua vitor de souza melo coltec",
+      "role": "user",
+      "uid": "nB8LOtd8ymc72y9QiI7pcJApbyf1",
+      "userClass": "203",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "11306630606"
+    },
+    "nCN650aoVxZ7kxKPHaL7W0We3mr1": {
+      "able": true,
+      "email": "a2024952520@teiacoltec.org",
+      "nome": "pedro veras de oliveira lima coltec",
+      "pontos": 54,
+      "role": "user",
+      "uid": "nCN650aoVxZ7kxKPHaL7W0We3mr1",
+      "userClass": "301",
+      "userCourse": "Análises Clínicas",
+      "userId": "12170930604"
+    },
+    "nUD89W9rVjXVBXCuykMmEa3AcJe2": {
+      "able": true,
+      "email": "natalymachado122@gmail.com",
+      "nome": "Nataly Machado",
+      "pontos": 0,
+      "role": "user",
+      "uid": "nUD89W9rVjXVBXCuykMmEa3AcJe2"
+    },
+    "oG5TyPeyT0PmkhrmUZAOuZSuske2": {
+      "able": true,
+      "email": "a2025951625@teiacoltec.org",
+      "nome": "Giovanna Lucilene Nery Rocha De Freitas",
+      "pontos": 44,
+      "role": "user",
+      "uid": "oG5TyPeyT0PmkhrmUZAOuZSuske2",
+      "userClass": "202",
+      "userCourse": "Química",
+      "userId": "16730599618"
+    },
+    "oveR32dHpAU1F0dVtTeH2PTMU8O2": {
+      "able": true,
+      "email": "fredericosantos0309@gmail.com",
+      "nome": "frederico santos",
+      "pontos": 0,
+      "role": "user",
+      "uid": "oveR32dHpAU1F0dVtTeH2PTMU8O2"
+    },
+    "p3N6tKqKYcYBRJ4X7Ry8KbXQ2O12": {
+      "able": true,
+      "email": "a2024952911@teiacoltec.org",
+      "nome": "francisco andrade gonçalves coltec",
+      "pontos": 81,
+      "role": "user",
+      "uid": "p3N6tKqKYcYBRJ4X7Ry8KbXQ2O12",
+      "userClass": "302",
+      "userCourse": "Química",
+      "userId": "70166373605"
+    },
+    "pEj94WtyAOYx2eX0YpeTkLyFsbl1": {
+      "able": true,
+      "email": "dossantosbrasileirojoaogabriel@gmail.com",
+      "nome": "João Gabriel Dos Santos Brasileiro",
+      "pontos": 0,
+      "role": "user",
+      "uid": "pEj94WtyAOYx2eX0YpeTkLyFsbl1"
+    },
+    "puSBjZKl62e4Jdbctmzy3ub6fLG3": {
+      "able": true,
+      "email": "isabelaroliveira2009@gmail.com",
+      "nome": "ISABELA RODRIGUES OLIVEIRA",
+      "pontos": 0,
+      "role": "user",
+      "uid": "puSBjZKl62e4Jdbctmzy3ub6fLG3"
+    },
+    "pvxLB5SsW0Sxkm3Gee2zYLFjOkF2": {
+      "able": true,
+      "email": "a2024951141@teiacoltec.org",
+      "nome": "marina fernanda braga dias coltec",
+      "pontos": 0,
+      "role": "user",
+      "uid": "pvxLB5SsW0Sxkm3Gee2zYLFjOkF2",
+      "userClass": "304",
+      "userCourse": "Automação Industrial",
+      "userId": "14794246684"
+    },
+    "q86nK0H01Vhdm6KvXuqmqykUpOD2": {
+      "able": true,
+      "email": "a2025951560@teiacoltec.org",
+      "nome": "Beatriz Teodora Santos Silvestre",
+      "pontos": 0,
+      "role": "user",
+      "uid": "q86nK0H01Vhdm6KvXuqmqykUpOD2",
+      "userClass": "102",
+      "userCourse": "Química",
+      "userId": "01079624627"
+    },
+    "qWL9GphezgZzvBGF4finAswBQ9H3": {
+      "able": true,
+      "email": "a2026951300@teiacoltec.org",
+      "nome": "Guilherme Barcellos Bastos",
+      "pontos": 0,
+      "role": "user",
+      "uid": "qWL9GphezgZzvBGF4finAswBQ9H3",
+      "userClass": "104",
+      "userCourse": "Automação Industrial",
+      "userId": "70046761616"
+    },
+    "qllHb6svTEOvntkAA6dJslwHXGC2": {
+      "able": true,
+      "email": "adrianalaradasilva@gmail.com",
+      "nome": "Adriana Silva",
+      "pontos": 0,
+      "role": "user",
+      "uid": "qllHb6svTEOvntkAA6dJslwHXGC2"
+    },
+    "r6e7HnEtEaNMqJb7uMlt9J5U8Dz1": {
+      "able": true,
+      "email": "elenmquintaomacedo@gmail.com",
+      "nome": "Elen Maria",
+      "pontos": 0,
+      "role": "user",
+      "uid": "r6e7HnEtEaNMqJb7uMlt9J5U8Dz1"
+    },
+    "re9sCSWRpARJHXS6JZq9utoG3602": {
+      "able": true,
+      "email": "a2025951420@teiacoltec.org",
+      "nome": "Gabriela Ferreira Silva",
+      "pontos": 0,
+      "role": "user",
+      "uid": "re9sCSWRpARJHXS6JZq9utoG3602",
+      "userClass": "101",
+      "userCourse": "Análises Clínicas",
+      "userId": "16374802616"
+    },
+    "ruo6flbgzga30JpAQAcdJqNZum32": {
+      "able": true,
+      "email": "a2025951137@teiacoltec.org",
+      "nome": "Alice Weber Mendes Campos",
+      "pontos": 44,
+      "role": "user",
+      "uid": "ruo6flbgzga30JpAQAcdJqNZum32",
+      "userClass": "101",
+      "userCourse": "Análises Clínicas",
+      "userId": "02067497677"
+    },
+    "t19cDEkjraT2hVpmNo2MFOql5Ow1": {
+      "able": true,
+      "email": "a2023950770@teiacoltec.org",
+      "nome": "pedro henrique resende figueiredo",
+      "pontos": 0,
+      "role": "user",
+      "uid": "t19cDEkjraT2hVpmNo2MFOql5Ow1",
+      "userClass": "304",
+      "userCourse": "Automação Industrial",
+      "userId": "15493433605"
+    },
+    "t2lv2DpFo9XEa6QrpExd46iITOZ2": {
+      "able": true,
+      "email": "sergioamaraldesouza@gmail.com",
+      "nome": "sergio amaral",
+      "pontos": 0,
+      "role": "user",
+      "uid": "t2lv2DpFo9XEa6QrpExd46iITOZ2",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "14937281640"
+    },
+    "uHDR8qKrsmVl7v35L1v2OGup7sr1": {
+      "able": true,
+      "email": "a2024952431@teiacoltec.org",
+      "nome": "carlos eduardo melo coltec",
+      "pontos": 0,
+      "role": "user",
+      "uid": "uHDR8qKrsmVl7v35L1v2OGup7sr1",
+      "userClass": "301",
+      "userCourse": "Análises Clínicas",
+      "userId": "17982966675"
+    },
+    "v0Asr57iqAY6pq13lG8ct6NffTa2": {
+      "able": true,
+      "email": "a2024951710@teiacoltec.org",
+      "nome": "Daniel Caetano Soares de Oliveira coltec",
+      "pontos": 54,
+      "role": "user",
+      "uid": "v0Asr57iqAY6pq13lG8ct6NffTa2",
+      "userClass": "305",
+      "userCourse": "Eletrônica",
+      "userId": "16815074633"
+    },
+    "v1vj3vc4xUYxthAtybjqrnLbxel1": {
+      "able": true,
+      "email": "a2023951504@teiacoltec.org",
+      "nome": "giovana nunes cesario",
+      "pontos": 0,
+      "role": "user",
+      "uid": "v1vj3vc4xUYxthAtybjqrnLbxel1"
+    },
+    "vCoVi36zwHcKEAlKDP2ef96i1482": {
+      "able": true,
+      "email": "a2024952180@teiacoltec.org",
+      "nome": "gabriel oliveira dias barboza coltec",
+      "pontos": 0,
+      "role": "user",
+      "uid": "vCoVi36zwHcKEAlKDP2ef96i1482",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "13375617623"
+    },
+    "vL8Hw6P71zRYBS3lESSnEtEMcg23": {
+      "able": true,
+      "email": "a2025951722@teiacoltec.org",
+      "nome": "Isaque Nunes De Oliveira",
+      "pontos": 44,
+      "role": "user",
+      "uid": "vL8Hw6P71zRYBS3lESSnEtEMcg23",
+      "userClass": "202",
+      "userCourse": "Química",
+      "userId": "01879902630"
+    },
+    "vuFxmRP6OqZnpvdYqlf1CWhdaAV2": {
+      "able": true,
+      "email": "a2023950923@teiacoltec.org",
+      "nome": "rubyane gabrielle pereira sliva santos",
+      "pontos": 1,
+      "role": "user",
+      "uid": "vuFxmRP6OqZnpvdYqlf1CWhdaAV2",
+      "userClass": "305",
+      "userCourse": "Eletrônica",
+      "userId": "13076963686"
+    },
+    "vxGHb14sP4d0PDfk0WSetFBbUKJ2": {
+      "able": true,
+      "email": "a2025950114@teiacoltec.org",
+      "nome": "Carlos Alexandre Martins Queiroz",
+      "pontos": 98,
+      "role": "user",
+      "uid": "vxGHb14sP4d0PDfk0WSetFBbUKJ2",
+      "userClass": "204",
+      "userCourse": "Automação Industrial",
+      "userId": "70045120617"
+    },
+    "wEXjEHiCjYXtGWBAxTbRbHxV08b2": {
+      "able": true,
+      "email": "a2025950424@teiacoltec.org",
+      "nome": "Samuel Lemos Ricaldoni",
+      "pontos": 0,
+      "role": "user",
+      "uid": "wEXjEHiCjYXtGWBAxTbRbHxV08b2",
+      "userClass": "205",
+      "userCourse": "Eletrônica",
+      "userId": "14745668635"
+    },
+    "wm0njyO6v9OQ5LhhTbpUARd8vYw1": {
+      "able": true,
+      "email": "a2023951482@teiacoltec.org",
+      "nome": "samuel goncalves lobato",
+      "pontos": 0,
+      "role": "user",
+      "uid": "wm0njyO6v9OQ5LhhTbpUARd8vYw1",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "11943407681"
+    },
+    "wnFBonWFtEcexYqVl3iRpEw3V0w2": {
+      "able": true,
+      "email": "analuizacaetanocaetano@gmail.com",
+      "nome": "Ana Luiza Caetano",
+      "pontos": 0,
+      "role": "user",
+      "uid": "wnFBonWFtEcexYqVl3iRpEw3V0w2"
+    },
+    "x3ITTfU6mlX6u4dPQYW8bA1nJnw1": {
+      "able": true,
+      "email": "a2024954299@teiacoltec.org",
+      "nome": "Ítalo gomes braganca",
+      "role": "user",
+      "uid": "x3ITTfU6mlX6u4dPQYW8bA1nJnw1",
+      "userClass": "203",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "169.453.746-37"
+    },
+    "x6dqlujXJieBy0NfgGXSmBXZaV63": {
+      "able": true,
+      "email": "a2024951222@teiacoltec.org",
+      "nome": "dirlan dos reis borges junio coltec",
+      "pontos": 54,
+      "role": "user",
+      "uid": "x6dqlujXJieBy0NfgGXSmBXZaV63",
+      "userClass": "304",
+      "userCourse": "Automação Industrial",
+      "userId": "14584207607"
+    },
+    "xEXQEp6jZTfiRxHiewpDne5I76g1": {
+      "able": true,
+      "email": "a2024952032@teiacoltec.org",
+      "nome": "gabriel della gaspera coltec",
+      "pontos": 0,
+      "role": "user",
+      "uid": "xEXQEp6jZTfiRxHiewpDne5I76g1",
+      "userClass": "203",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "116.595.096-02"
+    },
+    "xPFT9ksUYCOXmzzyc2TyAj8X7aA3": {
+      "able": true,
+      "email": "a2024952091@teiacoltec.org",
+      "nome": "tiago alves de souza almeida coltec",
+      "pontos": 86,
+      "role": "user",
+      "uid": "xPFT9ksUYCOXmzzyc2TyAj8X7aA3",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "16161701669"
+    },
+    "xRzKOTidhtPmpMBdLr5oFOpA65I3": {
+      "able": true,
+      "email": "a2024952016@teiacoltec.org",
+      "nome": "paulo henrique vieira gomes coltec",
+      "pontos": 71,
+      "role": "user",
+      "uid": "xRzKOTidhtPmpMBdLr5oFOpA65I3",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "17092725623"
+    },
+    "xXSUpPIQSXcGvCMHLXlJtrzoHxr2": {
+      "able": true,
+      "email": "eduminelli1971@gmail.com",
+      "nome": "Miguel Campos",
+      "pontos": 0,
+      "role": "user",
+      "uid": "xXSUpPIQSXcGvCMHLXlJtrzoHxr2"
+    },
+    "y85GbsKjZohG1M1pVtAjixFbNi93": {
+      "able": true,
+      "email": "a2025953040@teiacoltec.org",
+      "nome": "Ana Luiza Caetano Da Silva",
+      "pontos": 0,
+      "role": "user",
+      "uid": "y85GbsKjZohG1M1pVtAjixFbNi93",
+      "userClass": "102",
+      "userCourse": "Química",
+      "userId": "18067894698"
+    },
+    "yv4VDeDRRoWUxR9RO4VR4s0Jj5j1": {
+      "able": true,
+      "email": "a2023952624@teiacoltec.org",
+      "nome": "júlia martins souza",
+      "pontos": 0,
+      "role": "admin",
+      "uid": "yv4VDeDRRoWUxR9RO4VR4s0Jj5j1",
+      "userClass": "103",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "15549581647"
+    },
+    "yxy5EtF58XR5a8eDoZtzIgltUnI3": {
+      "able": true,
+      "email": "a2023950699@teiacoltec.org",
+      "nome": "Flora Afonseca Carvalho",
+      "pontos": 1,
+      "role": "user",
+      "uid": "yxy5EtF58XR5a8eDoZtzIgltUnI3",
+      "userClass": "304",
+      "userCourse": "Automação Industrial",
+      "userId": "10255018614"
+    },
+    "zE3suIieq5ZCIMWxLLwsWsSkL942": {
+      "able": true,
+      "email": "a2024953250@teiacoltec.org",
+      "nome": "davi elias martins da silva coltec",
+      "pontos": 44,
+      "role": "user",
+      "uid": "zE3suIieq5ZCIMWxLLwsWsSkL942",
+      "userClass": "303",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "13125057612"
+    },
+    "zT66btmgIobRNDXlUMRccUAkgJb2": {
+      "email": "a2024952130@teiacoltec.org",
+      "nome": "joão leonardo pereira lemos coltec",
+      "uid": "zT66btmgIobRNDXlUMRccUAkgJb2",
+      "userClass": "203",
+      "userCourse": "Desenvolvimento de Sistemas",
+      "userId": "12390885667"
+    },
+    "zUlYCYaD2tY7MnAvsIDA9dupGIl1": {
+      "able": true,
+      "email": "davibajur@gmail.com",
+      "nome": "Davi Kauã Otoni Bajur Davi",
+      "pontos": 0,
+      "role": "user",
+      "uid": "zUlYCYaD2tY7MnAvsIDA9dupGIl1"
+    },
+    "zUnBLPh8YhObELVN83JEVInKuq63": {
+      "able": true,
+      "email": "a2024951745@teiacoltec.org",
+      "nome": "iara gomes miranda oliveira coltec",
+      "pontos": 54,
+      "role": "user",
+      "uid": "zUnBLPh8YhObELVN83JEVInKuq63",
+      "userClass": "205",
+      "userCourse": "Eletrônica",
+      "userId": "02126048640"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+# Dados sensíveis (principalmente do Firebase)
+# Tome cuidado com eles!
+.env
+
+# Módulos
+node_modules/
+
+# Cache
+hosting/.firebase/*.cache
+
+# IDEs/editores
+.vscode/
+.idea/
+
+# Log files
+*.log
