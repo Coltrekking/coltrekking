@@ -2,6 +2,9 @@
 # Tome cuidado com eles!
 .env
 
+# Arquivos locais/privados
+local/
+
 # Módulos
 node_modules/
 
