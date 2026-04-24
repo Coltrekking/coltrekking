@@ -4,6 +4,7 @@
 
 # Site resultante
 dist/
+hosting/public/
 
 # Arquivos locais/privados
 local/
