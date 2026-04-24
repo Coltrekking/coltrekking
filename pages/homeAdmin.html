@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Coltrekking - Home</title>
-    <link rel="shortcut icon" href="../src/assets/images/logo.png" type="image/x-icon">
+    <link rel="shortcut icon" href="/assets/images/logo.png" type="image/x-icon">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Bebas+Neue&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Anton&display=swap">
@@ -12,23 +12,23 @@
 
 <body>
     <div id="homePage" class="center">
-        <img src="../src/assets/images/coltrekkingHorizontal.png" id="imgHP" alt="Logo Coltrekking">
+        <img src="/assets/images/coltrekkingHorizontal.png" id="imgHP" alt="Logo Coltrekking">
         <hr>
         <h3 class="center">Bem-vindo(a) a HomePage admin!</h3>
         <div id="userInfo" class="center">
             <img id="userImg">
             <p id="userName"></p>
             <p id="userEmail"></p>
-            <button class="alternative" onclick="signOut()">Sair</button>
-            <button class="danger" onclick="deleteAccount()">Excluir conta</button>
-            <button class="alternative" onclick="toggleUserManager()">Gerenciar Usuários</button>
+            <button id="signOutBtn" class="alternative">Sair</button>
+            <button id="deleteAccountBtn" class="danger">Excluir conta</button>
+            <button id="toggleUserManagerBtn" class="alternative">Gerenciar Usuários</button>
 
             <div id="userManager" class="center" style="display: none;">
                 <h3>Gerenciamento de Usuários</h3>
 
                 <!-- Campo de busca -->
                 <div id="userSearchContainer" style="margin-bottom: 15px;">
-                    <input type="text" id="userSearch" placeholder="Buscar usuário por nome..." oninput="loadUsers()"
+                    <input type="text" id="userSearch" placeholder="Buscar usuário por nome..."
                         style="padding: 6px; width: 70%; max-width: 300px;" />
                 </div>
 
@@ -39,10 +39,10 @@
 
         <hr>
         <div class="tab-bar">
-            <button class="tab-button active" onclick="openTab('eventos', event)">Eventos</button>
-            <button class="tab-button" onclick="openTab('photos', event)">Photos</button>
-            <button class="tab-button" onclick="openTab('lista-blocks', event)">Lista de Bloqueios</button>
-            <button class="tab-button" onclick="openTab('instrucoes', event)">Instruções Gerais</button>
+            <button id="eventBtn" class="tab-button active">Eventos</button>
+            <button id="photoBtn" class="tab-button">Photos</button>
+            <button id="blockListBtn" class="tab-button">Lista de Bloqueios</button>
+            <button id="instructionBtn" class="tab-button">Instruções Gerais</button>
         </div>
 
         <div id="eventos" class="tab-content active">
@@ -109,8 +109,8 @@
                 <input type="file" id="percursoAltimetria" accept=".png, .jpg"><br>
                 -->
 
-                <br><button type="submit" id="submitEventForm">Sallet Evento</button>
-                <br><button type="button" class="alternative" id="editEventForm">Sallet Edição</button>
+                <br><button type="submit" id="submitEventForm">Salvar Evento</button>
+                <br><button type="button" class="alternative" id="editEventForm">Salvar Edição</button>
                 <button type="button" class="danger" id="cancelEventForm">Cancelar</button>
             </form>
 
@@ -139,7 +139,7 @@
                 <label>URL das Fotos:</label><br>
                 <input type="text" id="photoURL"><br>
                 <button id="addPhotoBtn">Adicionar Link de Fotos</button>
-                <button type="button" class="danger" onclick="hideItem(photoAdminForm)">Cancelar</button>
+                <button id="cancelPhotoAdminFormBtn" type="button" class="danger">Cancelar</button>
             </div>
         </div>
 
@@ -158,7 +158,7 @@
                         definitiva.</p>
                 </div>
 
-                <button type="button" class="alternative" id="blockUser" onclick="toggleBlockManager()">Gerenciar
+                <button id="manageBlockBtn" type="button" class="alternative" id="blockUser">Gerenciar
                     Bloqueios</button>
 
                 <div id="blockManager" class="center" style="display: none; margin-top:12px;">
@@ -166,7 +166,7 @@
 
                     <!-- Campo de pesquisa -->
                     <input type="text" id="blockSearch" placeholder="Buscar usuário por nome..."
-                        oninput="loadBlockManager()" style="padding: 6px; width: 70%; max-width: 300px;" />
+                        style="padding: 6px; width: 70%; max-width: 300px;" />
 
                     <!-- Lista renderizada pelo JS -->
                     <div id="blockList"></div>
@@ -193,7 +193,7 @@
                     </ul>
                 </div>
                 <div class="instrucao-card">
-                    <h4>O que lelet e/ou usar</h4>
+                    <h4>O que levar e/ou usar</h4>
                     <ul>
                         <li>Blusa de manga comprida (de preferência com proteção UV)</li>
                         <li>Calça</li>
@@ -207,6 +207,7 @@
                         <li>Roupa de Banho e Toalha</li>
                         <li>Repelente</li>
                         <li>Muda de roupa limpa</li>
+                        <li>Dinheiro vivo</li>
                         <li>Chinelo (para colocar na hora de voltar)</li>
                     </ul>
                 </div>
@@ -238,37 +239,22 @@
 
         <footer id="mainFooter">
             <div class="footer-content">
-                <p>Site desenvolvido por Júlia Martins Souza para o Projeto de Ensino Coltrekking do Colégio Técnico da
-                    UFMG</p>
-                <h3><img src="../src/assets/images/logoColtec.png" id="imgColtec" alt="Logo Coltec"> &copy; 2025 Coltrekking. Todos os
+                <p>Site desenvolvido por
+                    <a href="https://www.linkedin.com/in/j%C3%BAlia-martins-souza-997ba6350/" target="_blank">Júlia Martins Souza</a>
+                    e por <a href="https://www.linkedin.com/in/andré-dias-de-paula-3430ba406/" target="_blank">André Dias de Paula</a>
+                    para o Projeto de Ensino Coltrekking do Colégio Técnico da UFMG</p>
+                <h3><img src="/assets/images/logoColtec.png" id="imgColtec" alt="Logo Coltec"> &copy; 2026 Coltrekking. Todos os
                     direitos reservados.</h3>
                 <div class="footer-links">
                     <a href="https://www.coltec.ufmg.br" target="_blank">Institucional</a>
-                    <a href="https://www.linkedin.com/in/j%C3%BAlia-martins-souza-997ba6350/"
-                        target="_blank">Contato</a>
+
                 </div>
             </div>
         </footer>
     </div>
 
-    <!-- Recursos do Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/7.8.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/7.8.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/7.8.1/firebase-database.js"></script>
-
     <!-- Scripts -->
-    <script src="../src/config/firebase.js"></script>
-    <script src="../src/js/auth.js"></script>
-    <script src="../src/js/utils.js"></script>
-    <script src="../src/js/tabs.js"></script>
-    <script src="../src/js/eventAdmin.js"></script>
-    <script src="../src/js/date.js"></script>
-    <script src="../src/js/photosAdmin.js"></script>
-    <script src="../src/js/listaBloqueiosAdmin.js"></script>
-
-    <script>
-        checkAuth(); //verifica se o usuario está logado com a conta institucional
-    </script>
+    <script type="module" src="/src/js/pages/homePage/homeAdmin.js"></script>
 </body>
 
 </html>

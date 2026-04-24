@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Coltrekking - Home</title>
-    <link rel="shortcut icon" href="../src/assets/images/logo.png" type="image/x-icon">
+    <link rel="shortcut icon" href="/assets/images/logo.png" type="image/x-icon">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Bebas+Neue&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Anton&display=swap">
@@ -12,7 +12,7 @@
 
 <body>
     <div id="homePage" class="center">
-        <img src="../src/assets/images/coltrekkingHorizontal.png" id="imgHP" alt="Logo Coltrekking">
+        <img src="/assets/images/coltrekkingHorizontal.png" id="imgHP" alt="Logo Coltrekking">
         <hr>
         <h3 class="center">Bem-vindo(a) a HomePage!</h3>
         <div id="userInfo" class="center">
@@ -25,9 +25,9 @@
             <p id="userCourse">Curso: </p>
             <p id="userPoints">Pontuação: 0</p>
 
-            <button class="alternative" onclick="signOut()">Sair</button>
-            <button class="alternative" onclick="editPersonalInfo()">Editar Informações Pessoais</button>
-            <button class="danger" onclick="deleteAccount()">Excluir conta</button>
+            <button id="signOutBtn" class="alternative">Sair</button>
+            <button id="editPersonalInfoBtn" class="alternative">Editar Informações Pessoais</button>
+            <button id="deleteAccountBtn" class="danger">Excluir conta</button>
 
             <form id="editPersonalInfoForm" class="startHidden">
                 <label>CPF:</label><br>
@@ -46,17 +46,17 @@
                     <option value="Eletrônica">Eletrônica</option>
                 </select><br>
 
-                <button type="submit" id="submitProfileForm">Sallet</button>
-                <button type="button" onclick="cancelEdit()">Cancelar</button>
+                <button type="submit" id="submitProfileForm">Salvar</button>
+                <button id="cancelEditBtn" type="button">Cancelar</button>
             </form>
         </div>
 
         <hr>
         <div class="tab-bar">
-            <button class="tab-button active" onclick="openTab('eventos', event)">Eventos</button>
-            <button class="tab-button" onclick="openTab('photos', event), fillPhotoList()">Photos</button>
-            <button class="tab-button" onclick="openTab('lista-blocks', event)">Lista de Bloqueios</button>
-            <button class="tab-button" onclick="openTab('instrucoes', event)">Instruções Gerais</button>
+            <button id="eventBtn" class="tab-button active">Eventos</button>
+            <button id="photoBtn" class="tab-button">Photos</button>
+            <button id="blockListBtn" class="tab-button">Lista de Bloqueios</button>
+            <button id="instructionBtn" class="tab-button">Instruções Gerais</button>
         </div>
 
         <div id="eventos" class="tab-content active">
@@ -110,7 +110,7 @@
                     </ul>
                 </div>
                 <div class="instrucao-card">
-                    <h4>O que lelet e/ou usar</h4>
+                    <h4>O que levar e/ou usar</h4>
                     <ul>
                         <li>Blusa de manga comprida (de preferência com proteção UV)</li>
                         <li>Calça</li>
@@ -124,6 +124,7 @@
                         <li>Roupa de Banho e Toalha</li>
                         <li>Repelente</li>
                         <li>Muda de roupa limpa</li>
+                        <li>Dinheiro vivo</li>
                         <li>Chinelo (para colocar na hora de voltar)</li>
                     </ul>
                 </div>
@@ -155,38 +156,22 @@
 
         <footer id="mainFooter">
             <div class="footer-content">
-                <p>Site desenvolvido por Júlia Martins Souza para o Projeto de Ensino Coltrekking do Colégio Técnico
-                    da
-                    UFMG</p>
-                <h3><img src="../src/assets/images/logoColtec.png" id="imgColtec" alt="Logo Coltec"> &copy; 2025 Coltrekking.
+                <p>Site desenvolvido por
+                    <a href="https://www.linkedin.com/in/j%C3%BAlia-martins-souza-997ba6350/" target="_blank">Júlia Martins Souza</a>
+                    e por <a href="https://www.linkedin.com/in/andré-dias-de-paula-3430ba406/" target="_blank">André Dias de Paula</a>
+                    para o Projeto de Ensino Coltrekking do Colégio Técnico da UFMG</p>
+                <h3><img src="/assets/images/logoColtec.png" id="imgColtec" alt="Logo Coltec"> &copy; 2026 Coltrekking.
                     Todos os
                     direitos reservados.</h3>
                 <div class="footer-links">
                     <a href="https://www.coltec.ufmg.br" target="_blank">Institucional</a>
-                    <a href="https://www.linkedin.com/in/j%C3%BAlia-martins-souza-997ba6350/"
-                        target="_blank">Contato</a>
                 </div>
             </div>
         </footer>
         </div>
 
-        <!-- Recursos do Firebase -->
-        <script src="https://www.gstatic.com/firebasejs/7.8.1/firebase-app.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/7.8.1/firebase-auth.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/7.8.1/firebase-database.js"></script>
-
-        <!-- Scripts -->
-        <script src="../src/config/firebase.js"></script>
-        <script src="../src/js/auth.js"></script>
-        <script src="../src/js/utils.js"></script>
-        <script src="../src/js/tabs.js"></script>
-        <script src="../src/js/eventUser.js"></script>
-        <script src="../src/js/date.js"></script>
-        <script src="../src/js/photosUser.js"></script>
-
-    <script>
-        checkAuth(); //verifica se o usuario está logado com a conta institucional
-    </script> 
+    <!-- Scripts -->
+    <script type="module" src="/src/js/pages/homePage/homePage.js"></script>
 </body>
 
 </html>

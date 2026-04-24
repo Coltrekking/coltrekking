@@ -1,4 +1,4 @@
-function openTab(tabId, event) {
+export function openTab(tabId, event) {
   const contents = document.querySelectorAll('.tab-content');
   const buttons = document.querySelectorAll('.tab-button');
 

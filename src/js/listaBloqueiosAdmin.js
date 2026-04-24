@@ -1,7 +1,7 @@
 import {Auth, Database} from "../config/firebase";
 
 // abre/fecha a área de gerenciamento de bloqueios
-function toggleBlockManager() {
+export function toggleBlockManager() {
     const div = document.getElementById("blockManager");
     const btn = document.querySelector("button[onclick='toggleBlockManager()']"); // pega o botão
     const user = Auth.currentUser;
@@ -41,7 +41,7 @@ function toggleBlockManager() {
 }
 
 // carrega todos os usuários com botões de bloquear/desbloquear
-function loadBlockManager() {
+export function loadBlockManager() {
     const blockList = document.getElementById("blockList");
     blockList.innerHTML = "<p>Carregando usuários...</p>";
 

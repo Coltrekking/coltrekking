@@ -1,69 +1,60 @@
 import {Auth, Database} from "../config/firebase";
-import { ref, set } from "firebase/database";
+import { child, ref, set, onValue } from "firebase/database";
 
 // Referências dos elementos da página
-let loading = document.getElementById('loading');
-let auth = document.getElementById('auth');
-let homePage = document.getElementById('homePage');
-let userEmail = document.getElementById('userEmail');
-let userImg = document.getElementById('userImg');
-let userName = document.getElementById('userName');
+export let loading = document.getElementById('loading');
+export let auth = document.getElementById('auth');
+export let homePage = document.getElementById('homePage');
+export let userEmail = document.getElementById('userEmail');
+export let userImg = document.getElementById('userImg');
+export let userName = document.getElementById('userName');
 
-let userId = document.getElementById('userId');
-let userClass = document.getElementById('userClass');
-let userCourse = document.getElementById('userCourse');
-let cpf = document.getElementById('cpf');
-let turma = document.getElementById('turma');
-let curso = document.getElementById('curso');
-let editPersonalInfoForm = document.getElementById('editPersonalInfoForm');
+export let userId = document.getElementById('userId');
+export let userClass = document.getElementById('userClass');
+export let userCourse = document.getElementById('userCourse');
+export let cpf = document.getElementById('cpf');
+export let turma = document.getElementById('turma');
+export let curso = document.getElementById('curso');
+export let editPersonalInfoForm = document.getElementById('editPersonalInfoForm');
 
 //definindo referências para os eventos
-let eventForm = document.getElementById('eventForm');
-let submitEventForm = document.getElementById('submitEventForm');
-let editEventForm = document.getElementById('editEventForm');
-let eventContainer = document.getElementById('eventContainer');
-let eventCount = document.getElementById('eventCount');
+export let eventForm = document.getElementById('eventForm');
+export let submitEventForm = document.getElementById('submitEventForm');
+export let editEventForm = document.getElementById('editEventForm');
+export let eventContainer = document.getElementById('eventContainer');
+export let eventCount = document.getElementById('eventCount');
 
 // Remove elementos da aba
-function hideItem(item) {
+export function hideItem(item) {
     if (item && item.style) {
         item.style.display = 'none';
     }
 }
 
 // Oculta elementos da aba
-function showItem(item) {
+export function showItem(item) {
     if (item && item.style) {
         item.style.display = 'block';
     }
 }
 
 // Mostrar conteúdo para usuários não autenticados
-function showAuth() {
+export function showAuth() {
     hideItem(homePage);
     showItem(auth);
 }
 
 /**
  * Retorna a referência da célula do banco de dados no caminho dado.
- * @param path caminho para a célula, como 'users/AjdkaJDJId892' ou 'event/'
+ * @param path caminho para a célula, como `users/AjdkaJDJId892` ou `event/`
  * @returns {DatabaseReference}
  */
-function getRef(path) {
+export function getRefFromDatabase(path) {
     return ref(Database, path);
 }
 
-/**
- * Retorna a referência de um usuário no banco de dados utilizando seu UID.
- * @param userId UID do usuário
- * @returns {DatabaseReference}
- */
-function getUserRef(userId) {
-    return getRef('users/' + userId);
-}
-
 //mostrar conteúdo para usuários autenticados
-function showUserContent(user) {
+export function showUserContent(user) {
     if (!user) return;
 
     // Exibe dados básicos do Auth
@@ -98,7 +89,7 @@ function showUserContent(user) {
 
 
 //editar informações pessoais do usuário
-function editPersonalInfo() {
+export function editPersonalInfo() {
     const user = Auth.currentUser;
     if (!user) return;
 
@@ -116,7 +107,7 @@ function editPersonalInfo() {
 }
 
 //cancelar edição de informações pessoais
-function cancelEdit() {
+export function cancelEdit() {
     if (!editPersonalInfoForm) return;
     hideItem(editPersonalInfoForm);
     editPersonalInfoForm.reset();
@@ -162,7 +153,7 @@ if (editPersonalInfoForm) {
 }
 
 //verificação de cpf
-function validarCPF(cpf) {
+export function validarCPF(cpf) {
     if (!cpf) return false;
 
     // Remove caracteres não numéricos
@@ -198,7 +189,7 @@ function validarCPF(cpf) {
 }
 
 //centralizar e traduzir erros
-function showError(prefix, error) {
+export function showError(prefix, error) {
     hideItem(loading);
     console.error(error.code);
 
@@ -219,8 +210,4 @@ let actionCodeSettings = {
     url: 'coltrekking-app-c3026.firebaseapp.com'
 }
 
-let dbRefEvents = Database.ref('event');
 
-dbRefEvents.on('value', function (dataSnapshot) {
-    fillEventList(dataSnapshot, Auth.currentUser);
-});

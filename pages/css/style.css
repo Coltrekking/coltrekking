@@ -6,10 +6,11 @@ body {
 }
 
 #app {
-    width: 40%;
-    min-width: 300px;
+    width: 40vw;
+    min-width: 500px;
 
-    height: 70vh;
+    min-height: 700px;
+
     margin: auto;
     box-shadow: 4px 4px 20px #888;
     padding: 20px;
@@ -32,19 +33,26 @@ body {
 }
 
 #imgLogin {
-    width: 40%;
-    min-width: 250px;
+    width: 45%;
+    min-width: 400px;
     height: auto;
     border-radius: 20px;
 }
 
 #logoGoogle {
-    width: 10%;
-    min-width: 60px;
-
+    width: calc(100% - 35vw);
     border-radius: 100%;
+    outline: 2px solid white;
+
     margin-top: 5px;
     border: 2px none red;
+
+    transition: outline 0.1s ease-in;
+}
+
+#logoGoogle:hover {
+    cursor: pointer;
+    outline: 2px solid dodgerblue;
 }
 
 #auth {
@@ -71,7 +79,8 @@ h3 {
     font-family: 'Bebas Neue', sans-serif;
     color: #15140e;
     margin: 4px;
-    font-size: 50px;
+    font-size: max(50px, 5vh);
+
     min-width: 300px;
 }
 

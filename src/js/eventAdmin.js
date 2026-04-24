@@ -1,19 +1,22 @@
 // Importa as coisas do firebase que serão usadas
-import {Auth, Database} from "../config/firebase";
+import {Database} from "../config/firebase";
+import {
+    hideItem,
+    showItem,
+    eventForm,
+    loading,
+    editEventForm,
+    submitEventForm,
+    showError,
+    getRefFromDatabase
+} from "./utils"
+import {validarOrdemDatas} from "./date";
+import {get} from 'firebase/database'
+import {atualizarPontuacaoUsuario, calcularPontuacaoDoEvento} from "/src/js/event";
 
-//trata a exibicao do formulário de eventos
-document.getElementById('createEvent').onclick = function () {
-    showItem(eventForm);
-    hideItem(loading);
-    hideItem(editEventForm);
-    showItem(submitEventForm);
-    eventForm.reset();
+const dbRefEvents  = Database.ref('event');
 
-}
-
-//trata a submissão do formulário de eventos
-eventForm.onsubmit = function (event) {
-    event.preventDefault();
+export function criarEvento() {
     hideItem(eventForm);
     showItem(loading);
 
@@ -69,79 +72,17 @@ eventForm.onsubmit = function (event) {
     }
 }
 
-//botão para remover evento
-function removeEvent(key) {
-    let selectedItem = document.getElementById(key);
-
-    // título dentro do elemento
-    let eventName = selectedItem.querySelector('h3')?.textContent || 'evento';
-
-    let confirmation = confirm('Você tem certeza que deseja remover o evento: "' + eventName + '"?');
-    if (confirmation) {
-        // Referências
-        let eventRef = dbRefEvents.child(key); // eventos/{key}
-        let inscricoesRef = Database.ref('inscricoes/' + key); // inscricoes/{key}
-
-        // Executa as duas remoções em paralelo
-        Promise.all([
-            eventRef.remove(),
-            inscricoesRef.remove()
-        ])
-            .then(() => {
-                selectedItem.remove();
-                console.log("Evento e inscrições removidos com sucesso.");
-            })
-            .catch(function (error) {
-                showError("Falha ao remover o evento/inscrições: ", error);
-            });
-    }
-}
-
-//botão para editar evento
-function updateEvent(key) {
-    const eventRef = Database.ref('event/' + key);
-
-    eventForm.scrollIntoView({ behavior: "smooth", block: "start" });
-
-    eventRef.once('value').then(snapshot => {
-        const value = snapshot.val();
-        if (!value) {
-            alert('Evento não encontrado no banco.');
-            return;
-        }
-
-        // Preenche os campos diretamente com os valores salvos no BD
-        document.getElementById('nome').value = value.nome || '';
-        document.getElementById('descricao').value = value.descricao || '';
-        document.getElementById('data').value = value.data || ''; // já no formato correto
-        document.getElementById('dataInscricao').value = value.dataInscricao || '';
-        document.getElementById('dataPrelecao').value = value.dataPrelecao || '';
-        document.getElementById('localPrelecao').value = value.localPrelecao || '';
-        document.getElementById('localEncontro').value = value.localEncontro || '';
-        document.getElementById('dificuldade').value = value.dificuldade || '';
-        document.getElementById('distancia').value = value.distancia || '';
-        document.getElementById('subida').value = value.subida || '';
-        document.getElementById('descida').value = value.descida || '';
-        document.getElementById('trajeto').value = value.trajeto || '';
-
-        // Guarda a key para usar depois na atualização
-        eventForm.dataset.editingKey = key;
-
-        // Mostra formulário de edição
-        showItem(eventForm);
-        hideItem(submitEventForm);
-        showItem(editEventForm);
-    });
-}
-
-//trata a submissão do formulário de edição de eventos
-editEventForm.onclick = function (event) {
-    event.preventDefault();
+export async function atualizarEvento() {
     let key = eventForm.dataset.editingKey;
     if (!key) {
         alert('Erro: nenhum evento em edição.');
         return;
     }
+
+    // Retira a pontuação do evento de todos os inscritos
+    //  obs: retirar e depois colocar a pontuação foi a forma que
+    //  encontrei de lidar com a lógica duvidosa do código inteiro.
+    await atualizarPontuacaoDosInscritosDoEvento(key, false);
 
     // Pegando todos os valores do formulário
     let nome = document.getElementById('nome').value.trim();
@@ -177,23 +118,175 @@ editEventForm.onclick = function (event) {
             descricao
         };
 
-        dbRefEvents.child(key).update(dataToUpdate).then(() => {
-            alert('Evento atualizado com sucesso!');
+        dbRefEvents.child(key).update(dataToUpdate).then(async () => {
+            // Adiciona a pontuação a todos
+            await atualizarPontuacaoDosInscritosDoEvento(key, true);
+
+            // Atualiza o texto da lista de inscrições que diz da pontuação do evento
+            const pontosListaInscritosElem = document.getElementById("listaInscritosPontuacaoEvento");
+            if (pontosListaInscritosElem) {
+                const eventSnap = await get(getRefFromDatabase("event/" + key)) ;
+                const evento = eventSnap.val();
+                pontosListaInscritosElem.innerHTML = `<strong>Pontuação do evento:</strong> ${calcularPontuacaoDoEvento(evento)} pontos`;
+            }
+
             eventForm.reset();
             hideItem(eventForm);
             showItem(submitEventForm);   // mostra de novo o botão de criar
             hideItem(editEventForm);     // esconde o botão de editar
-            dbRefEvents.once('value').then(fillEventList);
+
+            alert('Evento atualizado com sucesso!');
+
+            /*dbRefEvents.once('value').then(dataSnapshot => {
+                fillEventList(dataSnapshot);
+            });*/
         }).catch((error) => {
             showError('Erro ao atualizar evento:', error);
         });
     } else {
         alert('Por favor, preencha todos os campos para atualizar o evento.');
     }
-};
+}
+
+export function cancelarFormEvento() {
+    if (confirm("Tem certeza que deseja cancelar? As alterações não serão salvas.")) {
+        currentEditingEvent = false;
+        eventForm.reset();
+        hideItem(eventForm);
+        showItem(submitEventForm); // volta o botão de criar
+        hideItem(editEventForm);   // esconde o botão de editar
+    }
+}
+
+/**
+ * Retira a pontuação do evento de todos os seus inscritos.
+ * @param eventoId o id do evento que se quer remover os respectivos pontos dos inscritos
+ * @param adicionar se deseja adicionar a pontuação aos inscritos (`true`) ou se deseja retirar
+ *                  a pontuação dos inscritos (`false`)
+ */
+async function atualizarPontuacaoDosInscritosDoEvento(eventoId, adicionar) {
+    const inscricoesRef = getRefFromDatabase("inscricoes/" + eventoId);
+    await get(inscricoesRef)
+        .then(snapshot => {
+            // Atualiza a pontuação de cada inscrito
+            snapshot.forEach(async snapshot => {
+                const uid = snapshot.key;
+                const presenca = snapshot.val().presenca;
+
+                if (presenca) // Só atualiza se o usuário estiver presente
+                    // Atualiza a pontuação do usuário (retirando ela)
+                    await atualizarPontuacaoUsuario(uid, eventoId, adicionar);
+            });
+        });
+}
+
+//botão para remover evento
+export function removeEvent(key) {
+    let selectedItem = document.getElementById(key);
+
+    // título dentro do elemento
+    let eventName = selectedItem.querySelector('h3')?.textContent || 'evento';
+
+    let confirmation = confirm('Você tem certeza que deseja remover o evento: "' + eventName + '"?');
+    if (confirmation) {
+        // Referências
+        let eventRef = dbRefEvents.child(key); // eventos/{key}
+        let inscricoesRef = Database.ref('inscricoes/' + key); // inscricoes/{key}
+
+        // Certifique-se que essa função é executada antes de remover o evento!
+        // Para ter essa certeza, eu chamei ela e o resto do código está dentro do
+        // 'then'.
+        atualizarPontuacaoDosInscritosDoEvento(key, false)
+            .then(_ => {
+                // Executa as duas remoções em paralelo
+                Promise.all([
+                    eventRef.remove(),
+                    inscricoesRef.remove()
+                ])
+                    .then(async () => {
+                        selectedItem.remove();
+                        console.log("Evento e inscrições removidos com sucesso.");
+                    })
+                    .catch(function (error) {
+                        showError("Falha ao remover o evento/inscrições: ", error);
+                    }
+                );
+            }
+        )
+            .catch(error => {
+                showError("Falha ao remover o evento/inscrições: ", error);
+            }
+        );
+
+        // Fecha a lista de inscritos
+        if (currentListingSubscribeEvent === key) {
+            fecharListaInscritos();
+        }
+
+        // Fecha o menu de edição
+        if (currentEditingEvent === key) {
+            eventForm.reset();
+            hideItem(eventForm);
+            showItem(submitEventForm); // volta o botão de criar
+            hideItem(editEventForm);   // esconde o botão de editar
+        }
+
+    }
+}
+
+/**
+ * Fecha a lista de inscritos
+ */
+export function fecharListaInscritos() {
+    const container = document.getElementById("inscritosContainer");
+    if (container) container.classList.add("startHidden");
+    currentListingSubscribeEvent = null;
+}
+
+// Id do evento que está atualmente sendo editado.
+// `null` se não houver evento sendo editado
+let currentEditingEvent = null
+
+//botão para editar evento
+export function updateEvent(key) {
+    currentEditingEvent = key;
+    const eventRef = Database.ref('event/' + key);
+
+    eventForm.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    eventRef.once('value').then(snapshot => {
+        const value = snapshot.val();
+        if (!value) {
+            alert('Evento não encontrado no banco.');
+            return;
+        }
+
+        // Preenche os campos diretamente com os valores salvos no BD
+        document.getElementById('nome').value = value.nome || '';
+        document.getElementById('descricao').value = value.descricao || '';
+        document.getElementById('data').value = value.data || ''; // já no formato correto
+        document.getElementById('dataInscricao').value = value.dataInscricao || '';
+        document.getElementById('dataPrelecao').value = value.dataPrelecao || '';
+        document.getElementById('localPrelecao').value = value.localPrelecao || '';
+        document.getElementById('localEncontro').value = value.localEncontro || '';
+        document.getElementById('dificuldade').value = value.dificuldade || '';
+        document.getElementById('distancia').value = value.distancia || '';
+        document.getElementById('subida').value = value.subida || '';
+        document.getElementById('descida').value = value.descida || '';
+        document.getElementById('trajeto').value = value.trajeto || '';
+
+        // Guarda a key para usar depois na atualização
+        eventForm.dataset.editingKey = key;
+
+        // Mostra formulário de edição
+        showItem(eventForm);
+        hideItem(submitEventForm);
+        showItem(editEventForm);
+    });
+}
 
 // botão para listar inscrições de um evento e exportar CSV
-function exportarInscricoesCSV(eventId, nomeEvento = 'Evento', dataInicioEvento = null) {
+export function exportarInscricoesCSV(eventId, nomeEvento = 'Evento', dataInicioEvento = null) {
     const inscricoesRef = Database.ref('inscricoes/' + eventId);
 
     inscricoesRef.once('value')
@@ -286,49 +379,16 @@ function exportarInscricoesCSV(eventId, nomeEvento = 'Evento', dataInicioEvento 
         });
 }
 
-// função para atualizar pontos usando fator K
-async function atualizarPontuacaoUsuario(uid, eventId, adicionar) {
-    try {
-        const eventSnap = await Database.ref("event/" + eventId).once("value");
-        const evento = eventSnap.val();
 
-        if (!evento) {
-            console.error("Evento não encontrado:", eventId);
-            return;
-        }
 
-        const distancia = parseFloat(evento.distancia) || 0;
-        const subida = parseFloat(evento.subida) || 0;
-        const descida = parseFloat(evento.descida) || 0;
 
-        // Fator K
-        const fatorK = 1 + ((subida + descida) / 1000);
-        const pontuacaoEvento = Math.round(distancia * fatorK);
-
-        if (pontuacaoEvento <= 0) {
-            console.warn(`Pontuação inválida (${pontuacaoEvento}) para evento ${eventId}`);
-            return;
-        }
-
-        // Busca pontos atuais do usuário
-        const userRef = Database.ref("users/" + uid);
-        const userSnap = await userRef.once("value");
-        const userData = userSnap.val() || {};
-
-        const pontosAtuais = parseFloat(userData.pontos) || 0;
-        const novosPontos = adicionar
-            ? pontosAtuais + pontuacaoEvento   // soma se presente
-            : Math.max(0, pontosAtuais - pontuacaoEvento); // remove se ausente
-
-        // Atualiza no BD
-        await userRef.update({ pontos: novosPontos });
-    } catch (err) {
-        console.error("Erro ao atualizar pontuação:", err);
-    }
-}
+// Id do evento que está listando os inscritos atualmente.
+// `null` se não estiver listando nada.
+let currentListingSubscribeEvent = null
 
 // botão para listar inscritos e registrar presença (FATOR K)
-function listarInscritos(eventId) {
+export function listarInscritos(eventId) {
+    currentListingSubscribeEvent = eventId;
     const inscritosContainer = document.getElementById("inscritosContainer");
     const inscritosList = document.getElementById("inscritosList");
 
@@ -358,14 +418,10 @@ function listarInscritos(eventId) {
                 const evento = eventSnap.val();
                 if (!evento) return;
 
-                const distancia = parseFloat(evento.distancia) || 0;
-                const subida = parseFloat(evento.subida) || 0;
-                const descida = parseFloat(evento.descida) || 0;
-
-                const fatorK = 1 + ((subida + descida) / 1000);
-                const pontuacaoEvento = Math.round(distancia * fatorK);
+                const pontuacaoEvento = calcularPontuacaoDoEvento(evento);
 
                 const pontosElem = document.createElement("p");
+                pontosElem.id = "listaInscritosPontuacaoEvento";
                 pontosElem.innerHTML = `<strong>Pontuação do evento:</strong> ${pontuacaoEvento} pontos`;
                 pontosElem.className = "pontuacao-evento";
                 inscritosList.appendChild(pontosElem);
@@ -450,122 +506,4 @@ function listarInscritos(eventId) {
 }
 
 
-// botão de fechar lista
-const fecharInscritosBtn = document.getElementById("fecharInscritos");
-if (fecharInscritosBtn) {
-    fecharInscritosBtn.addEventListener("click", () => {
-        const container = document.getElementById("inscritosContainer");
-        if (container) container.classList.add("startHidden");
-    });
-}
 
-// função para preencher a lista de eventos na página
-function fillEventList(dataSnapshot) {
-    const eventContainer = document.getElementById('eventContainer');
-    eventContainer.innerHTML = '';
-
-    const events = dataSnapshot.numChildren();
-    eventCount.innerHTML = 'Total de eventos: ' + events;
-
-    const user = Auth.currentUser;
-
-    // função async para pegar a role do usuário logado
-    async function getUserRole(uid) {
-        const snap = await Database.ref('users/' + uid + '/role').once('value');
-        return snap.val();
-    }
-
-    getUserRole(user.uid).then(userRole => {
-        const isAdmin = userRole === 'admin';
-
-        // Transforma snapshot em array para ordenar
-        const eventsArray = [];
-        dataSnapshot.forEach(item => {
-            eventsArray.push({ key: item.key, value: item.val() });
-        });
-
-        // Ordena pelo campo dataInscricao (mais recente acima)
-        eventsArray.sort((a, b) => {
-            const tA = a.value.dataInscricao ? new Date(a.value.dataInscricao).getTime() : 0;
-            const tB = b.value.dataInscricao ? new Date(b.value.dataInscricao).getTime() : 0;
-            return tB - tA; // decrescente
-        });
-
-        // Cria os cards ordenados
-        eventsArray.forEach(item => {
-            const value = item.value;
-            if (document.getElementById(item.key)) return;
-
-            const eventCard = document.createElement('div');
-            eventCard.className = 'event-card';
-            eventCard.id = item.key;
-
-            eventCard.innerHTML = `
-                <h3>${value.nome}</h3>
-                <h4>${value.descricao || '---'}</h4>
-                <p>Data: ${value.data ? formattedDate(value.data) : '---'}</p>
-                <p>Ponto de Encontro: ${value.localEncontro || '---'}</p>
-                <p>Data de Inscrição: ${value.dataInscricao ? formattedDate(value.dataInscricao) : '---'}</p>
-                <p>Data da Preleção: ${value.dataPrelecao ? formattedDate(value.dataPrelecao) : '---'}</p>
-                <p>Local da preleção: ${value.localPrelecao || '---'}</p>
-                <p>Dificuldade: ${value.dificuldade || '---'}</p>
-                <p>Distância: ${value.distancia || '---'} km</p>
-                <p>Subida: ${value.subida || '---'} m</p>
-                <p>Descida: ${value.descida || '---'} m</p>
-                <p>Trajeto: ${value.trajeto || '---'}</p>
-            `;
-
-            /* inserir altimentria depois (precisa do cloud storage)
-                <p>Altimetria:<br>
-                    ${value.percursoAltimetria
-                    ? `<img src="${value.percursoAltimetria}" alt="altimetria" style="max-width: 100%;">`
-                    : '---'}
-                </p>
-            */
-
-            if (isAdmin) {
-                const removeBtn = document.createElement('button');
-                removeBtn.textContent = 'Remover';
-                removeBtn.className = 'danger eventBtn';
-                removeBtn.onclick = () => removeEvent(item.key);
-
-                const editBtn = document.createElement('button');
-                editBtn.textContent = 'Editar';
-                editBtn.className = 'alternative eventBtn';
-                editBtn.onclick = () => updateEvent(item.key);
-
-                const listarBtn = document.createElement('button');
-                listarBtn.textContent = 'Listar Inscritos';
-                listarBtn.className = 'alternative eventBtn';
-                listarBtn.onclick = () => listarInscritos(item.key);
-
-                const exportarCSV = document.createElement('button');
-                exportarCSV.textContent = 'Baixar Planilha de Inscrições';
-                exportarCSV.className = 'alternative eventBtn';
-                exportarCSV.onclick = () => exportarInscricoesCSV(item.key, value.nome);
-
-                eventCard.appendChild(removeBtn);
-                eventCard.appendChild(editBtn);
-                eventCard.appendChild(listarBtn);
-                eventCard.appendChild(exportarCSV);
-            }
-
-            eventContainer.appendChild(eventCard);
-        });
-
-        hideItem(loading);
-    }).catch(err => {
-        console.error("Erro ao buscar role do usuário:", err);
-        hideItem(loading);
-    });
-}
-
-// botão cancelar (funciona tanto para criação quanto edição)
-document.getElementById('cancelEventForm').onclick = function () {
-    if (confirm("Tem certeza que deseja cancelar? As alterações não serão salvas.")) {
-        eventForm.reset();
-        hideItem(eventForm);
-        showItem(submitEventForm); // volta o botão de criar
-        hideItem(editEventForm);   // esconde o botão de editar
-    }
-};

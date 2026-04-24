@@ -1,5 +1,5 @@
 // Converte data BR para formato yyyy-mm-dd (para input type="date")
-function formattedDate(date) {
+export function formattedDate(date) {
     const dateObj = new Date(date);
     if (isNaN(dateObj)) return 'Data inválida';
     return dateObj.toLocaleString('pt-BR', {
@@ -9,7 +9,7 @@ function formattedDate(date) {
 }
 
 // Função auxiliar para validar ordem das datas
-function validarOrdemDatas(dataInscricao, dataPrelecao, dataEvento) {
+export function validarOrdemDatas(dataInscricao, dataPrelecao, dataEvento) {
     const inscricao = new Date(dataInscricao).getTime();
     const prelecao = new Date(dataPrelecao).getTime();
     const evento = new Date(dataEvento).getTime();

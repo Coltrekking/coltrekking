@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Coltrekking - Home</title>
+    <link rel="shortcut icon" href="/assets/images/logo.png" type="image/x-icon">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Bebas+Neue&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Anton&display=swap">
+  <script type="module" crossorigin src="/assets/date-3aL5wtAM.js"></script>
+  <script type="module" crossorigin src="/assets/homePage-qeEsx132.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/date-ClkdYV0t.css">
+</head>
+
+<body>
+    <div id="homePage" class="center">
+        <img src="/assets/images/coltrekkingHorizontal.png" id="imgHP" alt="Logo Coltrekking">
+        <hr>
+        <h3 class="center">Bem-vindo(a) a HomePage!</h3>
+        <div id="userInfo" class="center">
+            <img id="userImg">
+            <p id="userName"></p>
+            <p id="userEmail"></p>
+            <!-- informações adicionais (e essenciais) do usuário -->
+            <p id="userId">CPF: </p>
+            <p id="userClass">Turma: </p>
+            <p id="userCourse">Curso: </p>
+            <p id="userPoints">Pontuação: 0</p>
+
+            <button id="signOutBtn" class="alternative">Sair</button>
+            <button id="editPersonalInfoBtn" class="alternative">Editar Informações Pessoais</button>
+            <button id="deleteAccountBtn" class="danger">Excluir conta</button>
+
+            <form id="editPersonalInfoForm" class="startHidden">
+                <label>CPF:</label><br>
+                <input type="text" id="cpf" required><br>
+
+                <label>Turma:</label><br>
+                <input type="text" id="turma" required><br>
+
+                <label>Curso:</label><br>
+                <select id="curso" required>
+                    <option value="">Selecione</option>
+                    <option value="Análises Clínicas">Análises Clínicas</option>
+                    <option value="Química">Química</option>
+                    <option value="Desenvolvimento de Sistemas">Desenvolvimento de Sistemas</option>
+                    <option value="Automação Industrial">Automação Industrial</option>
+                    <option value="Eletrônica">Eletrônica</option>
+                </select><br>
+
+                <button type="submit" id="submitProfileForm">Salvar</button>
+                <button id="cancelEditBtn" type="button">Cancelar</button>
+            </form>
+        </div>
+
+        <hr>
+        <div class="tab-bar">
+            <button id="eventBtn" class="tab-button active">Eventos</button>
+            <button id="photoBtn" class="tab-button">Photos</button>
+            <button id="blockListBtn" class="tab-button">Lista de Bloqueios</button>
+            <button id="instructionBtn" class="tab-button">Instruções Gerais</button>
+        </div>
+
+        <div id="eventos" class="tab-content active">
+            <h2>Eventos</h2>
+            <p>Bem-vindo aos eventos! Aqui ficará a programação principal.</p>
+            <div id="listEvents">
+                <p id="eventCount">Carregando eventos...</p>
+                <div id="eventContainer"></div>
+            </div>
+        </div>
+
+        <div id="photos" class="tab-content">
+            <h2>Photos</h2>
+            <p>Galeria de fotos dos eventos.</p>
+            <div id="photoContainer">
+                <p id="photoCount">Carregando fotos...</p>
+            </div>
+        </div>
+
+        <div id="lista-blocks" class="tab-content">
+            <h2>Lista de Bloqueios</h2>
+            <div id="regrasBloqueio" class="center">
+                <h2>Comportamentos que suspendem a participação</h2>
+                <div class="regra-card">
+                    <h4>Comportamento inadequado</h4>
+                    <p>Participantes que desrespeitam colegas, instrutores ou organizadores poderão ser suspensos.</p>
+                </div>
+                <div class="regra-card">
+                    <h4>Faltas injustificadas</h4>
+                    <p>Faltas sem aviso prévio ou justificativa plausível também levam à suspensão temporária ou
+                        definitiva.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="instrucoes" class="tab-content">
+            <h2>Instruções Gerais</h2>
+            <p>Orientações importantes para todos os participantes.</p>
+            <div id="instrucoesGerais">
+                <div class="instrucao-card">
+                    <h4>Recomendações</h4>
+                    <ul>
+                        <li>Chegar com 15 minutos de antecedência no ponto de encontro</li>
+                        <li>Informar qualquer condição médica especial (alergias, asma, etc.)</li>
+                        <li>Usar equipamentos em boas condições: mochila, sapato, roupa...</li>
+                        <li>Seguir as instruções dos guias e organizadores</li>
+                        <li>Respeitar o meio ambiente e não deixar lixo para trás</li>
+                        <li>Manter-se hidratado</li>
+                        <li>Usar protetor solar e repelente</li>
+                        <li>Em caso de emergência, comunicar imediatamente um organizador</li>
+                    </ul>
+                </div>
+                <div class="instrucao-card">
+                    <h4>O que levar e/ou usar</h4>
+                    <ul>
+                        <li>Blusa de manga comprida (de preferência com proteção UV)</li>
+                        <li>Calça</li>
+                        <li>Autorização dos pais (impressa ou escrita à mão)</li>
+                        <li>Carteira de Identidade</li>
+                        <li>Protetor solar</li>
+                        <li>Lanche</li>
+                        <li>Pelo menos 2 litros de água (garrafa PET)</li>
+                        <li>Saco plástico</li>
+                        <li>Boné</li>
+                        <li>Roupa de Banho e Toalha</li>
+                        <li>Repelente</li>
+                        <li>Muda de roupa limpa</li>
+                        <li>Dinheiro vivo</li>
+                        <li>Chinelo (para colocar na hora de voltar)</li>
+                    </ul>
+                </div>
+                <div class="instrucao-card">
+                    <h4>Sugestão de Lanche</h4>
+                    <ul>
+                        <li>Barra de cereal</li>
+                        <li>Frutas (evitar cítricas)</li>
+                        <li>Sanduíches naturais</li>
+                        <li>Tortas salgadas</li>
+                        <li>Castanhas</li>
+                        <li>Sucos</li>
+                        <li>Gatorade/Powerade</li>
+                    </ul>
+                </div>
+                <div class="instrucao-card alerta-card">
+                    <h4>ATENÇÃO! Condicionamento Físico e Psicológico</h4>
+                    <p>
+                        É fundamental que todos os participantes estejam atentos ao seu condicionamento físico e
+                        psicológico.
+                        As trilhas e caminhadas exigem preparo, resistência e disposição para lidar com desafios
+                        naturais, como subidas,
+                        terrenos irregulares e condições climáticas diversas. Além disso, manter o equilíbrio emocional
+                        contribui para a segurança e o bem-estar de todo o grupo.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <footer id="mainFooter">
+            <div class="footer-content">
+                <p>Site desenvolvido por
+                    <a href="https://www.linkedin.com/in/j%C3%BAlia-martins-souza-997ba6350/" target="_blank">Júlia Martins Souza</a>
+                    e por <a href="https://www.linkedin.com/in/andré-dias-de-paula-3430ba406/" target="_blank">André Dias de Paula</a>
+                    para o Projeto de Ensino Coltrekking do Colégio Técnico da UFMG</p>
+                <h3><img src="/assets/images/logoColtec.png" id="imgColtec" alt="Logo Coltec"> &copy; 2026 Coltrekking.
+                    Todos os
+                    direitos reservados.</h3>
+                <div class="footer-links">
+                    <a href="https://www.coltec.ufmg.br" target="_blank">Institucional</a>
+                </div>
+            </div>
+        </footer>
+        </div>
+
+    <!-- Scripts -->
+</body>
+
+</html>

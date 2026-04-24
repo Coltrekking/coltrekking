@@ -2,6 +2,9 @@
 # Tome cuidado com eles!
 .env
 
+# Site resultante
+dist/
+
 # Arquivos locais/privados
 local/
 

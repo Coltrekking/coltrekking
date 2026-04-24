@@ -1,9 +1,9 @@
 <div align="center">
 
-  # **COLTREKKING WEB APP** <img src="hosting/public/images/logo.png" alt="Logo do Projeto" width="28px"/>
+  # **COLTREKKING WEB APP** <img src="public/assets/images/logo.png" alt="Logo do Projeto" width="28px"/>
 
-  <img src="src/assets/images/coltrekkingHorizontal.png" alt="Logo do Projeto" width="45%"/>
-  <img src="src/assets/images/github/groupHH.jpg" alt="Grupo 17/05" width="40%"/>
+  <img src="public/assets/images/coltrekkingHorizontal.png" alt="Logo do Projeto" width="45%"/>
+  <img src="public/assets/images/github/groupHH.jpg" alt="Grupo 17/05" width="40%"/>
 </div>
 
 ---
@@ -23,7 +23,7 @@ O site funciona como um **gestor de eventos**, permitindo que administradores pu
 ### Autenticação com Google
 Permite ao usuário fazer login diretamente com o Google, com restrição obrigatória ao e-mail institucional **@teiacoltec**.
 
-<img src="src/assets/images/github/readme/loginUser.png" alt="Login" width="45%"/>
+<img src="public/assets/images/github/readme/loginUser.png" alt="Login" width="45%"/>
 
 ### Gestão e Edição de Eventos
 Permite que os administradores criem ou editem eventos. O sistema valida regras de datas e exige o preenchimento de todos os campos para garantir a organização.
@@ -31,12 +31,12 @@ Permite que os administradores criem ou editem eventos. O sistema valida regras 
 <table>
   <tr>
     <td width="50%">
-      <img src="src/assets/images/github/readme/eventosUser.png" width="100%" alt="Eventos Usuário"><br><br>
-      <img src="src/assets/images/github/readme/criarEventosAdmin.png" width="100%" alt="Criar Eventos">
+      <img src="public/assets/images/github/readme/eventosUser.png" width="100%" alt="Eventos Usuário"><br><br>
+      <img src="public/assets/images/github/readme/criarEventosAdmin.png" width="100%" alt="Criar Eventos">
     </td>
     <td width="50%" valign="center">
-      <img src="src/assets/images/github/readme/eventosAdmin.png" width="100%" alt="Eventos Admin"><br><br>
-      <img src="src/assets/images/github/readme/editarEventosAdmin.png" alt="Editar Eventos" width="100%"/>
+      <img src="public/assets/images/github/readme/eventosAdmin.png" width="100%" alt="Eventos Admin"><br><br>
+      <img src="public/assets/images/github/readme/editarEventosAdmin.png" alt="Editar Eventos" width="100%"/>
     </td>
   </tr>
 </table>
@@ -44,22 +44,22 @@ Permite que os administradores criem ou editem eventos. O sistema valida regras 
 ### Aba Photos
 Substituindo o antigo compartilhamento por WhatsApp, esta aba permite que administradores publiquem links de drives, mantendo as fotos organizadas e acessíveis.
 
-<img src="src/assets/images/github/readme/photosAdmin.png" width="48%"/> <img src="src/assets/images/github/readme/photosUser.png" width="48%"/>
+<img src="public/assets/images/github/readme/photosAdmin.png" width="48%"/> <img src="public/assets/images/github/readme/photosUser.png" width="48%"/>
 
 ### Gerenciador de Usuários e Segurança
 * **Promoção de Admins:** Facilita a transição de membros da comissão, permitindo promover novos administradores.
 * **Lista de Bloqueios:** Exibição de pessoas suspensas por faltas não justificadas ou condutas inadequadas.
-* **Instruções Gerais:** Orientações sobre o que lelet, precauções e recomendações.
+* **Instruções Gerais:** Orientações sobre o que levar, precauções e recomendações.
 
 <table>
   <tr>
     <td width="50%">
-      <img src="src/assets/images/github/readme/promoteAdmin.png" width="100%" alt="Promover Admin"><br><br>
-      <img src="src/assets/images/github/readme/instrucoesUser.png" width="100%" alt="Instruções Gerais">
+      <img src="public/assets/images/github/readme/promoteAdmin.png" width="100%" alt="Promover Admin"><br><br>
+      <img src="public/assets/images/github/readme/instrucoesUser.png" width="100%" alt="Instruções Gerais">
     </td>
     <td width="50%" valign="center">
-      <img src="src/assets/images/github/readme/blocksAdmin.png" width="100%" alt="Lista de Bloqueio Admin"><br><br>
-      <img src="src/assets/images/github/readme/blocksUser.png" width="100%"/>
+      <img src="public/assets/images/github/readme/blocksAdmin.png" width="100%" alt="Lista de Bloqueio Admin"><br><br>
+      <img src="public/assets/images/github/readme/blocksUser.png" width="100%"/>
     </td>
   </tr>
 </table>
@@ -70,17 +70,17 @@ Substituindo o antigo compartilhamento por WhatsApp, esta aba permite que admini
 * **Inscrições:** Sistema de abertura automática em horários determinados e opção de cancelamento pelo usuário.
 
 <div align="center">
-  <img src="src/assets/images/github/readme/planilha.png" width="80%" alt="Planilha de Inscrições"/>
+  <img src="public/assets/images/github/readme/planilha.png" width="80%" alt="Planilha de Inscrições"/>
   
   <br><br>
 
   <table border="0">
     <tr>
       <td align="center" valign="bottom">
-        <img src="src/assets/images/github/readme/listaAdmin.png" width="80%" alt="Lista Admin"/>
+        <img src="public/assets/images/github/readme/listaAdmin.png" width="80%" alt="Lista Admin"/>
       </td>
       <td align="center" valign="bottom">
-        <img src="src/assets/images/github/readme/infoUser.png" width="100%" alt="Informações Usuário"/>
+        <img src="public/assets/images/github/readme/infoUser.png" width="100%" alt="Informações Usuário"/>
       </td>
     </tr>
   </table>
@@ -91,10 +91,11 @@ Substituindo o antigo compartilhamento por WhatsApp, esta aba permite que admini
 ### COMO FOI REALIZADO
 
 O site foi desenvolvido do zero, utilizando as tecnologias do Google, como **Firebase Authentication**, **Cloud Functions**, **Realtime Database** e **Hosting**. As linguagens utilizadas foram HTML, JavaScript, CSS e JSON.
+Além disso, para uma camada de _modernidade_, o uso de ferramentas como o _Vite_ foram de suma importância!
 
 ---
 
-### Sobre a desenvolvedora
+### Sobre a 1ª desenvolvedora
 
 Oi! Meu nome é Júlia, mais conhecida como Julinha.
 
@@ -102,20 +103,35 @@ Sou formada no curso técnico integrado em Desenvolvimento de Sistemas pelo Col�
 
 Minha história com o Coltrekking começou logo no primeiro ano de colégio. O que começou como uma curiosidade em 2023 se tornou uma paixão: no meu último ano, eu já não perdia uma trilha sequer! Essa conexão com o projeto me motivou a ser aprovada no Programa de Monitoria do COLTEC, onde tive a oportunidade de unir a tecnologia e a natureza. Desenvolver este sistema foi a forma que encontrei de retribuir ao projeto, transformando meu estágio em uma solução real para facilitar a organização das trilhas que tanto amo.
 
+<div align="center">
 <table align="center">
   <tr>
     <td>
-      <img src="src/assets/images/github/dev.jpg" width="400"><br>
-      <img src="src/assets/images/github/devMadames.jpg" width="400">
+      <img src="public/assets/images/github/dev.jpg" width="400"><br>
+      <img src="public/assets/images/github/devMadames.jpg" width="400">
     </td>
     <td valign="center">
-      <img src="src/assets/images/github/HondinhaJulinha.jpg" width="450">
+      <img src="public/assets/images/github/HondinhaJulinha.jpg" width="450">
     </td>
   </tr>
 </table>
-
-<div align="center">
-
-### COLTEC 2025
-
 </div>
+
+
+---
+### Sobre o 2º desenvolvedor
+
+Eae! Meu nome é André, também chamado de Dedé _(principalmente)_ por causa do meu tamanho =D
+
+Sou formado em Desenvolvimento de Sistemas pelo Colégio Técnico da UFMG e este projeto foi
+o meu estágio!
+
+Sempre fui bem elétrico, principalmente quando se trata de correr! Quando vi o Coltrekking, 
+senti um grande incentivo de fazer trilhas e me aventurar pela natureza. Para me incentivar mais,
+optei por manter o projeto do site e, assim, conseguir me convencer de uma vez por todas _(e minha
+família)_ para eu ir às trilhas!
+
+---
+
+### COLTEC 2026
+
