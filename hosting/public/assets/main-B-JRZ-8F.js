@@ -1,1 +1,0 @@
-import{c as e}from"./date-3aL5wtAM.js";import"./listaBloqueiosAdmin-COZa0cFh.js";document.getElementById(`logoGoogle`).addEventListener(`click`,e);

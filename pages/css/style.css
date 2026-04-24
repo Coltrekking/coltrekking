@@ -40,7 +40,9 @@ body {
 }
 
 #logoGoogle {
-    width: calc(100% - 35vw);
+    width: 10vh;
+    min-width: 100px;
+
     border-radius: 100%;
     outline: 2px solid white;
 
