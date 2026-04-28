@@ -1,5 +1,4 @@
 // Importa as coisas do firebase que serão usadas
-import {Database} from "../config/firebase";
 import {
     hideItem,
     showItem,
@@ -8,13 +7,15 @@ import {
     editEventForm,
     submitEventForm,
     showError,
-    getRefFromDatabase
+    refFromDatabase,
+    EventsDatabaseRef, getDataFromDatabase, InscricoesDatabaseRef, UsersDatabaseRef
 } from "./utils"
 import {validarOrdemDatas} from "./date";
-import {get} from 'firebase/database'
-import {atualizarPontuacaoUsuario, calcularPontuacaoDoEvento} from "/src/js/event";
-
-const dbRefEvents  = Database.ref('event');
+import {get, push, set, update, remove} from 'firebase/database'
+import {
+    atualizarPontuacaoUsuario, calcularPontuacaoDoEvento, fillEventList, getPontuacaoMinimaParaDificuldade,
+    unsubscribeUserFromEvent
+} from "/src/js/event";
 
 export function criarEvento() {
     hideItem(eventForm);
@@ -41,8 +42,8 @@ export function criarEvento() {
             return;
         }
 
-        let newEventRef = dbRefEvents.push();
-        newEventRef.set({
+        let newEventRef = push(EventsDatabaseRef);
+        set(newEventRef, {
             nome: nome,
             distancia: distancia,
             subida: subida,
@@ -56,20 +57,58 @@ export function criarEvento() {
             localEncontro: localEncontro,
             descricao: descricao,
             //percursoAltimetria: percursoAltimetria
-        }).then(function () {
-            alert('Evento criado com sucesso!');
-            hideItem(loading);
-            hideItem(eventForm);
-        }).catch(function (error) {
-            showError('Erro ao criar evento:', error);
-            hideItem(loading);
-            showItem(eventForm);
+        })
+            .then(function () {
+                alert('Evento criado com sucesso!');
+                hideItem(loading);
+                hideItem(eventForm);
+            }).catch(function (error) {
+                showError('Erro ao criar evento:', error);
+                hideItem(loading);
+                showItem(eventForm);
         });
     } else {
         alert('Por favor, preencha todos os campos do evento.');
         hideItem(loading);
         showItem(eventForm);
     }
+}
+
+/**
+ * Lógica para retirar usuários com pontuação insuficiente, dependendo da dificuldade do evento.
+ * @param eventId id do evento
+ * @param pontuacaoEvento pontuação do evento
+ * @param dificuldade dificuldade do evento
+ */
+function retirarUsuariosComPontuacaoInsuficiente(eventId, pontuacaoEvento, dificuldade) {
+    return getDataFromDatabase(refFromDatabase(InscricoesDatabaseRef, eventId))
+        .then(snapshot => {
+            // Atualiza a pontuação de cada inscrito
+            snapshot.forEach(async snapshot => {
+                if (!snapshot.exists()) return;
+
+                const uid = snapshot.key;
+
+                // Retira a pontuação do evento para ver a pontuação "real" do usuário, sem contar o evento que ele pode ser retirado
+                let pontuacao = snapshot.val().pontos || 0;
+                const presenca = snapshot.val().presenca;
+                // Se o usuário tiver presente, retira a pontuação do evento (que el
+                if (presenca) {
+                    pontuacao = Math.max(pontuacao - pontuacaoEvento, 0);
+                }
+
+                // Se a pontuação do usuário for menor que a pontuação mínima
+                // para o evento, retira ele
+                if (pontuacao <= getPontuacaoMinimaParaDificuldade(dificuldade)) {
+                    // Se o usuário estiver presente, retira a pontuação do evento dele antes de retirar ele do evento
+                    if (presenca)
+                        await atualizarPontuacaoUsuario(uid, eventId, false);
+
+                    // Desinscreve o usuário
+                    await unsubscribeUserFromEvent(eventId, uid);
+                }
+            });
+        });
 }
 
 export async function atualizarEvento() {
@@ -118,36 +157,50 @@ export async function atualizarEvento() {
             descricao
         };
 
-        dbRefEvents.child(key).update(dataToUpdate).then(async () => {
-            // Adiciona a pontuação a todos
-            await atualizarPontuacaoDosInscritosDoEvento(key, true);
+        update(refFromDatabase(EventsDatabaseRef, key), dataToUpdate)
+            .then(async () => {
+                // Adiciona a pontuação a todos
+                await atualizarPontuacaoDosInscritosDoEvento(key, true);
 
-            // Atualiza o texto da lista de inscrições que diz da pontuação do evento
-            const pontosListaInscritosElem = document.getElementById("listaInscritosPontuacaoEvento");
-            if (pontosListaInscritosElem) {
-                const eventSnap = await get(getRefFromDatabase("event/" + key)) ;
-                const evento = eventSnap.val();
-                pontosListaInscritosElem.innerHTML = `<strong>Pontuação do evento:</strong> ${calcularPontuacaoDoEvento(evento)} pontos`;
-            }
+                // Atualiza o texto da lista de inscrições que diz da pontuação do evento
+                const pontosListaInscritosElem = document.getElementById("listaInscritosPontuacaoEvento");
+                if (pontosListaInscritosElem) {
+                    const eventSnap = await get(refFromDatabase("event/" + key)) ;
+                    const evento = eventSnap.val();
+                    pontosListaInscritosElem.innerHTML = `<strong>Pontuação do evento:</strong> ${calcularPontuacaoDoEvento(evento)} pontos`;
+                }
 
-            eventForm.reset();
-            hideItem(eventForm);
-            showItem(submitEventForm);   // mostra de novo o botão de criar
-            hideItem(editEventForm);     // esconde o botão de editar
+                // Verifica a dificuldade do evento (se precisar de pontuação mínima).
+                // Se houver usuários que não têm a pontuação mínima, retira eles do evento
+                if (getPontuacaoMinimaParaDificuldade(dificuldade) > 0) {
+                    await retirarUsuariosComPontuacaoInsuficiente(key, calcularPontuacaoDoEvento(dataToUpdate), dificuldade);
+                }
 
-            alert('Evento atualizado com sucesso!');
+                if (currentListingSubscribeEvent === key)
+                    listarInscritos(key, true); // só atualiza, para evitar "inscritos fantasmas"
 
-            /*dbRefEvents.once('value').then(dataSnapshot => {
-                fillEventList(dataSnapshot);
-            });*/
-        }).catch((error) => {
-            showError('Erro ao atualizar evento:', error);
-        });
+                eventForm.reset();
+                hideItem(eventForm);
+                showItem(submitEventForm);   // mostra de novo o botão de criar
+                hideItem(editEventForm);     // esconde o botão de editar
+
+                alert('Evento atualizado com sucesso!');
+
+                /*dbRefEvents.once('value').then(dataSnapshot => {
+                    fillEventList(dataSnapshot);
+                });*/
+            }).catch((error) => {
+                showError('Erro ao atualizar evento:', error);
+            });
+
+
     } else {
         alert('Por favor, preencha todos os campos para atualizar o evento.');
     }
 }
 
+// Cancela o formulário de criação/edição de evento, limpando os campos
+// e escondendo o formulário
 export function cancelarFormEvento() {
     if (confirm("Tem certeza que deseja cancelar? As alterações não serão salvas.")) {
         currentEditingEvent = false;
@@ -165,8 +218,7 @@ export function cancelarFormEvento() {
  *                  a pontuação dos inscritos (`false`)
  */
 async function atualizarPontuacaoDosInscritosDoEvento(eventoId, adicionar) {
-    const inscricoesRef = getRefFromDatabase("inscricoes/" + eventoId);
-    await get(inscricoesRef)
+    await getDataFromDatabase(refFromDatabase(InscricoesDatabaseRef, eventoId))
         .then(snapshot => {
             // Atualiza a pontuação de cada inscrito
             snapshot.forEach(async snapshot => {
@@ -190,18 +242,18 @@ export function removeEvent(key) {
     let confirmation = confirm('Você tem certeza que deseja remover o evento: "' + eventName + '"?');
     if (confirmation) {
         // Referências
-        let eventRef = dbRefEvents.child(key); // eventos/{key}
-        let inscricoesRef = Database.ref('inscricoes/' + key); // inscricoes/{key}
+        let eventRef = refFromDatabase(EventsDatabaseRef, key); // eventos/{key}
+        let inscricoesRef = refFromDatabase(InscricoesDatabaseRef, key); // inscricoes/{key}
 
-        // Certifique-se que essa função é executada antes de remover o evento!
-        // Para ter essa certeza, eu chamei ela e o resto do código está dentro do
-        // 'then'.
+        // Certifique-se que a função de atualizar pontuação é executada antes de
+        // remover o evento! Para ter essa certeza, eu chamei ela e o resto do código
+        // está dentro do 'then'.
         atualizarPontuacaoDosInscritosDoEvento(key, false)
             .then(_ => {
                 // Executa as duas remoções em paralelo
                 Promise.all([
-                    eventRef.remove(),
-                    inscricoesRef.remove()
+                    remove(eventRef),
+                    remove(inscricoesRef)
                 ])
                     .then(async () => {
                         selectedItem.remove();
@@ -250,11 +302,12 @@ let currentEditingEvent = null
 //botão para editar evento
 export function updateEvent(key) {
     currentEditingEvent = key;
-    const eventRef = Database.ref('event/' + key);
+    const eventRef = refFromDatabase(EventsDatabaseRef, key);
 
     eventForm.scrollIntoView({ behavior: "smooth", block: "start" });
 
-    eventRef.once('value').then(snapshot => {
+    getDataFromDatabase(eventRef)
+        .then(snapshot => {
         const value = snapshot.val();
         if (!value) {
             alert('Evento não encontrado no banco.');
@@ -287,9 +340,9 @@ export function updateEvent(key) {
 
 // botão para listar inscrições de um evento e exportar CSV
 export function exportarInscricoesCSV(eventId, nomeEvento = 'Evento', dataInicioEvento = null) {
-    const inscricoesRef = Database.ref('inscricoes/' + eventId);
+    const inscricoesRef = refFromDatabase(InscricoesDatabaseRef, eventId);
 
-    inscricoesRef.once('value')
+    getDataFromDatabase(inscricoesRef)
         .then(snapshot => {
             if (!snapshot.exists()) {
                 alert(`Nenhuma inscrição encontrada para "${nomeEvento}".`);
@@ -315,8 +368,7 @@ export function exportarInscricoesCSV(eventId, nomeEvento = 'Evento', dataInicio
                     }
                 }
 
-                const userRef = Database.ref('users/' + uid);
-                const p = userRef.once('value').then(userSnap => {
+                const p = getDataFromDatabase(UsersDatabaseRef, uid).then(userSnap => {
                     const userData = userSnap.val() || {};
                     inscricoes.push({
                         nome: userData.nome || '---',
@@ -379,15 +431,18 @@ export function exportarInscricoesCSV(eventId, nomeEvento = 'Evento', dataInicio
         });
 }
 
-
-
-
 // Id do evento que está listando os inscritos atualmente.
 // `null` se não estiver listando nada.
 let currentListingSubscribeEvent = null
 
-// botão para listar inscritos e registrar presença (FATOR K)
-export function listarInscritos(eventId) {
+/**
+ * Botão para listar inscritos e registrar presença (fator K).
+ * @param eventId Id do evento
+ * @param onlyUpdate se verdadeiro, apenas haverá atualização dos elementos,
+ *                   sem abertura do menu nem animação de scroll. Por padrão,
+ *                   esse valor é falso.
+ */
+export function listarInscritos(eventId, onlyUpdate = false) {
     currentListingSubscribeEvent = eventId;
     const inscritosContainer = document.getElementById("inscritosContainer");
     const inscritosList = document.getElementById("inscritosList");
@@ -397,14 +452,13 @@ export function listarInscritos(eventId) {
         return;
     }
 
-    inscritosContainer.classList.remove("startHidden");
-    inscritosList.innerHTML = "<p>Carregando inscritos...</p>";
+    if (!onlyUpdate) {
+        inscritosContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+        inscritosContainer.classList.remove("startHidden");
+        inscritosList.innerHTML = "<p>Carregando inscritos...</p>";
+    }
 
-    inscritosContainer.scrollIntoView({ behavior: "smooth", block: "start" });
-
-    const inscricoesRef = Database.ref("inscricoes/" + eventId);
-
-    inscricoesRef.once("value")
+    getDataFromDatabase(InscricoesDatabaseRef, eventId)
         .then(snapshot => {
             inscritosList.innerHTML = "";
 
@@ -414,7 +468,7 @@ export function listarInscritos(eventId) {
             }
 
             // Mostra pontuação do evento
-            Database.ref("event/" + eventId).once("value").then(eventSnap => {
+            getDataFromDatabase(EventsDatabaseRef, eventId).then(eventSnap => {
                 const evento = eventSnap.val();
                 if (!evento) return;
 
@@ -445,8 +499,7 @@ export function listarInscritos(eventId) {
             inscritosList.appendChild(totalElem);
 
             const promises = inscricoes.map((inscricao, index) => {
-                const userRef = Database.ref("users/" + inscricao.uid);
-                return userRef.once("value").then(userSnap => {
+                return getDataFromDatabase(UsersDatabaseRef, inscricao.uid).then(userSnap => {
                     const user = userSnap.val() || {};
 
                     const userCard = document.createElement("div");
@@ -470,8 +523,8 @@ export function listarInscritos(eventId) {
 
                     presencaBtn.addEventListener("click", async () => {
                         try {
-                            const presencaRef = Database.ref(`inscricoes/${eventId}/${inscricao.uid}/presenca`);
-                            const presencaSnap = await presencaRef.once("value");
+                            const presencaRef = refFromDatabase(InscricoesDatabaseRef, `${eventId}/${inscricao.uid}/presenca`)
+                            const presencaSnap = await getDataFromDatabase(presencaRef);
                             const atual = presencaSnap.val() === true;
                             const novoStatus = !atual;
 
@@ -479,7 +532,7 @@ export function listarInscritos(eventId) {
                             await atualizarPontuacaoUsuario(inscricao.uid, eventId, novoStatus);
 
                             // Atualiza presença no BD
-                            await presencaRef.set(novoStatus);
+                            await set(presencaRef, novoStatus);
 
                             // Atualiza botão visualmente
                             presencaBtn.textContent = novoStatus ? "Presente" : "Ausente";

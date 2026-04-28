@@ -10,4 +10,3 @@ import "./auth"
 import './utils';
 import './tabs'
 import './date'
-import './listaBloqueiosAdmin'

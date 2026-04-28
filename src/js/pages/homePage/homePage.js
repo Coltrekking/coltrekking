@@ -23,7 +23,7 @@ function loadPage() {
     loadEvents();
 }
 
-if (!isAdmin() && window.location.pathname === "/homePage.html") loadPage()
+if (!isAdmin() && (window.location.pathname === "/homePage.html" || window.location.pathname === "/homePage" )) loadPage()
 
 
 

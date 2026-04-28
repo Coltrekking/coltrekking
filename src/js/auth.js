@@ -1,25 +1,31 @@
-import {Auth, Database} from "../config/firebase";
-import {hideItem, loading, showUserContent, showItem, showAuth, showError, getRefFromDatabase} from "./utils"
+/**
+ * Código responsável pela lógica de autenticação/conta/perfil do site.
+ */
+import {Auth} from "../config/firebase";
+import {
+    hideItem,
+    loading,
+    showUserContent,
+    showItem,
+    showAuth,
+    showError,
+    refFromDatabase,
+    getDataFromDatabase, UsersDatabaseRef, refFromUser
+} from "./utils"
 
-import { GoogleAuthProvider } from "firebase/auth";
+import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, deleteUser, reload } from "firebase/auth";
+import {child, ref, set, update} from "firebase/database";
 
-
-
-// Cargo do usuário
-const Role = Object.freeze({
-    UNDEFINED: undefined,
+// Lista de Cargos de um usuário
+const Roles = Object.freeze({  // O `Object.freeze()` certifica que não é possível atualizar
+    UNDEFINED: undefined,                      // os cargos no meio da execução do site.
     USER: 'user',
     ADMIN: 'admin'
+    // Lembre-se: se adicionar um novo cargo, atualize a função currentUserHasAdminPower() para refletir o poder desse novo cargo!
 });
 
 // Traduz o conteúdo do site para português
 Auth.languageCode = 'pt-BR';
-
-// Administradores do sistema
-let adminEmails = [
-    "a2023952624@teiacoltec.org",
-    "hh@teiacoltec.org"
-];
 
 // Cargo do usuário (variável que serve como um cache,
 // para não precisar fazer pedidos frequentes ao banco de dados)
@@ -39,7 +45,7 @@ checkAuth()
  * @param snapshot data do usuário
  */
 function updateUserRoleVar(snapshot) {
-    currentUserRole = snapshot.val()?.role || Role.USER;
+    currentUserRole = snapshot.val()?.role || Roles.USER;
 
     // Resolve a promise se existir
     if (resolveUserLoaded) {
@@ -60,10 +66,8 @@ async function tryToGetUser() {
     if (currentUserRole === null) {
         // Se não foi obtido, tenta obter a partir do banco de dados
         if (Auth.currentUser) {
-            const userRef = Database.ref('users/' + Auth.currentUser.uid); //getRefFromDatabase("users/" + Auth.currentUser.uid);
-
             try {
-                const snapshot = await userRef.once('value');
+                const snapshot = await getDataFromDatabase('users/' + Auth.currentUser.uid);
                 updateUserRoleVar(snapshot);
                 return true;
             } catch (error) {
@@ -90,13 +94,12 @@ async function tryToGetUser() {
  * por exemplo, pois há chance do usuário e seu cargo não terem sido obtidos
  * ainda.
  *
- * Obtém o usuário (principalmente seu cargo). Caso não tenha sido definido/obtido,
- * ainda, o seu cargo, tenta obter o seu cargo do banco de dados (essa ação pode
- * demorar um pouco). Caso o cargo já tenha sido obtido, a função parará.
+ * Caso o usuário/seu cargo não tenha sido definido/obtido ainda, tenta obter
+ * o seu cargo do banco de dados (essa ação pode demorar um pouco). Caso o
+ * cargo já tenha sido obtido, a função parará.
  *
  * Se múltiplas chamadas são feitas enquanto o usuário está sendo carregado,
  * todas aguardarão pelo mesmo resultado sem fazer requisições duplicadas.
- *
  *
  * @param {?number} tries quantas tentativas até desistir de obter o cargo. Por padrão,
  * são 100 tentativas com 0,1 segundos de diferença (gerando 10s de espera no máximo).
@@ -124,10 +127,10 @@ export async function waitForUser(tries = 100) {
     // Função auxiliar para tentar obter o usuário com delay
     const tryWithDelay = async (remainingTries) => {
         if (remainingTries <= 0) {
-            currentUserRole = Role.UNDEFINED;
+            currentUserRole = Roles.UNDEFINED;
             console.warn("Não foi possível carregar o usuário!");
             if (resolveUserLoaded) {
-                resolveUserLoaded(Role.UNDEFINED);
+                resolveUserLoaded(Roles.UNDEFINED);
                 resolveUserLoaded = null;
                 userLoadedPromise = null;
             }
@@ -152,21 +155,29 @@ export async function waitForUser(tries = 100) {
 }
 
 /**
- * Retorna se o usuário logado é administrador ou não.
+ * Obtém o cargo do usuário logado. Se o cargo ainda não tiver sido carregado, retorna o cargo "indefinido".
+ * @return {Roles} cargo do usuário logado.
+ */
+export function getUserRole() {
+    return currentUserRole;
+}
+
+/**
+ * Retorna se o usuário logado é administrador/tem poderes de admin ou não.
  * @return {boolean} se o usuário logado é admin.
  */
 export function isAdmin() {
-    return currentUserRole === Role.ADMIN;
+    return currentUserHasAdminPower();
 }
 
-//função que centraliza e trata a autenticação
-Auth.onAuthStateChanged(function(user) {
+// Função que centraliza e trata a autenticação
+onAuthStateChanged(Auth, (user) => {
     hideItem(loading);
 
     if (user) {
-        const userRef = Database.ref('users/' + user.uid);
-
-        userRef.once('value').then(snapshot => {
+        checkAuth();
+        getDataFromDatabase(UsersDatabaseRef, user.uid)
+        .then(snapshot => {
             updateUserRoleVar(snapshot);
 
             if (!snapshot.exists()) {
@@ -179,7 +190,7 @@ Auth.onAuthStateChanged(function(user) {
                     able: true,
                     pontos: 0 // <-- novo campo de pontuação inicial
                 };
-                return userRef.set(userData).then(() => {
+                return set(child(UsersDatabaseRef, user.uid), userData).then(() => {
                     console.log('Usuário criado com sucesso!');
                     return userData;
                 });
@@ -206,7 +217,7 @@ Auth.onAuthStateChanged(function(user) {
                 }
 
                 if (Object.keys(updates).length > 0) {
-                    return userRef.update(updates).then(() => {
+                    return update(refFromUser(user.uid), updates).then(() => {
                         console.log('Dados de usuário atualizados:', updates);
                         return data;
                     });
@@ -214,7 +225,8 @@ Auth.onAuthStateChanged(function(user) {
 
                 return data;
             }
-        }).then(userData => {
+        })
+        .then(userData => {
             // Salva UID no localStorage
             localStorage.setItem('uid', user.uid);
 
@@ -226,9 +238,10 @@ Auth.onAuthStateChanged(function(user) {
 
             // Exibe o conteúdo normal
             showUserContent(user, userData.role, userData.able);
-        }).catch(error => {
-            console.error("Erro ao ler/criar usuário:", error);
-        });
+        })
+            .catch(error => {
+                console.error("Erro ao ler/criar usuário:", error);
+            });
 
     } else {
         localStorage.removeItem('uid');
@@ -236,28 +249,31 @@ Auth.onAuthStateChanged(function(user) {
     }
 });
 
-//função que permite o user sair de sua conta
-function signOut() {
-    Auth.signOut().then(function() {
+/**
+ * Função que permite o user sair de sua conta
+ */
+export function userSignOut() {
+    signOut(Auth).then(function() {
         window.location.href = 'index.html';
     }).catch(function(error) {
         showError("Erro ao sair: ", error);
     });
 }
 
-//função que permite o login com a conta do Google
+/**
+ * Função que permite o login com a conta do Google
+ */
 export function signInWithGoogle() {
     showItem(loading);
 
     const provider = new GoogleAuthProvider;
 
-    Auth.signInWithPopup(provider)
+    signInWithPopup(Auth, provider)
         .then(result => {
             const user = result.user;
-            const userRef = Database.ref('users/' + user.uid + '/role');
 
             // Pega o role do usuário
-            return userRef.once('value');
+            return getDataFromDatabase(refFromUser(user.uid), '/role');
         })
         .then(roleSnap => {
             const role = roleSnap.val();
@@ -275,12 +291,14 @@ export function signInWithGoogle() {
         });
 }
 
-//função que exclui a conta do Usuário
+/**
+ * Função que exclui a conta do usuário
+ */
 export function deleteAccount() {
     let confirmation = confirm("Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.");
     if (confirmation) {
         showItem(loading);
-        Auth.currentUser.delete().then(function() {
+        deleteUser(Auth.currentUser).then(function() {
             alert("Conta excluída com sucesso!");
             window.location.href = 'index.html';
         }).catch(function(error) {
@@ -303,14 +321,13 @@ export function toggleUserManager() {
     }
 
     // Recarrega info do usuário para garantir dados atualizados
-    user.reload().then(() => {
+    reload(user).then(() => {
         const uid = user.uid;
 
         // Verifica role do usuário atual
-        Database.ref("users/" + uid).once("value")
+        getDataFromDatabase(refFromUser(uid), '/role')
             .then(snap => {
-                const role = snap.val()?.role;
-                if (role !== "admin") {
+                if (!currentUserHasAdminPower()) {
                     alert("Você não tem permissão para gerenciar usuários.");
                     return;
                 }
@@ -324,8 +341,10 @@ export function toggleUserManager() {
                     div.style.display = "none";
                     if (btn) btn.textContent = "Gerenciar Usuários"; // volta ao original
                 }
-            })
-            .catch(err => console.error("Erro ao verificar role:", err));
+            }
+        )
+            .catch(err => console.error("Erro ao verificar role:", err)
+        );
     });
 }
 
@@ -337,7 +356,7 @@ export function loadUsers() {
     const searchTerm =
         document.getElementById("userSearch")?.value.trim().toLowerCase() || "";
 
-    Database.ref("users").once("value")
+    getDataFromDatabase(refFromDatabase("users"))
         .then(snapshot => {
             userList.innerHTML = "";
 
@@ -400,7 +419,8 @@ export function loadUsers() {
 
 // Função para promover um usuário a admin
 function promoteToAdmin(uid) {
-    Database.ref("users/" + uid).update({ role: "admin" })
+
+    update(refFromUser(uid), { role: Roles.ADMIN })
         .then(() => {
             alert("Usuário promovido a admin!");
             loadUsers(); // atualiza a lista
@@ -410,7 +430,7 @@ function promoteToAdmin(uid) {
 
 // Função para remover a role de admin
 function demoteFromAdmin(uid) {
-    Database.ref("users/" + uid).update({ role: "user" })
+    update(refFromUser(uid), { role: Roles.USER })
         .then(() => {
             alert("Admin removido!");
             loadUsers(); // atualiza a lista
@@ -418,19 +438,46 @@ function demoteFromAdmin(uid) {
         .catch(err => console.error("Erro ao remover admin:", err));
 }
 
-//verifica se o usuário está autenticado com a conta institucional (para evitar redirecionamento desnecessário para homePage)
-//RESTRINGE PARA CONTA INSTITUCIONAL (@TEIACOLTEC.ORG)
-export function checkAuth() {
-    Auth.onAuthStateChanged(function(user) {
-        if (user) {
-            const userEmail = user.email;
+/**
+ * Verifica se o usuário atual tem poder de admin (ou seja, se ele é,
+ * pelo menos, admin). Se o usuário for um cargo maior que admin, essa
+ * função também retornará verdadeiro.
+ * Se o usuário ainda não tiver sido carregado, a função retornará falso.
+ * @returns {boolean} se o usuário tem poder de admin.
+ */
+export function currentUserHasAdminPower() {
+    return hasAdminPower(currentUserRole);
+}
 
-            if (!userEmail.endsWith("@teiacoltec.org")) {
-                alert("Acesso negado. Conta não autorizada. Por favor, use um email institucional (@teiacoltec.org) para se autenticar.");
-                Auth.signOut();
+/**
+ * Verifica se o cargo tem poder de admin (ou seja, se ele é, pelo menos, admin).
+ * @param role Cargo do usuário a ser verificado.
+ * @returns {boolean} se o usuário tem poder de admin.
+ */
+export function hasAdminPower(role) {
+    return role === Roles.ADMIN;
+}
+
+/**
+ * Verifica se o usuário está autenticado e se seu email é institucional `(@teiacoltec.org)`.
+ * Se não estiver autenticado, redireciona para a página de login. Se estiver autenticado
+ * mas o email não for institucional, exibe um alerta e desloga o usuário.
+ */
+export function checkAuth() {
+    waitForUser() // Espera o usuário ser carregado
+        .then(()=> {
+            const user = Auth.currentUser;
+            if (user) {
+                const userEmail = user.email;
+
+                // Verifica se o email termina com o endereço de email institucional
+                if (!userEmail.endsWith("@teiacoltec.org")) {
+                    alert("Acesso negado. Conta não autorizada. Por favor, use um email institucional (@teiacoltec.org) para se autenticar.");
+                    userSignOut();
+                }
+            } else {
+                window.location.href = "index.html";
             }
-        } else {
-            window.location.href = "index.html";
         }
-    });
+    );
 }

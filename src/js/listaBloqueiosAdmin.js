@@ -1,4 +1,7 @@
-import {Auth, Database} from "../config/firebase";
+import {Auth} from "../config/firebase";
+import {getDataFromDatabase, getDataFromUser, refFromUser, UsersDatabaseRef} from "/src/js/utils";
+import {currentUserHasAdminPower, hasAdminPower} from "/src/js/auth";
+import {update} from "firebase/database";
 
 // abre/fecha a área de gerenciamento de bloqueios
 export function toggleBlockManager() {
@@ -14,12 +17,9 @@ export function toggleBlockManager() {
     user.reload().then(() => {
         const uid = user.uid;
 
-        Database.ref("users/" + uid).once("value")
+        getDataFromUser(uid)
             .then(snap => {
-                const data = snap.val();
-                const role = data ? data.role : null;
-
-                if (role !== "admin") {
+                if (!currentUserHasAdminPower()) {
                     alert("Você não tem permissão para gerenciar bloqueios.");
                     return;
                 }
@@ -47,7 +47,7 @@ export function loadBlockManager() {
 
     const searchTerm = document.getElementById("blockSearch")?.value.trim().toLowerCase() || "";
 
-    Database.ref("users").once("value")
+    getDataFromDatabase(UsersDatabaseRef)
         .then(snapshot => {
             blockList.innerHTML = ""; // limpa antes de popular
 
@@ -58,7 +58,7 @@ export function loadBlockManager() {
                 const uid = childSnap.key;
 
                 // Ignora admins
-                if (user.role === "admin") return;
+                if (hasAdminPower(user)) return;
 
                 // Filtra pelo início do nome
                 if (searchTerm && !user.nome.toLowerCase().startsWith(searchTerm)) {
@@ -115,7 +115,7 @@ export function loadBlockManager() {
 
 // função para bloquear usuário
 function blockUser(uid) {
-    Database.ref("users/" + uid).update({ able: false })
+    update(refFromUser(uid), { able: false })
         .then(() => {
             alert("Usuário bloqueado com sucesso!");
             loadBlockManager();
@@ -128,7 +128,7 @@ function blockUser(uid) {
 
 // função para desbloquear usuário
 function unblockUser(uid) {
-    Database.ref("users/" + uid).update({ able: true })
+    update(refFromUser(uid), { able: true })
         .then(() => {
             alert("Usuário desbloqueado com sucesso!");
             loadBlockManager();

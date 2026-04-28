@@ -1,9 +1,59 @@
 // função para preencher a lista de eventos
-import {Auth, Database} from "../config/firebase";
-import {formattedDate, validarOrdemDatas} from "./date"
-import {eventCount, getRefFromDatabase, hideItem, loading} from "./utils";
-import {isAdmin} from "./auth";
+import {Auth} from "../config/firebase";
+import {formattedDate} from "./date"
+import {
+    eventCount,
+    refFromDatabase,
+    hideItem,
+    loading,
+    getDataFromDatabase,
+    InscricoesDatabaseRef,
+    getDataFromUser, EventsDatabaseRef, UsersDatabaseRef, refFromUser, getAttributeFromUser
+} from "./utils";
+import {currentUserHasAdminPower, getUserRole, isAdmin} from "./auth";
 import {exportarInscricoesCSV, fecharListaInscritos, listarInscritos, removeEvent, updateEvent} from "./eventAdmin";
+import {remove, set, update} from "firebase/database";
+
+/**
+ * Retorna a quantidade mínima de pontos para se inscrever
+ * em eventos da dificuldade dada.
+ * @param dificuldade dificuldade do evento
+ * @return {number} pontuação mínima necessária para se inscrever em eventos dessa dificuldade
+ */
+export function getPontuacaoMinimaParaDificuldade(dificuldade) {
+    switch (dificuldade) {
+        case "Médio (acampas)":
+            return 50;
+        // NOTA: Se houver mais dificuldades, adicione-as aqui
+
+        default:
+            return 0; // Sem requisito para outras dificuldades
+    }
+}
+
+/**
+ * Verifica a dificuldade do evento. Se o usuário não tiver a pontuação
+ * que precisa para participar do evento, mostra um aviso para ele.
+ * @param userUid UID do usuário
+ * @param dificuldade dificuldade do evento
+ * @param eventDate data do evento, para mostrar o aviso apenas se o evento ainda não tiver acontecido
+ * @param eventCard elemento eventCard do evento, para mostrar o aviso
+ */
+function checkForDifficult(userUid, dificuldade, eventDate, eventCard) {
+    getAttributeFromUser(userUid, "pontos").then(pontuacaoUsuario => {
+        // Se não tiver pontos suficientes, mostra um aviso.
+        const pontuacaoNecessaria = getPontuacaoMinimaParaDificuldade(dificuldade);
+        if (pontuacaoUsuario < pontuacaoNecessaria) {
+            if (eventDate && Date.now() > eventDate.getTime()) return; // se o evento já passou, não mostra aviso
+
+            // Cria elemento de aviso em vez de usar innerHTML +=
+            const avisoElem = document.createElement('p');
+            avisoElem.className = 'soft-warn';
+            avisoElem.textContent = `Você precisa de ${pontuacaoNecessaria} pontos para participar deste evento!`;
+            eventCard.appendChild(avisoElem);
+        }
+    });
+}
 
 /**
  * Preenche a lista de eventos com a data _(informações)_ dadas,
@@ -18,100 +68,94 @@ function fillEventListAsAdmin(dataSnapshot) {
     eventCount.innerHTML = 'Total de eventos: ' + events;
 
     const user = Auth.currentUser;
+    const isAdmin = currentUserHasAdminPower();
 
-    // função async para pegar a role do usuário logado
-    async function getUserRole(uid) {
-        const snap = await Database.ref('users/' + uid + '/role').once('value');
-        return snap.val();
-    }
-
-    getUserRole(user.uid).then(userRole => {
-        const isAdmin = userRole === 'admin';
-
-        // Transforma snapshot em array para ordenar
-        const eventsArray = [];
-        dataSnapshot.forEach(item => {
-            eventsArray.push({ key: item.key, value: item.val() });
-        });
-
-        // Ordena pelo campo dataInscricao (mais recente acima)
-        eventsArray.sort((a, b) => {
-            const tA = a.value.dataInscricao ? new Date(a.value.dataInscricao).getTime() : 0;
-            const tB = b.value.dataInscricao ? new Date(b.value.dataInscricao).getTime() : 0;
-            return tB - tA; // decrescente
-        });
-
-        // Cria os cards ordenados
-        eventsArray.forEach(item => {
-            const value = item.value;
-            if (document.getElementById(item.key)) return;
-
-            const eventCard = document.createElement('div');
-            eventCard.className = 'event-card';
-            eventCard.id = item.key;
-
-            eventCard.innerHTML = `
-                <h3>${value.nome}</h3>
-                <h4>${value.descricao || '---'}</h4>
-                <p>Data: ${value.data ? formattedDate(value.data) : '---'}</p>
-                <p>Ponto de Encontro: ${value.localEncontro || '---'}</p>
-                <p>Data de Inscrição: ${value.dataInscricao ? formattedDate(value.dataInscricao) : '---'}</p>
-                <p>Data da Preleção: ${value.dataPrelecao ? formattedDate(value.dataPrelecao) : '---'}</p>
-                <p>Local da preleção: ${value.localPrelecao || '---'}</p>
-                <p>Dificuldade: ${value.dificuldade || '---'}</p>
-                <p>Distância: ${value.distancia || '---'} km</p>
-                <p>Subida: ${value.subida || '---'} m</p>
-                <p>Descida: ${value.descida || '---'} m</p>
-                <p>Trajeto: ${value.trajeto || '---'}</p>
-            `;
-
-            /* inserir altimentria depois (precisa do cloud storage)
-                <p>Altimetria:<br>
-                    ${value.percursoAltimetria
-                    ? `<img src="${value.percursoAltimetria}" alt="altimetria" style="max-width: 100%;">`
-                    : '---'}
-                </p>
-            */
-
-            let [subscribeBtn, unsubscribeBtn] = createSubscribeButton(value, item.key, user.uid);
-
-            if (isAdmin) {
-                const removeBtn = document.createElement('button');
-                removeBtn.textContent = 'Remover';
-                removeBtn.className = 'danger eventBtn';
-                removeBtn.onclick = () => removeEvent(item.key);
-
-                const editBtn = document.createElement('button');
-                editBtn.textContent = 'Editar';
-                editBtn.className = 'alternative eventBtn';
-                editBtn.onclick = () => updateEvent(item.key);
-
-                const listarBtn = document.createElement('button');
-                listarBtn.textContent = 'Listar Inscritos';
-                listarBtn.className = 'alternative eventBtn';
-                listarBtn.onclick = () => listarInscritos(item.key);
-
-                const exportarCSV = document.createElement('button');
-                exportarCSV.textContent = 'Baixar Planilha de Inscrições';
-                exportarCSV.className = 'alternative eventBtn';
-                exportarCSV.onclick = () => exportarInscricoesCSV(item.key, value.nome);
-
-                eventCard.appendChild(removeBtn);
-                eventCard.appendChild(editBtn);
-                eventCard.appendChild(listarBtn);
-                eventCard.appendChild(exportarCSV);
-            }
-
-            eventCard.appendChild(subscribeBtn);
-            eventCard.appendChild(unsubscribeBtn);
-            eventContainer.appendChild(eventCard);
-        });
-
-        hideItem(loading);
-    }).catch(err => {
-        console.error("Erro ao buscar role do usuário:", err);
-        hideItem(loading);
+    // Transforma snapshot em array para ordenar
+    const eventsArray = [];
+    dataSnapshot.forEach(item => {
+        eventsArray.push({ key: item.key, value: item.val() });
     });
+
+    // Ordena pelo campo dataInscricao (mais recente acima)
+    eventsArray.sort((a, b) => {
+        const tA = a.value.dataInscricao ? new Date(a.value.dataInscricao).getTime() : 0;
+        const tB = b.value.dataInscricao ? new Date(b.value.dataInscricao).getTime() : 0;
+        return tB - tA; // decrescente
+    });
+
+    // Cria os cards ordenados
+    eventsArray.forEach(item => {
+        const value = item.value;
+        if (document.getElementById(item.key)) return;
+
+        const eventCard = document.createElement('div');
+        eventCard.className = 'event-card';
+        eventCard.id = item.key;
+
+        eventCard.innerHTML = `
+            <h3>${value.nome}</h3>
+            <h4>${value.descricao || '---'}</h4>
+            <p>Data: ${value.data ? formattedDate(value.data) : '---'}</p>
+            <p>Ponto de Encontro: ${value.localEncontro || '---'}</p>
+            <p>Data de Inscrição: ${value.dataInscricao ? formattedDate(value.dataInscricao) : '---'}</p>
+            <p>Data da Preleção: ${value.dataPrelecao ? formattedDate(value.dataPrelecao) : '---'}</p>
+            <p>Local da preleção: ${value.localPrelecao || '---'}</p>
+            <p>Dificuldade: ${value.dificuldade || '---'}</p>
+            <p>Distância: ${value.distancia || '---'} km</p>
+            <p>Subida: ${value.subida || '---'} m</p>
+            <p>Descida: ${value.descida || '---'} m</p>
+            <p>Trajeto: ${value.trajeto || '---'}</p>
+        `;
+
+        /* inserir altimentria depois (precisa do cloud storage)
+            <p>Altimetria:<br>
+                ${value.percursoAltimetria
+                ? `<img src="${value.percursoAltimetria}" alt="altimetria" style="max-width: 100%;">`
+                : '---'}
+            </p>
+        */
+
+        const eventDate = value.data ? new Date(value.data) : null;
+        let [subscribeBtn, unsubscribeBtn] = createSubscribeButton(value, item.key, user.uid, eventDate);
+
+        if (isAdmin) {
+            const removeBtn = document.createElement('button');
+            removeBtn.textContent = 'Remover';
+            removeBtn.className = 'danger eventBtn';
+            removeBtn.onclick = () => removeEvent(item.key);
+
+            const editBtn = document.createElement('button');
+            editBtn.textContent = 'Editar';
+            editBtn.className = 'alternative eventBtn';
+            editBtn.onclick = () => updateEvent(item.key);
+
+            const listarBtn = document.createElement('button');
+            listarBtn.textContent = 'Listar Inscritos';
+            listarBtn.className = 'alternative eventBtn';
+            listarBtn.onclick = () => listarInscritos(item.key);
+
+            const exportarCSV = document.createElement('button');
+            exportarCSV.textContent = 'Baixar Planilha de Inscrições';
+            exportarCSV.className = 'alternative eventBtn';
+            exportarCSV.onclick = () => exportarInscricoesCSV(item.key, value.nome);
+
+            eventCard.appendChild(removeBtn);
+            eventCard.appendChild(editBtn);
+            eventCard.appendChild(listarBtn);
+            eventCard.appendChild(exportarCSV);
+        }
+
+        eventCard.appendChild(subscribeBtn);
+        eventCard.appendChild(unsubscribeBtn);
+
+        // Verifica a dificuldade (para mostrar o aviso se precisar)
+        checkForDifficult(user.uid, value.dificuldade, eventDate, eventCard);
+
+        eventContainer.appendChild(eventCard);
+    });
+
+    hideItem(loading);
+
 }
 
 /**
@@ -119,9 +163,10 @@ function fillEventListAsAdmin(dataSnapshot) {
  * @param evento o evento em que se quer colocar o botão
  * @param key o uid do evento
  * @param userUid o uid do usuário
+ * @param eventDate data do evento
  * @return {HTMLButtonElement[]} os botões de inscrição/desinscrição
  */
-function createSubscribeButton(evento, key, userUid) {
+function createSubscribeButton(evento, key, userUid, eventDate) {
     const subscribeBtn = document.createElement('button');
     subscribeBtn.textContent = 'Inscrever-se';
     subscribeBtn.className = 'primary eventBtn';
@@ -131,7 +176,7 @@ function createSubscribeButton(evento, key, userUid) {
 
     // pega a hora do evento
     const eventStart = evento.dataInscricao ? new Date(evento.dataInscricao) : null;
-    const eventDate = evento.data ? new Date(evento.data) : null;
+
 
     // verifica se já é hora de inscrição e se ainda não passou a data do evento
     function checkSubscriptionTime() {
@@ -173,8 +218,7 @@ function createSubscribeButton(evento, key, userUid) {
     unsubscribeBtn.style.display = 'none';
 
     // verifica se o usuário já está inscrito
-    Database.ref('inscricoes/' + key + '/' + userUid)
-        .once('value')
+    getDataFromDatabase(InscricoesDatabaseRef, key + '/' + userUid)
         .then(snapshot => {
             if (snapshot.exists()) {
                 subscribeBtn.style.display = 'none';
@@ -201,12 +245,13 @@ function createSubscribeButton(evento, key, userUid) {
             return;
         }
 
-        subscribeToEvent(key, subscribeBtn, unsubscribeBtn);
+        subscribeToEvent(key, subscribeBtn, unsubscribeBtn)
+            .then( () => listarInscritos(key, true) );
     };
 
     unsubscribeBtn.onclick = () => {
-        unsubscribeFromEvent(key, unsubscribeBtn, subscribeBtn);
-        fecharListaInscritos();
+        unsubscribeFromEvent(key, unsubscribeBtn, subscribeBtn)
+            .then( () => listarInscritos(key, true) );
     };
 
     return [subscribeBtn, unsubscribeBtn];
@@ -241,7 +286,7 @@ function fillEventListAsUser(dataSnapshot) {
         return;
     }
 
-    Database.ref('/users/' + uid).once('value')
+    getDataFromUser(uid)
         .then(_userSnapshot => {
             eventCount.innerHTML = 'Total de eventos: ' + eventosArray.length;
 
@@ -277,10 +322,15 @@ function fillEventListAsUser(dataSnapshot) {
                 */
 
                 // Cria o botão de inscrever e desinscrever
-                let [subscribeBtn, unsubscribeBtn] = createSubscribeButton(value, item.key, uid);
+                const eventDate = value.data ? new Date(value.data) : null;
+                let [subscribeBtn, unsubscribeBtn] = createSubscribeButton(value, item.key, uid, eventDate);
 
                 eventCard.appendChild(subscribeBtn);
                 eventCard.appendChild(unsubscribeBtn);
+
+                // Verifica a dificuldade (para mostrar o aviso se precisar)
+                checkForDifficult(uid, value.dificuldade, eventDate, eventCard);
+
                 eventContainer.appendChild(eventCard);
             });
 
@@ -319,7 +369,7 @@ export function calcularPontuacaoDoEvento(evento) {
 // função para atualizar pontos usando fator K
 export async function atualizarPontuacaoUsuario(uid, eventId, adicionar) {
     try {
-        const eventSnap = await Database.ref("event/" + eventId).once("value");
+        const eventSnap = await getDataFromDatabase(EventsDatabaseRef, eventId);
         const evento = eventSnap.val();
 
         if (!evento) {
@@ -334,8 +384,8 @@ export async function atualizarPontuacaoUsuario(uid, eventId, adicionar) {
         }
 
         // Busca pontos atuais do usuário
-        const userRef = Database.ref("users/" + uid);
-        const userSnap = await userRef.once("value");
+        const userRef = refFromUser(uid);
+        const userSnap = await getDataFromDatabase(userRef);
         const userData = userSnap.val() || {};
 
         const pontosAtuais = parseFloat(userData.pontos) || 0;
@@ -344,7 +394,7 @@ export async function atualizarPontuacaoUsuario(uid, eventId, adicionar) {
             : Math.max(0, pontosAtuais - pontuacaoEvento); // remove se ausente
 
         // Atualiza no BD
-        await userRef.update({ pontos: novosPontos });
+        await update(userRef, { pontos: novosPontos });
     } catch (err) {
         console.error("Erro ao atualizar pontuação:", err);
     }
@@ -356,13 +406,13 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn) {
     const user = Auth.currentUser;
     if (!user) {
         alert('Você precisa estar logado para se inscrever.');
-        return;
+        return Promise.reject(new Error("Usuário não autenticado"));
     }
 
     const uid = user.uid;
 
     // Busca dados do usuário
-    Database.ref("users/" + uid).once("value")
+    return getDataFromUser(uid)
         .then(snapshot => {
             const userData = snapshot.val();
 
@@ -377,7 +427,7 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn) {
             }
 
             // Busca dados do evento
-            return Database.ref("event/" + eventId).once("value")
+            return getDataFromDatabase(EventsDatabaseRef, eventId)
                 .then(eventoSnap => {
                     const evento = eventoSnap.val();
                     if (!evento) {
@@ -386,12 +436,11 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn) {
                     }
 
                     // Verifica pontuação mínima para eventos médios
-                    if (evento.dificuldade === "Médio (acampas)") {
-                        const pontos = parseFloat(userData.pontos) || 0;
-                        if (pontos < 50) {
-                            alert("⚠️ Você precisa de pelo menos 50 pontos para participar deste evento.");
-                            throw new Error("Pontuação insuficiente");
-                        }
+                    const pontos = parseFloat(userData.pontos) || 0;
+                    const pontuacaoNecessaria = getPontuacaoMinimaParaDificuldade(evento.dificuldade);
+                    if (pontos < pontuacaoNecessaria) {
+                        alert(`⚠️ Você precisa de, pelo menos, ${pontuacaoNecessaria} pontos para participar deste evento.`);
+                        throw new Error("Pontuação insuficiente");
                     }
 
                     return { evento, userData };
@@ -400,7 +449,7 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn) {
         .then(() => {
             // Registra inscrição
             const dataInscricao = Date.now();
-            return Database.ref(`inscricoes/${eventId}/${uid}`).set({
+            return set(refFromDatabase(InscricoesDatabaseRef, `${eventId}/${uid}`), {
                 dataInscricao: dataInscricao,
                 presenca: false
             });
@@ -420,18 +469,29 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn) {
 
 // função para cancelar inscrição
 async function unsubscribeFromEvent(eventId, unsubscribeBtn, subscribeBtn) {
+    const confirmar = confirm("Tem certeza que deseja cancelar sua inscrição?");
+    if (!confirmar) return;
+
     const user = Auth.currentUser;
     if (!user) {
         alert('Você precisa estar logado para cancelar a inscrição.');
         return;
     }
 
-    const confirmar = confirm("Tem certeza que deseja cancelar sua inscrição?");
-    if (!confirmar) return;
-
     const uid = user.uid;
 
-    const inscricaoRef = Database.ref(`inscricoes/${eventId}/${uid}`);
+    // Retira o usuário do evento
+    unsubscribeUserFromEvent(eventId, uid).then(() => {
+        alert('Inscrição removida com sucesso!');
+        unsubscribeBtn.style.display = 'none';
+        subscribeBtn.style.display = 'inline-block';
+    })
+}
+
+export async function unsubscribeUserFromEvent(eventId, uid) {
+    const user = await getDataFromUser(uid);
+
+    const inscricaoRef = refFromDatabase(InscricoesDatabaseRef, `${eventId}/${uid}`);
 
     // Se não encontrou a inscrição, retorna
     if (!inscricaoRef) return;
@@ -439,16 +499,11 @@ async function unsubscribeFromEvent(eventId, unsubscribeBtn, subscribeBtn) {
     // Retira a pontuação desse evento do usuário
     await atualizarPontuacaoUsuario(uid, eventId, false);
 
-    inscricaoRef.remove()
-        .then(() => {
-            alert('Inscrição removida com sucesso!');
-            unsubscribeBtn.style.display = 'none';
-            subscribeBtn.style.display = 'inline-block';
-        })
+    // Remove a inscrição do usuário
+    return remove(inscricaoRef)
         .catch(error => {
-            console.error('Erro ao remover inscrição:', error);
+            console.error(`Erro ao remover inscrição do usuário ${user.val().nome}:`, error);
             alert('Erro ao cancelar inscrição. Tente novamente.');
         });
 }
-
 

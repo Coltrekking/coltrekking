@@ -532,3 +532,9 @@ textarea {
     background-color: #4CAF50;
     color: white;
 }
+
+.soft-warn {
+    color: #d77819;
+    font-size: 1.2em;
+    font-style: italic;
+}

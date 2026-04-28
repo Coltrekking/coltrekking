@@ -2,20 +2,30 @@
  * Código do homeAdmin.html
  */
 
-import "./homePage"; // Carrega tudo que já haveria na homePage normalmente //TODO
-import {editEventForm, eventForm, hideItem, loading, showItem, submitEventForm} from "../../utils";
+import "./homePage"; // Carrega tudo que já haveria na homePage normalmente
+import {
+    editEventForm,
+    eventForm, EventsDatabaseRef,
+    getDataFromDatabase, getDataFromUser,
+    hideItem,
+    loading,
+    PhotosDatabaseRef, refFromDatabase,
+    showItem,
+    submitEventForm
+} from "../../utils";
 import {toggleUserManager, loadUsers, isAdmin} from "../../auth.js";
 import {toggleBlockManager, loadBlockManager} from "../../listaBloqueiosAdmin"
 import {
-    dbRefPhotos,
-    dbRefEvents,
     fillPhotoList,
     createPhotoBtn,
     addPhotoBtn,
-    loadCommonEvents, dbRefUsers, fillPhotoListAsAdmin,
+    loadCommonEvents
 } from "./homeMutual";
 import {atualizarEvento, cancelarFormEvento, criarEvento, fecharListaInscritos} from "../../eventAdmin";
-import {Auth} from "../../../config/firebase";
+import {Auth} from "/src/config/firebase";
+import {onValue, set} from "firebase/database";
+import {onAuthStateChanged} from "firebase/auth";
+import {fillEventList} from "/src/js/event";
 
 
 /**
@@ -30,7 +40,7 @@ export function populateEventSelectForPhotos() {
     select.innerHTML = '';
 
     // Popula
-    dbRefEvents.once('value').then(snapshot => {
+    getDataFromDatabase(EventsDatabaseRef).then(snapshot => {
         snapshot.forEach(eventSnap => {
             const option = document.createElement('option');
             option.value = eventSnap.key;
@@ -49,13 +59,14 @@ function addLink(eventKey, url) {
         return;
     }
 
-    dbRefPhotos.child(eventKey).once('value').then(snapshot => {
+    getDataFromDatabase(PhotosDatabaseRef, eventKey).then(snapshot => {
         const links = snapshot.val() || [];
         links.push(url);
 
-        dbRefPhotos.child(eventKey).set(links).then(() => {
-            fillPhotoList();
-            document.getElementById('photoURL').value = '';
+        set(refFromDatabase(PhotosDatabaseRef, eventKey), links)
+            .then(() => {
+                fillPhotoList();
+                document.getElementById('photoURL').value = '';
         });
     });
 }
@@ -65,12 +76,12 @@ function removeLink(eventKey, linkIndex) {
     if (!isAdmin()) return;
     if (!confirm('Deseja remover este link?')) return;
 
-    dbRefPhotos.child(eventKey).once('value').then(snapshot => {
+    getDataFromDatabase(PhotosDatabaseRef, eventKey).then(snapshot => {
         const links = snapshot.val() || [];
         links.splice(linkIndex, 1);
 
-        dbRefPhotos.child(eventKey).set(links)
-            .then(() => fillPhotoListAsAdmin());
+        set(refFromDatabase(PhotosDatabaseRef, eventKey), links)
+            .then(() => fillPhotoList());
     });
 }
 
@@ -78,10 +89,17 @@ function removeLink(eventKey, linkIndex) {
  * Carrega os eventos
  */
 function loadEvents() {
-    Auth.onAuthStateChanged(user => {
-        dbRefUsers.child(user.uid).once('value').then(_ => {
-            populateEventSelectForPhotos();
+    onAuthStateChanged(Auth,user => {
+        getDataFromUser(user.uid)
+            .then(_ => {
+                populateEventSelectForPhotos();
         });
+    });
+
+    // Quando os eventos atualizam
+    onValue(EventsDatabaseRef, function (_dataSnapshot) {
+        // Popula a lista de eventos na aba de fotos
+        populateEventSelectForPhotos();
     });
     // Trata a exibição do formulário de eventos
     document.getElementById('createEvent').onclick = function () {
@@ -158,7 +176,7 @@ function loadPage() {
     loadEvents();
 }
 
-if (isAdmin() && window.location.pathname === "/homeAdmin.html") loadPage();
+if (isAdmin() && (window.location.pathname === "/homeAdmin.html" || window.location.pathname === "/homeAdmin")) loadPage();
 
 
 

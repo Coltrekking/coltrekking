@@ -1,9 +1,9 @@
 import {Auth, Database} from "../config/firebase";
-import { child, ref, set, onValue } from "firebase/database";
+import {child, ref, get} from "firebase/database";
 
 // Referências dos elementos da página
 export let loading = document.getElementById('loading');
-export let auth = document.getElementById('auth');
+export let authElement = document.getElementById('auth');
 export let homePage = document.getElementById('homePage');
 export let userEmail = document.getElementById('userEmail');
 export let userImg = document.getElementById('userImg');
@@ -24,6 +24,11 @@ export let editEventForm = document.getElementById('editEventForm');
 export let eventContainer = document.getElementById('eventContainer');
 export let eventCount = document.getElementById('eventCount');
 
+export const EventsDatabaseRef = refFromDatabase("event/");
+export const InscricoesDatabaseRef = refFromDatabase("inscricoes/");
+export const PhotosDatabaseRef = refFromDatabase("photos/");
+export const UsersDatabaseRef = refFromDatabase("users/");
+
 // Remove elementos da aba
 export function hideItem(item) {
     if (item && item.style) {
@@ -41,16 +46,106 @@ export function showItem(item) {
 // Mostrar conteúdo para usuários não autenticados
 export function showAuth() {
     hideItem(homePage);
-    showItem(auth);
+    showItem(authElement);
 }
 
 /**
  * Retorna a referência da célula do banco de dados no caminho dado.
  * @param path caminho para a célula, como `users/AjdkaJDJId892` ou `event/`
+ * @param chName nome da criança/atributo (por exemplo, `email` ou `uid`), se
+ *        quiser um filho de `path`.
  * @returns {DatabaseReference}
  */
-export function getRefFromDatabase(path) {
-    return ref(Database, path);
+export function refFromDatabase(path, chName=null) {
+    let refPath = path;
+    // Se o caminho for uma string, converte para referência do banco de dados
+    if (typeof path === 'string') refPath = ref(Database, path);
+
+    if (chName === null) return refPath;
+
+    // Se chegou até aqui, chName não é nulo
+    return child(refPath, chName);
+}
+
+/**
+ * Retorna uma promise com a informação guardada no caminho dado do banco de dados.
+ * Note que essa função só vai retornar a informação uma vez (equivalente ao `once`/`get` do Firebase).
+ * @param path Caminho para a informação (ou para o pai dela, se for) em formato de string
+ *             ou referência. Caso tenha o caminho absoluto, use apenas esse parâmetro.
+ *             Por exemplo:
+ *
+ *   ```
+ *   getDataFromDatabase("users/" + uid).then(...);
+ *   ```
+ *
+ *   Não é recomendado usar com caminho absoluto, uma vez que, se alguma
+ *   parte do caminho ser alterada (como o nome da pasta dos usuários, por
+ *   exemplo), **todas** as chamadas que usem o caminho absoluto precisarão
+ *   de alteração.
+ *
+ *
+ * @param chName Nome da criança/atributo (por padrão, é nula). Por exemplo, se você quisesse
+ * acessar um usuário a partir da referência do `users`, você poderia usar:
+ *
+ *   ```
+ *   getDataFromDatabase(UsersDatabaseRef, uid).then(...);
+ *   ```
+ *
+ *   Outro exemplo seria acessar um atributo específico do usuário, como o email,
+ *   a partir da referência do usuário (lembre-se de colocar o '/' no início):
+ *
+ *   ```
+ *   getDataFromDatabase(refFromUser(uid), "/email").then(...);
+ *   ```
+ *   Caso tenha o caminho absoluto, não use esse parâmetro.
+ * @return {Promise<DataSnapshot>} Promise com a Snapshot da informação.
+ */
+export function getDataFromDatabase(path, chName=null) {
+    let refPath = path;
+    // Se o caminho for uma string, converte para referência do banco de dados
+    if (typeof path === 'string') refPath = refFromDatabase(path)
+    // Se o parâmetro chName estiver vazio, é caminho absoluto.
+    if (chName === null) return get(refPath);
+    // Se o parâmetro chname não estiver vazio, o caminho é relativo
+    // no formato `path/chName` (ou seja, obter o elemento cujo nome é
+    // `chName` dentro de `path`)
+    else return get(child(refPath, chName));
+}
+
+/**
+ * Retorna a referência da célula do banco de dados do usuário com o uid dado.
+ * A referência tem o caminho da forma `users/uid`.
+ * @param uid UID do usuário.
+ * @return {DatabaseReference} Referência do usuário com o uid dado.
+ */
+export function refFromUser(uid) {
+    return child(UsersDatabaseRef, uid);
+}
+
+/**
+ * Retorna uma promise com a informação guardada no caminho do usuário com o uid dado.
+ * Ou seja, retorna as informações do usuário.
+ * @param uid UID do usuário.
+ * @return {Promise<DataSnapshot>} Promise com a Snapshot da informação do usuário.
+ */
+export function getDataFromUser(uid) {
+    return get(refFromUser(uid));
+}
+
+/**
+ * Retorna uma promise com a informação do atributo específico do usuário com o uid dado.
+ * @param uid UID do usuário.
+ * @param attribute Atributo específico do usuário que se deseja acessar. Por exemplo, `email` ou `pontos`.
+ * @return {Promise<DataSnapshot>} Promise com a informação do atributo específico do usuário. Se o atributo não existir, retorna undefined.
+ */
+export function getAttributeFromUser(uid, attribute) {
+    return get(refFromUser(uid)).then(snapshot => {
+        if (snapshot.exists()) {
+            return snapshot.val()[attribute];
+        }
+        // Se chegou até aqui, a snapshot não existe
+        return undefined;
+    });
 }
 
 //mostrar conteúdo para usuários autenticados
@@ -63,7 +158,7 @@ export function showUserContent(user) {
     if (userEmail) userEmail.innerHTML = user.email || '';
 
     // Busca dados adicionais no BD
-    Database.ref('users/' + user.uid).once('value').then(snapshot => {
+    getDataFromUser(user.uid).then(snapshot => {
         const data = snapshot.val() || {};
 
         if (userId) userId.innerHTML = data.userId ? "CPF: " + data.userId : 'CPF: N/A';
@@ -78,11 +173,11 @@ export function showUserContent(user) {
                 'Por favor, edite suas informações pessoais.');
         }
 
-        hideItem(auth);
+        hideItem(authElement);
         showItem(homePage);
     }).catch(error => {
         console.error("Erro ao buscar dados adicionais do usuário:", error);
-        hideItem(auth);
+        hideItem(authElement);
         showItem(homePage);
     });
 }
@@ -93,7 +188,7 @@ export function editPersonalInfo() {
     const user = Auth.currentUser;
     if (!user) return;
 
-    const userRef = Database.ref("users/" + user.uid);
+    const userRef = getDataFromUser(user.uid);
     userRef.once("value").then(snapshot => {
         const data = snapshot.val() || {};
 
@@ -113,44 +208,7 @@ export function cancelEdit() {
     editPersonalInfoForm.reset();
 }
 
-//tratar o envio do formulário de edição de informações pessoais
-if (editPersonalInfoForm) {
-    editPersonalInfoForm.onsubmit = function (event) {
-        event.preventDefault();
-        const user = Auth.currentUser;
-        if (!user) return;
 
-        const uid = user.uid;
-        const cpf = document.getElementById('cpf').value.trim();
-        const turma = document.getElementById('turma').value.trim();
-        const curso = document.getElementById('curso').value.trim();
-
-        const cpfLimpo = cpf.replace(/[^\d]+/g, '');
-        
-        if (!validarCPF(cpfLimpo)) {
-            alert('CPF inválido. Verifique e tente novamente.');
-            return;
-        }
-
-        Database.ref('users/' + uid).update({
-            userId: cpfLimpo,
-            userClass: turma,
-            userCourse: curso
-        }).then(() => {
-            alert('Informações atualizadas com sucesso!');
-
-            // Atualiza os elementos da página imediatamente
-            if (userId) userId.innerHTML = `CPF: ${cpfLimpo}`;
-            if (userClass) userClass.innerHTML = `Turma: ${turma}`;
-            if (userCourse) userCourse.innerHTML = `Curso: ${curso}`;
-
-            hideItem(editPersonalInfoForm);
-        }).catch(err => {
-            console.error('Erro ao atualizar informações:', err);
-            alert('Erro ao atualizar informações. Tente novamente.');
-        });
-    };
-}
 
 //verificação de cpf
 export function validarCPF(cpf) {

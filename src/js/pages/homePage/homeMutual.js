@@ -1,12 +1,24 @@
 /**
- * Código comum entre a página home de usuário e admin
+ * Código comum entre a página home de usuário e admin.
+ * Esse código é chamado tanto no homeAdmin quanto no homePage,
+ * e serve para evitar repetição de código.
  */
-import {Auth, Database} from "../../../config/firebase";
-import {checkAuth, deleteAccount, isAdmin, waitForUser} from "../../auth";
-import {cancelEdit, editPersonalInfo, getRefFromDatabase, hideItem, showItem} from "../../utils";
+import {Auth} from "/src/config/firebase";
+import {checkAuth, deleteAccount, isAdmin, userSignOut, waitForUser} from "../../auth";
+import {
+    cancelEdit,
+    editPersonalInfo,
+    refFromDatabase,
+    hideItem,
+    showItem,
+    editPersonalInfoForm,
+    userId, userClass, userCourse, validarCPF, getDataFromDatabase, PhotosDatabaseRef, getDataFromUser,
+    EventsDatabaseRef, refFromUser
+} from "../../utils";
 import {openTab} from "../../tabs";
 import {fillEventList} from "../../event";
-import {onValue} from "firebase/database";
+import {onValue, update} from "firebase/database";
+import {onAuthStateChanged} from "firebase/auth";
 
 // Endereço da página de usuário
 const USER_PAGE_ADDRESS = "/homePage.html"
@@ -18,87 +30,86 @@ export const addPhotoBtn    = document.getElementById('addPhotoBtn');
 export const photoContainer = document.getElementById('photoContainer');
 export const photoAdminForm = document.getElementById('photoAdminForm');
 
-export const dbRefPhotos = Database.ref('photos');
-export const dbRefUsers  = Database.ref('users');
-export const dbRefEvents  = Database.ref('event');
 
 export function fillPhotoListAsAdmin() {
-    dbRefEvents.once('value').then(eventsSnapshot => {
-        const eventsArray = [];
+    getDataFromDatabase(EventsDatabaseRef)
+        .then(eventsSnapshot => {
+            const eventsArray = [];
 
-        // transforma snapshot em array
-        eventsSnapshot.forEach(eventSnap => {
-            eventsArray.push({
-                key: eventSnap.key,
-                value: eventSnap.val()
+            // transforma snapshot em array
+            eventsSnapshot.forEach(eventSnap => {
+                eventsArray.push({
+                    key: eventSnap.key,
+                    value: eventSnap.val()
+                });
             });
-        });
 
-        // ordena por data de inscrição (mais recente primeiro)
-        eventsArray.sort((a, b) => {
-            const tA = a.value.dataInscricao
-                ? new Date(a.value.dataInscricao).getTime()
-                : 0;
-            const tB = b.value.dataInscricao
-                ? new Date(b.value.dataInscricao).getTime()
-                : 0;
-            return tB - tA;
-        });
+            // ordena por data de inscrição (mais recente primeiro)
+            eventsArray.sort((a, b) => {
+                const tA = a.value.dataInscricao
+                    ? new Date(a.value.dataInscricao).getTime()
+                    : 0;
+                const tB = b.value.dataInscricao
+                    ? new Date(b.value.dataInscricao).getTime()
+                    : 0;
+                return tB - tA;
+            });
 
-        // monta os cards
-        eventsArray.forEach(eventItem => {
-            const eventKey  = eventItem.key;
-            const eventData = eventItem.value;
+            // monta os cards
+            eventsArray.forEach(eventItem => {
+                const eventKey  = eventItem.key;
+                const eventData = eventItem.value;
 
-            dbRefPhotos.child(eventKey).once('value').then(photoSnap => {
-                const links = photoSnap.val() || [];
-                const photoCard = document.createElement('div');
-                photoCard.className = 'photo-card';
+                getDataFromDatabase(PhotosDatabaseRef, eventKey)
+                    .then(photoSnap => {
+                        const links = photoSnap.val() || [];
+                        const photoCard = document.createElement('div');
+                        photoCard.className = 'photo-card';
 
-                const dataFormatada = eventData.data
-                    ? new Date(eventData.data)
-                        .toLocaleDateString('pt-BR')
-                        .replace(/\//g, '.')
-                    : '---';
+                        const dataFormatada = eventData.data
+                            ? new Date(eventData.data)
+                                .toLocaleDateString('pt-BR')
+                                .replace(/\//g, '.')
+                            : '---';
 
-                let linksHTML = '---';
+                        let linksHTML = '---';
 
-                if (links.length > 0) {
-                    linksHTML = links.map((link, index) => {
-                        let html = `
-                            <a href="${link}" target="_blank">
-                                ${eventData.nome}_${dataFormatada}
-                            </a>
-                        `;
+                        if (links.length > 0) {
+                            linksHTML = links.map((link, index) => {
+                                let html = `
+                                    <a href="${link}" target="_blank">
+                                        ${eventData.nome}_${dataFormatada}
+                                    </a>
+                                `;
 
-                        if (isAdmin()) {
-                            html += `
-                                <button class="danger"
-                                    onclick="removeLink('${eventKey}', ${index})">
-                                    Remover
-                                </button>
-                            `;
+                                if (isAdmin()) {
+                                    html += `
+                                        <button class="danger"
+                                            onclick="removeLink('${eventKey}', ${index})">
+                                            Remover
+                                        </button>
+                                    `;
+                                }
+
+                                return html;
+                            }).join('<br><br>');
                         }
 
-                        return html;
-                    }).join('<br><br>');
-                }
+                        photoCard.innerHTML = `
+                            <h3>${eventData.nome}</h3>
+                            <p>${linksHTML}</p>
+                        `;
 
-                photoCard.innerHTML = `
-                    <h3>${eventData.nome}</h3>
-                    <p>${linksHTML}</p>
-                `;
-
-                photoContainer.appendChild(photoCard);
+                        photoContainer.appendChild(photoCard);
+                    });
             });
         });
-    });
 }
 
 function fillPhotoListAsUser() {
     photoContainer.innerHTML = '';
 
-    dbRefEvents.once('value').then(eventsSnapshot => {
+    getDataFromDatabase(EventsDatabaseRef).then(eventsSnapshot => {
         const eventsArray = [];
 
         // transforma snapshot em array
@@ -125,7 +136,8 @@ function fillPhotoListAsUser() {
             const eventKey  = eventItem.key;
             const eventData = eventItem.value;
 
-            dbRefPhotos.child(eventKey).once('value').then(photoSnap => {
+            getDataFromDatabase(PhotosDatabaseRef, eventKey)
+                .then(photoSnap => {
                 const links = photoSnap.val() || [];
 
                 const photoCard = document.createElement('div');
@@ -163,7 +175,6 @@ function fillPhotoListAsUser() {
  */
 export function fillPhotoList() {
     photoContainer.innerHTML = '';
-
     if (isAdmin()) {
         fillPhotoListAsAdmin();
     } else {
@@ -176,24 +187,25 @@ export function fillPhotoList() {
  */
 export function loadCommonEvents() {
     // Auth + role
-    Auth.onAuthStateChanged(user => {
+    onAuthStateChanged(Auth,user => {
         if (!user) return;
 
-        dbRefUsers.child(user.uid).once('value').then(snapshot => {
-            fillPhotoList(); // todos veem
+        getDataFromUser(user.uid)
+            .then(_snapshot => {
+                fillPhotoList(); // todos veem
 
-            if (isAdmin()) {
-                //populateEventSelectForPhotos();
-                showItem(createPhotoBtn);
-            } else {
-                hideItem(createPhotoBtn);
-                hideItem(photoAdminForm);
-            }
+                if (isAdmin()) {
+                    //populateEventSelectForPhotos();
+                    showItem(createPhotoBtn);
+                } else {
+                    hideItem(createPhotoBtn);
+                    hideItem(photoAdminForm);
+                }
         });
     });
 
     const signOutBtn = document.getElementById("signOutBtn");
-    if (signOutBtn) signOutBtn.onclick = () => Auth.signOut();
+    if (signOutBtn) signOutBtn.onclick = () => userSignOut();
 
     const editPersonalInfoBtn = document.getElementById("editPersonalInfoBtn");
     if (editPersonalInfoBtn) editPersonalInfoBtn.onclick = () => editPersonalInfo();
@@ -249,22 +261,61 @@ async function loadCommon() {
     checkAuth()
 
     // Atualiza os eventos todas às vezes que algum dado atualizar
-    onValue(getRefFromDatabase('event'), function (dataSnapshot) {
+    onValue(EventsDatabaseRef, function (dataSnapshot) {
         fillEventList(dataSnapshot);
     });
+
+    //tratar o envio do formulário de edição de informações pessoais
+    if (editPersonalInfoForm) {
+        editPersonalInfoForm.onsubmit = function (event) {
+            event.preventDefault();
+            const user = Auth.currentUser;
+            if (!user) return;
+
+            const uid = user.uid;
+            const cpf = document.getElementById('cpf').value.trim();
+            const turma = document.getElementById('turma').value.trim();
+            const curso = document.getElementById('curso').value.trim();
+
+            const cpfLimpo = cpf.replace(/[^\d]+/g, '');
+
+            if (!validarCPF(cpfLimpo)) {
+                alert('CPF inválido. Verifique e tente novamente.');
+                return;
+            }
+
+            update(refFromUser(uid), {
+                userId: cpfLimpo,
+                userClass: turma,
+                userCourse: curso
+            }).then(() => {
+                alert('Informações atualizadas com sucesso!');
+
+                // Atualiza os elementos da página imediatamente
+                if (userId) userId.innerHTML = `CPF: ${cpfLimpo}`;
+                if (userClass) userClass.innerHTML = `Turma: ${turma}`;
+                if (userCourse) userCourse.innerHTML = `Curso: ${curso}`;
+
+                hideItem(editPersonalInfoForm);
+            }).catch(err => {
+                console.error('Erro ao atualizar informações:', err);
+                alert('Erro ao atualizar informações. Tente novamente.');
+            });
+        };
+    }
 }
 
 // Se o usuário for administrador e ele estiver na página de user,
 // ele será redirecionado para a página de admin
 if (isAdmin()) {
-    if (window.location.pathname === USER_PAGE_ADDRESS) {
+    if (!window.location.pathname.includes("Admin")) {
         alert("Você será redirecionado para a página de administrador.")
         window.location.href = ADMIN_PAGE_ADDRESS;
     }
 } else {
 // Se o usuário não for administrador e estiver na página de admin,
 // ele será redirecionado para a página de user
-    if (window.location.pathname === ADMIN_PAGE_ADDRESS) {
+    if (window.location.pathname.includes("Admin")) {
         alert("Você não tem permissão de acessar essa página!")
         window.location.href = USER_PAGE_ADDRESS;
     }
