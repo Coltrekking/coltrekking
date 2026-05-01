@@ -1,6 +1,7 @@
 import {Auth, Database} from "../config/firebase";
-import {child, ref, get, DatabaseReference} from "firebase/database";
+import {child, ref, get} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
+
 
 // Referências dos elementos da página
 export let loading = document.getElementById('loading');
