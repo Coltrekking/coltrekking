@@ -2,6 +2,7 @@ import {Auth} from "../config/firebase";
 import {getDataFromDatabase, getDataFromUser, refFromUser, UsersDatabaseRef} from "/src/js/utils";
 import {currentUserHasAdminPower, hasAdminPower} from "/src/js/auth";
 import {update} from "firebase/database";
+import {enviarErroParaSentry} from "/src/js/main";
 
 // abre/fecha a área de gerenciamento de bloqueios
 export function toggleBlockManager() {
@@ -18,7 +19,7 @@ export function toggleBlockManager() {
         const uid = user.uid;
 
         getDataFromUser(uid)
-            .then(snap => {
+            .then(_snap => {
                 if (!currentUserHasAdminPower()) {
                     alert("Você não tem permissão para gerenciar bloqueios.");
                     return;
@@ -35,6 +36,8 @@ export function toggleBlockManager() {
             })
             .catch(err => {
                 console.error("Erro ao verificar role (toggleBlockManager):", err);
+                enviarErroParaSentry(err);
+
                 alert("Erro ao verificar permissões. Tente novamente.");
             });
     });
@@ -110,7 +113,11 @@ export function loadBlockManager() {
                 blockList.innerHTML = "<p>Nenhum usuário encontrado.</p>";
             }
         })
-        .catch(err => console.error("Erro ao carregar usuários para bloqueio:", err));
+        .catch(err => {
+            console.error("Erro ao carregar usuários para bloqueio:", err)
+            enviarErroParaSentry(err);
+
+        });
 }
 
 // função para bloquear usuário
@@ -122,6 +129,8 @@ function blockUser(uid) {
         })
         .catch(err => {
             console.error("Erro ao bloquear usuário:", err);
+            enviarErroParaSentry(err);
+
             alert("Erro ao bloquear usuário. Verifique permissões.");
         });
 }
@@ -135,6 +144,7 @@ function unblockUser(uid) {
         })
         .catch(err => {
             console.error("Erro ao desbloquear usuário:", err);
+            enviarErroParaSentry(err);
             alert("Erro ao desbloquear usuário. Verifique permissões.");
         });
 }

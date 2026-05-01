@@ -8,7 +8,6 @@ import {checkAuth, deleteAccount, isAdmin, userSignOut, waitForUser} from "../..
 import {
     cancelEdit,
     editPersonalInfo,
-    refFromDatabase,
     hideItem,
     showItem,
     editPersonalInfoForm,
@@ -19,6 +18,7 @@ import {openTab} from "../../tabs";
 import {fillEventList} from "../../event";
 import {onValue, update} from "firebase/database";
 import {onAuthStateChanged} from "firebase/auth";
+import {enviarErroParaSentry} from "/src/js/main";
 
 // Endereço da página de usuário
 const USER_PAGE_ADDRESS = "/homePage.html"
@@ -265,6 +265,7 @@ async function loadCommon() {
         fillEventList(dataSnapshot);
     });
 
+
     //tratar o envio do formulário de edição de informações pessoais
     if (editPersonalInfoForm) {
         editPersonalInfoForm.onsubmit = function (event) {
@@ -299,6 +300,8 @@ async function loadCommon() {
                 hideItem(editPersonalInfoForm);
             }).catch(err => {
                 console.error('Erro ao atualizar informações:', err);
+                enviarErroParaSentry(err);
+
                 alert('Erro ao atualizar informações. Tente novamente.');
             });
         };

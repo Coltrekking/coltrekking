@@ -8,11 +8,12 @@ import {
     loading,
     getDataFromDatabase,
     InscricoesDatabaseRef,
-    getDataFromUser, EventsDatabaseRef, UsersDatabaseRef, refFromUser, getAttributeFromUser
+    getDataFromUser, EventsDatabaseRef, refFromUser, getAttributeFromUser
 } from "./utils";
-import {currentUserHasAdminPower, getUserRole, isAdmin} from "./auth";
-import {exportarInscricoesCSV, fecharListaInscritos, listarInscritos, removeEvent, updateEvent} from "./eventAdmin";
+import {currentUserHasAdminPower, isAdmin} from "./auth";
+import {exportarInscricoesCSV, listarInscritos, removeEvent, updateEvent} from "./eventAdmin";
 import {remove, set, update} from "firebase/database";
+import {enviarErroParaSentry} from "/src/js/main";
 
 /**
  * Retorna a quantidade mínima de pontos para se inscrever
@@ -337,6 +338,7 @@ function fillEventListAsUser(dataSnapshot) {
             hideItem(loading);
         })
         .catch(err => {
+            enviarErroParaSentry(err);
             console.error('Erro ao buscar usuário:', err);
             hideItem(loading);
         });
@@ -373,6 +375,7 @@ export async function atualizarPontuacaoUsuario(uid, eventId, adicionar) {
         const evento = eventSnap.val();
 
         if (!evento) {
+            enviarErroParaSentry(new Error(`Evento nao encontrado com id: ${eventId}`));
             console.error("Evento não encontrado:", eventId);
             return;
         }
@@ -397,6 +400,7 @@ export async function atualizarPontuacaoUsuario(uid, eventId, adicionar) {
         await update(userRef, { pontos: novosPontos });
     } catch (err) {
         console.error("Erro ao atualizar pontuação:", err);
+        enviarErroParaSentry(err);
     }
 }
 
@@ -462,6 +466,7 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn) {
         .catch(error => {
             if (!["Dados pessoais incompletos", "Usuário bloqueado", "Inscrição antes do horário", "Pontuação insuficiente"].includes(error.message)) {
                 console.error('Erro ao inscrever:', error);
+                enviarErroParaSentry(error);
                 alert('Erro ao realizar inscrição. Tente novamente.');
             }
         });
@@ -503,6 +508,7 @@ export async function unsubscribeUserFromEvent(eventId, uid) {
     return remove(inscricaoRef)
         .catch(error => {
             console.error(`Erro ao remover inscrição do usuário ${user.val().nome}:`, error);
+            enviarErroParaSentry(error);
             alert('Erro ao cancelar inscrição. Tente novamente.');
         });
 }

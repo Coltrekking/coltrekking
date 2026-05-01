@@ -13,9 +13,10 @@ import {
 import {validarOrdemDatas} from "./date";
 import {get, push, set, update, remove} from 'firebase/database'
 import {
-    atualizarPontuacaoUsuario, calcularPontuacaoDoEvento, fillEventList, getPontuacaoMinimaParaDificuldade,
+    atualizarPontuacaoUsuario, calcularPontuacaoDoEvento, getPontuacaoMinimaParaDificuldade,
     unsubscribeUserFromEvent
 } from "/src/js/event";
+import {enviarErroParaSentry} from "/src/js/main";
 
 export function criarEvento() {
     hideItem(eventForm);
@@ -341,7 +342,6 @@ export function updateEvent(key) {
 // botão para listar inscrições de um evento e exportar CSV
 export function exportarInscricoesCSV(eventId, nomeEvento = 'Evento', dataInicioEvento = null) {
     const inscricoesRef = refFromDatabase(InscricoesDatabaseRef, eventId);
-
     getDataFromDatabase(inscricoesRef)
         .then(snapshot => {
             if (!snapshot.exists()) {
@@ -427,6 +427,7 @@ export function exportarInscricoesCSV(eventId, nomeEvento = 'Evento', dataInicio
         })
         .catch(error => {
             console.error('Erro ao buscar inscrições:', error);
+            enviarErroParaSentry(error);
             alert('Erro ao buscar inscrições.');
         });
 }
@@ -449,6 +450,7 @@ export function listarInscritos(eventId, onlyUpdate = false) {
 
     if (!inscritosContainer || !inscritosList) {
         console.error("Container de inscritos não encontrado no HTML!");
+        enviarErroParaSentry(new Error("Container de inscritos não encontrado no HTML!"));
         return;
     }
 
@@ -540,6 +542,7 @@ export function listarInscritos(eventId, onlyUpdate = false) {
                             presencaBtn.classList.toggle("ausente", !novoStatus);
                         } catch (err) {
                             console.error("Erro ao atualizar presença:", err);
+                            enviarErroParaSentry(err);
                             alert("Erro ao atualizar presença. Tente novamente.");
                         }
                     });
@@ -554,6 +557,7 @@ export function listarInscritos(eventId, onlyUpdate = false) {
         })
         .catch(err => {
             console.error("Erro ao carregar inscritos:", err);
+            enviarErroParaSentry(err);
             inscritosList.innerHTML = "<p>Erro ao carregar inscritos.</p>";
         });
 }

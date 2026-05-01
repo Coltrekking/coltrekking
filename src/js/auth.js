@@ -14,7 +14,8 @@ import {
 } from "./utils"
 
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, deleteUser, reload } from "firebase/auth";
-import {child, ref, set, update} from "firebase/database";
+import {child, set, update} from "firebase/database";
+import {enviarErroParaSentry, identificarUserParaSentry} from "/src/js/main";
 
 // Lista de Cargos de um usuário
 const Roles = Object.freeze({  // O `Object.freeze()` certifica que não é possível atualizar
@@ -72,6 +73,7 @@ async function tryToGetUser() {
                 return true;
             } catch (error) {
                 console.error("Erro ao obter cargo do usuário: " + error);
+                enviarErroParaSentry(error);
                 return false;
             }
         } else {
@@ -173,7 +175,6 @@ export function isAdmin() {
 // Função que centraliza e trata a autenticação
 onAuthStateChanged(Auth, (user) => {
     hideItem(loading);
-
     if (user) {
         checkAuth();
         getDataFromDatabase(UsersDatabaseRef, user.uid)
@@ -190,12 +191,16 @@ onAuthStateChanged(Auth, (user) => {
                     able: true,
                     pontos: 0 // <-- novo campo de pontuação inicial
                 };
+
+
+
                 return set(child(UsersDatabaseRef, user.uid), userData).then(() => {
                     console.log('Usuário criado com sucesso!');
                     return userData;
                 });
             } else {
                 const data = snapshot.val();
+
                 let updates = {};
 
                 // Se não tiver role, define como "user"
@@ -227,6 +232,9 @@ onAuthStateChanged(Auth, (user) => {
             }
         })
         .then(userData => {
+            // Identifica o usuário para o Sentry
+            identificarUserParaSentry(user.uid, user.email, userData);
+
             // Salva UID no localStorage
             localStorage.setItem('uid', user.uid);
 
@@ -240,6 +248,7 @@ onAuthStateChanged(Auth, (user) => {
             showUserContent(user, userData.role, userData.able);
         })
             .catch(error => {
+                enviarErroParaSentry(error);
                 console.error("Erro ao ler/criar usuário:", error);
             });
 
@@ -326,7 +335,7 @@ export function toggleUserManager() {
 
         // Verifica role do usuário atual
         getDataFromDatabase(refFromUser(uid), '/role')
-            .then(snap => {
+            .then(_snap => {
                 if (!currentUserHasAdminPower()) {
                     alert("Você não tem permissão para gerenciar usuários.");
                     return;
@@ -343,7 +352,11 @@ export function toggleUserManager() {
                 }
             }
         )
-            .catch(err => console.error("Erro ao verificar role:", err)
+            .catch(err => {
+                console.error("Erro ao verificar role:", err);
+                enviarErroParaSentry(err);
+
+            }
         );
     });
 }
@@ -414,7 +427,11 @@ export function loadUsers() {
                 userList.innerHTML = "<p>Nenhum usuário encontrado.</p>";
             }
         })
-        .catch(err => console.error("Erro ao carregar usuários:", err));
+        .catch(err => {
+            console.error("Erro ao carregar usuários:", err);
+            enviarErroParaSentry(err);
+
+        });
 }
 
 // Função para promover um usuário a admin
@@ -425,7 +442,11 @@ function promoteToAdmin(uid) {
             alert("Usuário promovido a admin!");
             loadUsers(); // atualiza a lista
         })
-        .catch(err => console.error("Erro ao promover usuário:", err));
+        .catch(err => {
+            console.error("Erro ao promover usuário:", err);
+            enviarErroParaSentry(err);
+
+        });
 }
 
 // Função para remover a role de admin
@@ -435,7 +456,11 @@ function demoteFromAdmin(uid) {
             alert("Admin removido!");
             loadUsers(); // atualiza a lista
         })
-        .catch(err => console.error("Erro ao remover admin:", err));
+        .catch(err => {
+            console.error("Erro ao remover admin:", err);
+            enviarErroParaSentry(err);
+
+        });
 }
 
 /**

@@ -1,5 +1,6 @@
 import {Auth, Database} from "../config/firebase";
-import {child, ref, get} from "firebase/database";
+import {child, ref, get, DatabaseReference} from "firebase/database";
+import {enviarErroParaSentry} from "/src/js/main";
 
 // Referências dos elementos da página
 export let loading = document.getElementById('loading');
@@ -177,6 +178,7 @@ export function showUserContent(user) {
         showItem(homePage);
     }).catch(error => {
         console.error("Erro ao buscar dados adicionais do usuário:", error);
+        enviarErroParaSentry(error);
         hideItem(authElement);
         showItem(homePage);
     });
@@ -241,9 +243,7 @@ export function validarCPF(cpf) {
     resto = soma % 11;
     let digitoK = (resto < 2) ? 0 : 11 - resto;
 
-    if (digitoK !== parseInt(cpf.charAt(10))) return false;
-
-    return true; // CPF válido
+    return digitoK === parseInt(cpf.charAt(10));
 }
 
 //centralizar e traduzir erros
@@ -258,14 +258,16 @@ export function showError(prefix, error) {
                 break;
             default:
                 alert(prefix + ' ' + error.message);
+                enviarErroParaSentry(error);
         }
     } else {
         alert('Erro desconhecido: ' + error);
+        enviarErroParaSentry(error);
     }
 }
 
-let actionCodeSettings = {
-    url: 'coltrekking-app-c3026.firebaseapp.com'
-}
+//let actionCodeSettings = {
+//    url: 'coltrekking-app-c3026.firebaseapp.com'
+//}
 
 

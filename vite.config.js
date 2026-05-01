@@ -1,3 +1,4 @@
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 /**
  * Arquivo de configuração do vite
  */
@@ -5,7 +6,6 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
 export default defineConfig({
-
     // Diz ao Vite que os HTMLs estão na pasta 'pages'
     root: 'pages',
 
@@ -29,10 +29,10 @@ export default defineConfig({
         }
     },
 
-
     build: {
         // Diz onde deve colocar os arquivos compilados
         outDir: '../dist',
+
         // Limpa a pasta antes de colocar os novos arquivos
         emptyOutDir: true,
 
@@ -47,5 +47,13 @@ export default defineConfig({
                 // nome: resolve(__dirname, 'arquivo.html')
             },
         },
+
+        // Source Map para o Sentry ler
+        sourcemap: true
     },
+
+    plugins: [sentryVitePlugin({
+        org: "colegio-tecnico-da-ufmg",
+        project: "coltrekking"
+    })]
 });
