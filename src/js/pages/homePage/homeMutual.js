@@ -260,6 +260,20 @@ async function loadCommon() {
     // Verifica a autenticação do usuário
     checkAuth()
 
+
+    // Redirect logic after user is loaded
+    if (isAdmin()) {
+        if (!window.location.pathname.includes("Admin")) {
+            alert("Você será redirecionado para a página de administrador.")
+            window.location.href = ADMIN_PAGE_ADDRESS;
+        }
+    } else {
+        if (window.location.pathname.includes("Admin")) {
+            alert("Você não tem permissão de acessar essa página!")
+            window.location.href = USER_PAGE_ADDRESS;
+        }
+    }
+
     // Atualiza os eventos todas às vezes que algum dado atualizar
     onValue(EventsDatabaseRef, function (dataSnapshot) {
         fillEventList(dataSnapshot);
@@ -308,23 +322,5 @@ async function loadCommon() {
     }
 }
 
-// Se o usuário for administrador e ele estiver na página de user,
-// ele será redirecionado para a página de admin
-if (isAdmin()) {
-    if (!window.location.pathname.includes("Admin")) {
-        alert("Você será redirecionado para a página de administrador.")
-        window.location.href = ADMIN_PAGE_ADDRESS;
-    }
-} else {
-// Se o usuário não for administrador e estiver na página de admin,
-// ele será redirecionado para a página de user
-    if (window.location.pathname.includes("Admin")) {
-        alert("Você não tem permissão de acessar essa página!")
-        window.location.href = USER_PAGE_ADDRESS;
-    }
-}
-
 // Carrega o que tem em comum
 await loadCommon()
-
-

@@ -191,8 +191,7 @@ export function editPersonalInfo() {
     const user = Auth.currentUser;
     if (!user) return;
 
-    const userRef = getDataFromUser(user.uid);
-    userRef.once("value").then(snapshot => {
+    getDataFromUser(user.uid).then(snapshot => {
         const data = snapshot.val() || {};
 
         // Preencher formulário com valores atuais

@@ -23,8 +23,8 @@ import {enviarErroParaSentry} from "/src/js/main";
  */
 export function getPontuacaoMinimaParaDificuldade(dificuldade) {
     switch (dificuldade) {
-        case "Médio (acampas)":
-            return 50;
+        //case "Médio (acampas)":
+        //    return 50;
         // NOTA: Se houver mais dificuldades, adicione-as aqui
 
         default:
@@ -247,12 +247,16 @@ function createSubscribeButton(evento, key, userUid, eventDate) {
         }
 
         subscribeToEvent(key, subscribeBtn, unsubscribeBtn)
-            .then( () => listarInscritos(key, true) );
+            .then( () => {
+                if (isAdmin()) listarInscritos(key, true)
+            } );
     };
 
     unsubscribeBtn.onclick = () => {
         unsubscribeFromEvent(key, unsubscribeBtn, subscribeBtn)
-            .then( () => listarInscritos(key, true) );
+            .then( () => {
+                if (isAdmin()) listarInscritos(key, true)
+            } );
     };
 
     return [subscribeBtn, unsubscribeBtn];

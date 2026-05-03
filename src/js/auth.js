@@ -37,7 +37,7 @@ let userLoadedPromise = null;
 let resolveUserLoaded = null;
 
 // Carrega o usuário
-await waitForUser();
+// await waitForUser(); // Removed to avoid blocking module load on index.html
 // Verifica se ele está autenticado
 checkAuth()
 
@@ -497,8 +497,11 @@ export function checkAuth() {
 
                 // Verifica se o email termina com o endereço de email institucional
                 if (!userEmail.endsWith("@teiacoltec.org")) {
-                    alert("Acesso negado. Conta não autorizada. Por favor, use um email institucional (@teiacoltec.org) para se autenticar.");
-                    userSignOut();
+                    // Se não for a conta do site coltrekking
+                    if (userEmail !== "sitecoltrekking@gmail.com") {
+                        alert("Acesso negado. Conta não autorizada. Por favor, use um email institucional (@teiacoltec.org) para se autenticar.");
+                        userSignOut();
+                    }
                 }
             } else {
                 window.location.href = "index.html";
