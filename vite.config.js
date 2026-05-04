@@ -12,7 +12,7 @@ export default defineConfig({
     // Garante que o Vite busque o .env na raiz do projeto
     envDir: '..',
 
-    // Diretório que o vite apenas copiará
+    // Diretório que o vite apenas copiará (útil para imagens, fontes, etc)
     publicDir: '../public',
 
     resolve: {
@@ -44,11 +44,11 @@ export default defineConfig({
                 404: resolve(__dirname, './pages/404.html'),
 
                 // Adicione novas páginas no seguinte formato:
-                // nome: resolve(__dirname, 'arquivo.html')
+                // nome: resolve(__dirname, './pages/arquivo.html')
             },
         },
 
-        // Source Map para o Sentry ler
+        // Source Map (que tem as funções desofuscadas) para o Sentry ler
         sourcemap: true
     },
 

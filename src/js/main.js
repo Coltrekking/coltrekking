@@ -49,8 +49,22 @@ export function identificarUserParaSentry(userUid, email, data) {
  * Envia o erro dado para o Sentry
  * @param error erro a ser enviado
  */
+
+// Código de Erros que não serão enviados para o sentry
+const errosIgnorados = [
+    "auth/popup-closed-by-user",
+    "auth/cancelled-popup-request",
+    "auth/network-request-failed"
+]
 export function enviarErroParaSentry(error) {
-    Sentry.captureException(error);
+    let containAnyIgnoredError = false;
+    for (const erroIgnorado of errosIgnorados) {
+        if (error.code.includes(erroIgnorado)) {
+            containAnyIgnoredError = true;
+            break;
+        }
+    }
+    if (!containAnyIgnoredError) Sentry.captureException(error);
 }
 
 /* ========================= */

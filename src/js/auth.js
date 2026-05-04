@@ -10,7 +10,7 @@ import {
     showAuth,
     showError,
     refFromDatabase,
-    getDataFromDatabase, UsersDatabaseRef, refFromUser
+    getDataFromDatabase, UsersDatabaseRef, refFromUser, getDataFromUser
 } from "./utils"
 
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, deleteUser, reload } from "firebase/auth";
@@ -68,12 +68,18 @@ async function tryToGetUser() {
         // Se não foi obtido, tenta obter a partir do banco de dados
         if (Auth.currentUser) {
             try {
-                const snapshot = await getDataFromDatabase('users/' + Auth.currentUser.uid);
+                const snapshot = await getDataFromUser(Auth.currentUser.uid);
                 updateUserRoleVar(snapshot);
                 return true;
             } catch (error) {
-                console.error("Erro ao obter cargo do usuário: " + error);
-                enviarErroParaSentry(error);
+                // Pode ocorrer dessa função (tryToGetUser) ser chamada antes do usuário ser carregado,
+                // o que pode gerar um erro de permissão negada. Se for esse o caso, apenas retorna false
+                // para tentar novamente depois de um tempo. Se for outro tipo de erro, loga no console
+                // e envia para o Sentry.
+                if (!error.message.includes("Permission denied")) {
+                    console.error("Erro ao obter cargo do usuário: " + error);
+                    enviarErroParaSentry(error);
+                }
                 return false;
             }
         } else {
