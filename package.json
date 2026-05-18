@@ -14,7 +14,8 @@
     "@sentry/browser": "^10.51.0",
     "@sentry/vite-plugin": "^5.2.1",
     "firebase": "^12.12.1",
-    "vue": "^3.5.33"
+    "vue": "^3.5.33",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "vite": "^8.0.9"

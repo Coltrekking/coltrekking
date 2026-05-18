@@ -1,22 +1,29 @@
 // Importa as coisas do firebase que serão usadas
 import {
-    hideItem,
-    showItem,
-    eventForm,
-    loading,
     editEventForm,
-    submitEventForm,
-    showError,
+    eventForm,
+    EventsDatabaseRef,
+    getDataFromDatabase,
+    hideItem,
+    InscricoesDatabaseRef,
+    loading,
     refFromDatabase,
-    EventsDatabaseRef, getDataFromDatabase, InscricoesDatabaseRef, UsersDatabaseRef
+    showError,
+    showItem,
+    submitEventForm,
+    UsersDatabaseRef
 } from "./utils"
 import {validarOrdemDatas} from "./date";
-import {get, push, set, update, remove} from 'firebase/database'
+import {get, push, remove, set, update} from 'firebase/database'
 import {
-    atualizarPontuacaoUsuario, calcularPontuacaoDoEvento, getPontuacaoMinimaParaDificuldade,
+    atualizarPontuacaoUsuario,
+    calcularPontuacaoDoEvento, checkSubscribedEventsRequiringMinimumPoints,
+    getPontuacaoMinimaParaEvento,
     unsubscribeUserFromEvent
 } from "/src/js/event";
 import {enviarErroParaSentry} from "/src/js/main";
+import {Auth} from "/src/config/firebase";
+import * as XLSX from 'xlsx'; // Planilha
 
 export function criarEvento() {
     hideItem(eventForm);
@@ -57,6 +64,7 @@ export function criarEvento() {
             localPrelecao: localPrelecao,
             localEncontro: localEncontro,
             descricao: descricao,
+            pontuacaoNecessaria: currentEditingEventData.pontuacaoNecessaria || 0
             //percursoAltimetria: percursoAltimetria
         })
             .then(function () {
@@ -100,13 +108,22 @@ function retirarUsuariosComPontuacaoInsuficiente(eventId, pontuacaoEvento, dific
 
                 // Se a pontuação do usuário for menor que a pontuação mínima
                 // para o evento, retira ele
-                if (pontuacao <= getPontuacaoMinimaParaDificuldade(dificuldade)) {
+                if (pontuacao <= getPontuacaoMinimaParaEvento(eventId)) {
                     // Se o usuário estiver presente, retira a pontuação do evento dele antes de retirar ele do evento
                     if (presenca)
                         await atualizarPontuacaoUsuario(uid, eventId, false);
 
                     // Desinscreve o usuário
                     await unsubscribeUserFromEvent(eventId, uid);
+
+                    // Se o usuário que foi retirado for o usuário atual, atualiza os botões de inscrever/desinscrever
+                    if (uid === Auth.currentUser.uid) {
+                        const inscreverBtn = document.getElementById(`subscribeBtn-${eventId}`);
+                        inscreverBtn.style.display = "inline-block";
+
+                        const desinscreverBtn = document.getElementById(`unsubscribeBtn-${eventId}`);
+                        hideItem(desinscreverBtn);
+                    }
                 }
             });
         });
@@ -137,6 +154,12 @@ export async function atualizarEvento() {
     let localPrelecao = document.getElementById('localPrelecao').value.trim();
     let localEncontro = document.getElementById('localEncontro').value.trim();
     let descricao = document.getElementById('descricao').value.trim();
+    let pontuacaoNecessaria;
+
+    if (currentEditingEventData.pontuacaoNecessaria !== undefined)
+        pontuacaoNecessaria = String(currentEditingEventData.pontuacaoNecessaria).trim();
+    else
+        pontuacaoNecessaria = "0";
 
     if (nome && distancia && trajeto && dificuldade && data && dataInscricao && dataPrelecao && localPrelecao && localEncontro && descricao) {
         if (!validarOrdemDatas(dataInscricao, dataPrelecao, data)) {
@@ -155,8 +178,9 @@ export async function atualizarEvento() {
             dataPrelecao,
             localPrelecao,
             localEncontro,
-            descricao
+            pontuacaoNecessaria
         };
+
 
         update(refFromDatabase(EventsDatabaseRef, key), dataToUpdate)
             .then(async () => {
@@ -173,7 +197,7 @@ export async function atualizarEvento() {
 
                 // Verifica a dificuldade do evento (se precisar de pontuação mínima).
                 // Se houver usuários que não têm a pontuação mínima, retira eles do evento
-                if (getPontuacaoMinimaParaDificuldade(dificuldade) > 0) {
+                if (getPontuacaoMinimaParaEvento(key) > 0) {
                     await retirarUsuariosComPontuacaoInsuficiente(key, calcularPontuacaoDoEvento(dataToUpdate), dificuldade);
                 }
 
@@ -186,6 +210,9 @@ export async function atualizarEvento() {
                 hideItem(editEventForm);     // esconde o botão de editar
 
                 alert('Evento atualizado com sucesso!');
+
+                currentEditingEvent = null;
+                currentEditingEventData = {};
 
                 /*dbRefEvents.once('value').then(dataSnapshot => {
                     fillEventList(dataSnapshot);
@@ -204,7 +231,8 @@ export async function atualizarEvento() {
 // e escondendo o formulário
 export function cancelarFormEvento() {
     if (confirm("Tem certeza que deseja cancelar? As alterações não serão salvas.")) {
-        currentEditingEvent = false;
+        currentEditingEvent = null;
+        currentEditingEventData = {};
         eventForm.reset();
         hideItem(eventForm);
         showItem(submitEventForm); // volta o botão de criar
@@ -250,6 +278,24 @@ export function removeEvent(key) {
         // remover o evento! Para ter essa certeza, eu chamei ela e o resto do código
         // está dentro do 'then'.
         atualizarPontuacaoDosInscritosDoEvento(key, false)
+            // Verifica as pontuações dos usuários
+            .then(async () => {
+                const inscritosSnapshot = await getDataFromDatabase(inscricoesRef);
+
+                let inscritos = [];
+                inscritosSnapshot.forEach(snap => {
+                    inscritos.push(snap);
+                })
+
+                const verificacoes = inscritos.map(async inscricaoSnap => {
+                    const uid = inscricaoSnap.key;
+                    // Verifica os eventos que o usuário está inscrito para checar
+                    // se, em algum deles, ele não tem mais ponto suficiente para participar.
+                    await checkSubscribedEventsRequiringMinimumPoints(uid);
+                })
+
+                await Promise.all(verificacoes);
+            })
             .then(_ => {
                 // Executa as duas remoções em paralelo
                 Promise.all([
@@ -258,7 +304,6 @@ export function removeEvent(key) {
                 ])
                     .then(async () => {
                         selectedItem.remove();
-                        console.log("Evento e inscrições removidos com sucesso.");
                     })
                     .catch(function (error) {
                         showError("Falha ao remover o evento/inscrições: ", error);
@@ -299,10 +344,12 @@ export function fecharListaInscritos() {
 // Id do evento que está atualmente sendo editado.
 // `null` se não houver evento sendo editado
 let currentEditingEvent = null
+let currentEditingEventData = {};
 
 //botão para editar evento
 export function updateEvent(key) {
     currentEditingEvent = key;
+    currentEditingEventData = {};
     const eventRef = refFromDatabase(EventsDatabaseRef, key);
 
     eventForm.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -328,6 +375,9 @@ export function updateEvent(key) {
         document.getElementById('subida').value = value.subida || '';
         document.getElementById('descida').value = value.descida || '';
         document.getElementById('trajeto').value = value.trajeto || '';
+        // Escreve a pontuação + a palavra "ponto" ou "pontos" dependendo do número
+        document.getElementById("eventoPontuacaoNecessaria").innerHTML
+            = `${value.pontuacaoNecessaria || 0} ${Number(value.pontuacaoNecessaria) === 1 ? 'ponto' : 'pontos'}`;
 
         // Guarda a key para usar depois na atualização
         eventForm.dataset.editingKey = key;
@@ -432,9 +482,122 @@ export function exportarInscricoesCSV(eventId, nomeEvento = 'Evento', dataInicio
         });
 }
 
+export function exportarInscricoesXLSX(eventId, nomeEvento = 'Evento', dataInicioEvento = null) {
+    const inscricoesRef = refFromDatabase(InscricoesDatabaseRef, eventId);
+
+    getDataFromDatabase(inscricoesRef)
+        .then(snapshot => {
+            if (!snapshot.exists()) {
+                alert(`Nenhuma inscrição encontrada para "${nomeEvento}".`);
+                return;
+            }
+
+            const inscricoes = [];
+            const promises = [];
+
+            snapshot.forEach(childSnap => {
+                const uid = childSnap.key;
+                const inscricaoData = childSnap.val();
+
+                if (!uid) {
+                    console.warn("Inscrição sem UID:", inscricaoData);
+                    return;
+                }
+
+                // Filtra pelo timestamp da inscrição se dataInicioEvento foi informada
+                if (dataInicioEvento && inscricaoData.dataInscricao) {
+                    if (inscricaoData.dataInscricao < new Date(dataInicioEvento).getTime()) {
+                        return; // ignora inscrições antes do início do evento
+                    }
+                }
+
+                const p = getDataFromDatabase(UsersDatabaseRef, uid).then(userSnap => {
+                    const userData = userSnap.val() || {};
+                    inscricoes.push({
+                        nome: userData.nome || '---',
+                        email: userData.email || inscricaoData.email || '---',
+                        turma: userData.userClass || inscricaoData.userClass || '---',
+                        curso: userData.userCourse || inscricaoData.userCourse || '---',
+                        cpf: userData.userId || inscricaoData.userId || '---',
+                        uid: uid,
+                        dataInscricao: inscricaoData.dataInscricao || null
+                    });
+                });
+
+                promises.push(p);
+            });
+
+            return Promise.all(promises).then(() => inscricoes);
+        })
+        .then(inscricoes => {
+            if (!inscricoes || inscricoes.length === 0) {
+                alert('Nenhuma inscrição válida encontrada.');
+                return;
+            }
+
+            // Ordena por data de inscrição (mais antiga primeiro)
+            inscricoes.sort((a, b) => (a.dataInscricao || 0) - (b.dataInscricao || 0));
+
+            function formatarData(ts) {
+                if (!ts) return '---';
+                return new Date(ts).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', hour12: false });
+            }
+
+            // Prepara a matriz de dados para a planilha
+            const sheetData = [];
+
+            // Adiciona a linha de Cabeçalho
+            sheetData.push([" ", "Nome", "Email", "Turma", "Curso", "CPF", "Data de Inscrição"]);
+
+            // Adiciona as linhas de dados
+            inscricoes.forEach((i, index) => {
+                sheetData.push([
+                    index + 1,
+                    i.nome,
+                    i.email,
+                    i.turma,
+                    i.curso,
+                    i.cpf || '---',
+                    formatarData(i.dataInscricao)
+                ]);
+            });
+
+            // Converte a matriz de dados em uma planilha
+            const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+
+            // Ajusta automaticamente a largura das colunas
+            worksheet['!cols'] = [
+                {wch: 5},  // #
+                {wch: 30}, // Nome
+                {wch: 35}, // Email
+                {wch: 15}, // Turma
+                {wch: 25}, // Curso
+                {wch: 15}, // CPF
+                {wch: 20}  // Data
+            ];
+
+            // Cria um arquivo e adiciona a planilha a ele
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Inscrições");
+
+            // Gera o arquivo e aciona o download automático
+            const nomeArquivo = `${nomeEvento.replace(/\s+/g, '_')}_inscricoes.xlsx`;
+            XLSX.writeFile(workbook, nomeArquivo);
+        })
+        .catch(error => {
+            console.error('Erro ao buscar inscrições:', error);
+            enviarErroParaSentry(error);
+            alert('Erro ao buscar inscrições.');
+        });
+}
+
 // Id do evento que está listando os inscritos atualmente.
 // `null` se não estiver listando nada.
 let currentListingSubscribeEvent = null
+
+// Se está atualizando a lista de inscritos. Se sim, não
+// deixa atualizar novamente.
+let atualizandoListaInscritos = false;
 
 /**
  * Botão para listar inscritos e registrar presença (fator K).
@@ -444,6 +607,7 @@ let currentListingSubscribeEvent = null
  *                   esse valor é falso.
  */
 export function listarInscritos(eventId, onlyUpdate = false) {
+    if (atualizandoListaInscritos) return; // evita que a função seja chamada novamente enquanto já está atualizando
     currentListingSubscribeEvent = eventId;
     const inscritosContainer = document.getElementById("inscritosContainer");
     const inscritosList = document.getElementById("inscritosList");
@@ -454,6 +618,7 @@ export function listarInscritos(eventId, onlyUpdate = false) {
         return;
     }
 
+    atualizandoListaInscritos = true;
     if (!onlyUpdate) {
         inscritosContainer.scrollIntoView({ behavior: "smooth", block: "start" });
         inscritosContainer.classList.remove("startHidden");
@@ -559,8 +724,38 @@ export function listarInscritos(eventId, onlyUpdate = false) {
             console.error("Erro ao carregar inscritos:", err);
             enviarErroParaSentry(err);
             inscritosList.innerHTML = "<p>Erro ao carregar inscritos.</p>";
+        }).finally(() => {
+            // Quando tudo acabar, volta a permitir atualizações da lista
+            atualizandoListaInscritos = false;
         });
 }
 
+/**
+ * Edita a pontuação necessária para poder se inscrever no evento que está sendo criado/editado.
+ * @param novaPontuacao nova pontuação
+ */
+export function editarPontuacaoNecessariaEventoAtual(novaPontuacao) {
+    currentEditingEventData.pontuacaoNecessaria = novaPontuacao;
+    // Atualiza visualmente
+    document.getElementById("eventoPontuacaoNecessaria").innerHTML = `${novaPontuacao} ${Number(novaPontuacao) === 1 ? 'ponto' : 'pontos'}`;
+}
 
+/**
+ * Pega a pontuação necessária para se inscrever no evento que está sendo criado/editado.
+ * @return {number | null} pontuação necessária
+ */
+export function getPontuacaoNecessariaEventoAtual() {
+    // Se estiver criando/editando e estiver salva a pontuação, retorna
+    if (currentEditingEventData.pontuacaoNecessaria) return currentEditingEventData.pontuacaoNecessaria;
 
+    if (!currentEditingEvent) return 0;
+    return getPontuacaoMinimaParaEvento(currentEditingEvent);
+}
+
+/**
+ * Retorna se o usuário está editando um evento.
+ * @return {boolean} Se o usuário está editando um evento.
+ */
+export function isUserEditingEvent() {
+    return currentEditingEvent !== null;
+}

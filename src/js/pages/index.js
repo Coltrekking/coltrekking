@@ -2,6 +2,22 @@
  * Código do index.html
  */
 
-import {signInWithGoogle} from '../auth.js';
+import {isAdmin, signInWithGoogle, waitForUser} from '../auth.js';
+import {Auth} from "/src/config/firebase";
+import {onAuthStateChanged} from "firebase/auth";
 
-document.getElementById("logoGoogle").addEventListener("click", signInWithGoogle);
+// Se o usuário já estiver logado, redireciona ele para a homePage
+onAuthStateChanged(Auth, async (user) => {
+    // Verifica se o usuário já está logado
+    if (user) {
+        // Espera pelo usuário
+        await waitForUser()
+        // Redireciona para a devida página
+        if (isAdmin())
+            window.location.href = "/homeAdmin.html";
+        else
+            window.location.href = "/homePage.html";
+    }
+})
+document.getElementById("btnLogarGoogle").addEventListener("click", signInWithGoogle);
+

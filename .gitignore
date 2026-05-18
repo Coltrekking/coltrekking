@@ -1,5 +1,5 @@
 # Dados sensíveis (principalmente do Firebase)
-# Tome cuidado com eles!
+# Tome cuidado com eles, por mais que já haja segurança
 .env
 
 # Site resultante

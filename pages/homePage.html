@@ -12,50 +12,58 @@
 
 <body>
     <div id="homePage" class="center">
-        <img src="/assets/images/coltrekkingHorizontal.png" id="imgHP" alt="Logo Coltrekking">
-        <hr>
-        <h3 class="center">Bem-vindo(a) a HomePage!</h3>
+
+        <header>
+            <img src="/assets/images/coltrekkingHorizontal.png" id="imgHP" alt="Logo Coltrekking">
+            <hr>
+        </header>
+
         <div id="userInfo" class="center">
-            <img id="userImg">
-            <p id="userName"></p>
-            <p id="userEmail"></p>
-            <!-- informações adicionais (e essenciais) do usuário -->
-            <p id="userId">CPF: </p>
-            <p id="userClass">Turma: </p>
-            <p id="userCourse">Curso: </p>
+            <div class="user-header">
+                <img id="userImg" alt="Imagem do usuário">
+                <h3 id="mensagem-boas-vindas" class="center">Bem-vindo(a), André!</h3>
+            </div>
             <p id="userPoints">Pontuação: 0</p>
 
             <button id="signOutBtn" class="alternative">Sair</button>
             <button id="editPersonalInfoBtn" class="alternative">Editar Informações Pessoais</button>
             <button id="deleteAccountBtn" class="danger">Excluir conta</button>
 
-            <form id="editPersonalInfoForm" class="startHidden">
-                <label>CPF:</label><br>
-                <input type="text" id="cpf" required><br>
+            <div class="modal-overlay" style="display: none;" id="editPersonalInfoModal">
+                <form class="modal-content" id="editPersonalInfoForm">
+                    <label>Nome:</label>
+                    <p id="userName"></p>
 
-                <label>Turma:</label><br>
-                <input type="text" id="turma" required><br>
+                    <label>Email:</label>
+                    <p id="userEmail"></p>
 
-                <label>Curso:</label><br>
-                <select id="curso" required>
-                    <option value="">Selecione</option>
-                    <option value="Análises Clínicas">Análises Clínicas</option>
-                    <option value="Química">Química</option>
-                    <option value="Desenvolvimento de Sistemas">Desenvolvimento de Sistemas</option>
-                    <option value="Automação Industrial">Automação Industrial</option>
-                    <option value="Eletrônica">Eletrônica</option>
-                </select><br>
+                    <label>CPF:</label><br>
+                    <input type="text" id="cpf" required><br>
 
-                <button type="submit" id="submitProfileForm">Salvar</button>
-                <button id="cancelEditBtn" type="button">Cancelar</button>
-            </form>
+                    <label>Turma:</label><br>
+                    <input type="text" id="turma" required><br>
+
+                    <label>Curso:</label><br>
+                    <select id="curso" style="width: auto;" required>
+                        <option value="">Selecione</option>
+                        <option value="Análises Clínicas">Análises Clínicas</option>
+                        <option value="Química">Química</option>
+                        <option value="Desenvolvimento de Sistemas">Desenvolvimento de Sistemas</option>
+                        <option value="Automação Industrial">Automação Industrial</option>
+                        <option value="Eletrônica">Eletrônica</option>
+                    </select><br>
+
+                    <button type="submit" id="submitProfileForm">Salvar</button>
+                    <button id="cancelEditBtn" type="button">Cancelar</button>
+                </form>
+            </div>
         </div>
 
         <hr>
         <div class="tab-bar">
             <button id="eventBtn" class="tab-button active">Eventos</button>
             <button id="photoBtn" class="tab-button">Photos</button>
-            <button id="blockListBtn" class="tab-button">Lista de Bloqueios</button>
+            <button id="blockListBtn" class="tab-button">Bloqueios</button>
             <button id="instructionBtn" class="tab-button">Instruções Gerais</button>
         </div>
 

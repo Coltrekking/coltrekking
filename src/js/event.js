@@ -8,27 +8,29 @@ import {
     loading,
     getDataFromDatabase,
     InscricoesDatabaseRef,
-    getDataFromUser, EventsDatabaseRef, refFromUser, getAttributeFromUser
+    getDataFromUser, EventsDatabaseRef, refFromUser, getAttributeFromUser, userId
 } from "./utils";
+import {abrirModal, EntradasModal} from "./modal";
 import {currentUserHasAdminPower, isAdmin} from "./auth";
-import {exportarInscricoesCSV, listarInscritos, removeEvent, updateEvent} from "./eventAdmin";
+import {exportarInscricoesCSV, exportarInscricoesXLSX, listarInscritos, removeEvent, updateEvent} from "./eventAdmin";
 import {remove, set, update} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
 
 /**
  * Retorna a quantidade mínima de pontos para se inscrever
- * em eventos da dificuldade dada.
- * @param dificuldade dificuldade do evento
- * @return {number} pontuação mínima necessária para se inscrever em eventos dessa dificuldade
+ * no evento dado.
+ * @param eventoId id do evento
+ * @return {number} pontuação mínima necessária para se inscrever no evento dado.
  */
-export function getPontuacaoMinimaParaDificuldade(dificuldade) {
-    switch (dificuldade) {
-        //case "Médio (acampas)":
-        //    return 50;
-        // NOTA: Se houver mais dificuldades, adicione-as aqui
+export async function getPontuacaoMinimaParaEvento(eventoId) {
+    const snap = await getDataFromDatabase(EventsDatabaseRef, eventoId);
+    // Verifica se o snap existe
+    if (snap && snap.exists() && snap.val().pontuacaoNecessaria !== null) {
+        // Verifica se há uma dificuldade definida
+        if (snap.val().pontuacaoNecessaria === null || snap.val().pontuacaoNecessaria === undefined) return 0; // dificuldade padrão
 
-        default:
-            return 0; // Sem requisito para outras dificuldades
+        // Retorna a pontuação necessária definida para o evento
+        return snap.val().pontuacaoNecessaria;
     }
 }
 
@@ -36,14 +38,13 @@ export function getPontuacaoMinimaParaDificuldade(dificuldade) {
  * Verifica a dificuldade do evento. Se o usuário não tiver a pontuação
  * que precisa para participar do evento, mostra um aviso para ele.
  * @param userUid UID do usuário
- * @param dificuldade dificuldade do evento
+ * @param pontuacaoNecessaria pontuação necessária para participar do evento
  * @param eventDate data do evento, para mostrar o aviso apenas se o evento ainda não tiver acontecido
  * @param eventCard elemento eventCard do evento, para mostrar o aviso
  */
-function checkForDifficult(userUid, dificuldade, eventDate, eventCard) {
+function checkForDifficult(userUid, pontuacaoNecessaria, eventDate, eventCard) {
     getAttributeFromUser(userUid, "pontos").then(pontuacaoUsuario => {
         // Se não tiver pontos suficientes, mostra um aviso.
-        const pontuacaoNecessaria = getPontuacaoMinimaParaDificuldade(dificuldade);
         if (pontuacaoUsuario < pontuacaoNecessaria) {
             if (eventDate && Date.now() > eventDate.getTime()) return; // se o evento já passou, não mostra aviso
 
@@ -138,7 +139,28 @@ function fillEventListAsAdmin(dataSnapshot) {
             const exportarCSV = document.createElement('button');
             exportarCSV.textContent = 'Baixar Planilha de Inscrições';
             exportarCSV.className = 'alternative eventBtn';
-            exportarCSV.onclick = () => exportarInscricoesCSV(item.key, value.nome);
+            exportarCSV.onclick = () => {
+                // Pergunta ao usuário o formato para exportar
+                abrirModal(
+                    "Exportar Inscrições",
+                    "Deseja exportar em qual formato?",
+                    EntradasModal.SELECAO,
+                    {opcoes:
+                        {"xlsx": "Excel/Google Planilhas (.xlsx)", "csv": "CSV (.csv)"}
+                    }
+                ).then(resultado => {
+                    if (resultado) {
+                        switch (resultado) {
+                            case "csv":
+                                exportarInscricoesCSV(item.key, value.nome);
+                                break;
+                            case "xlsx":
+                                exportarInscricoesXLSX(item.key, value.nome);
+                                break;
+                        }
+                    }
+                });
+            }
 
             eventCard.appendChild(removeBtn);
             eventCard.appendChild(editBtn);
@@ -150,13 +172,65 @@ function fillEventListAsAdmin(dataSnapshot) {
         eventCard.appendChild(unsubscribeBtn);
 
         // Verifica a dificuldade (para mostrar o aviso se precisar)
-        checkForDifficult(user.uid, value.dificuldade, eventDate, eventCard);
+        let pontuacaoNecessaria = value.pontuacaoNecessaria;
+        if (pontuacaoNecessaria === null || pontuacaoNecessaria === undefined) pontuacaoNecessaria = 0; // dificuldade padrão
+        checkForDifficult(user.uid, pontuacaoNecessaria, eventDate, eventCard);
 
         eventContainer.appendChild(eventCard);
     });
 
     hideItem(loading);
 
+}
+
+
+// Estados do botão de inscrição/desinscrição
+const SubscribeButtonStates = Object.freeze({  // O `Object.freeze()` certifica que não é possível atualizar
+    INSCREVER: 'Inscrever',
+    DESINSCREVER: 'Desinscrever',
+    EVENTO_REALIZADO: 'eventoRealizado',
+    NAO_HABILITADO: 'naoHabilitado'
+    // Lembre-se: se adicionar um novo estado, atualize a função setSubscribeButtonState() para refletir o estado visual do botão
+});
+/**
+ * Define o estado do botão de inscrição/desinscrição a partir do estado dado.
+ * @param button o elemento do botão a ser modificado
+ * @param state estado do botão, dado pelos estados do SubscribeButtonStates
+ */
+function setSubscribeButtonState(button, state) {
+    if (!button)
+        throw new Error("Botão dado para definir o estado é inválido!")
+    switch (state) {
+        case SubscribeButtonStates.INSCREVER: {
+            button.textContent = 'Inscrever-se';
+            button.className = 'primary eventBtn';
+            //button.style.backgroundColor = '#ccc';
+            button.style.backgroundColor = '';
+            button.style.cursor = 'pointer';
+            button.disabled = false;
+            break;
+        }
+        case SubscribeButtonStates.DESINSCREVER: {
+            button.textContent = 'Cancelar inscrição';
+            button.className = 'danger eventBtn';
+            button.style.display = 'none';
+            break;
+        }
+        case SubscribeButtonStates.EVENTO_REALIZADO: {
+            button.style.backgroundColor = '#008000';
+            button.textContent = 'Evento realizado';
+            button.disabled = true;
+            button.style.cursor = 'not-allowed';
+            break;
+        }
+
+        case SubscribeButtonStates.NAO_HABILITADO: {
+            button.style.backgroundColor = '#ccc';
+            button.disabled = true;
+            button.style.cursor = 'not-allowed';
+            break;
+        }
+    }
 }
 
 /**
@@ -169,10 +243,9 @@ function fillEventListAsAdmin(dataSnapshot) {
  */
 function createSubscribeButton(evento, key, userUid, eventDate) {
     const subscribeBtn = document.createElement('button');
-    subscribeBtn.textContent = 'Inscrever-se';
-    subscribeBtn.className = 'primary eventBtn';
+    subscribeBtn.id = `subscribeBtn-${key}`;
+    setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.INSCREVER);
     subscribeBtn.disabled = true; // começa desativado
-    subscribeBtn.style.backgroundColor = '#ccc';
     subscribeBtn.style.cursor = 'not-allowed';
 
     // pega a hora do evento
@@ -187,26 +260,19 @@ function createSubscribeButton(evento, key, userUid, eventDate) {
 
         // se ainda não chegou a hora de inscrição
         if (now < eventStart.getTime()) {
-            subscribeBtn.disabled = true;
-            subscribeBtn.style.backgroundColor = '#ccc';
-            subscribeBtn.style.cursor = 'not-allowed';
+            setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.NAO_HABILITADO);
             return;
         }
 
         // se a data do evento já passou
         if (eventDate && now > eventDate.getTime()) {
-            subscribeBtn.disabled = true;
-            subscribeBtn.style.backgroundColor = '#008000';
-            subscribeBtn.style.cursor = 'not-allowed';
-            subscribeBtn.textContent = 'Evento realizado';
+            setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.EVENTO_REALIZADO);
             clearInterval(subscriptionTimer);
             return;
         }
 
         // se está no período válido de inscrição
-        subscribeBtn.disabled = false;
-        subscribeBtn.style.backgroundColor = '';
-        subscribeBtn.style.cursor = 'pointer';
+        setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.INSCREVER);
     }
 
     // chama a função a cada segundo até habilitar
@@ -214,9 +280,8 @@ function createSubscribeButton(evento, key, userUid, eventDate) {
     checkSubscriptionTime(); // checa imediatamente
 
     const unsubscribeBtn = document.createElement('button');
-    unsubscribeBtn.textContent = 'Cancelar inscrição';
-    unsubscribeBtn.className = 'danger eventBtn';
-    unsubscribeBtn.style.display = 'none';
+    unsubscribeBtn.id = `unsubscribeBtn-${key}`;
+    setSubscribeButtonState(unsubscribeBtn, SubscribeButtonStates.DESINSCREVER);
 
     // verifica se o usuário já está inscrito
     getDataFromDatabase(InscricoesDatabaseRef, key + '/' + userUid)
@@ -228,10 +293,7 @@ function createSubscribeButton(evento, key, userUid, eventDate) {
                 // checa se a data do evento já passou
                 const eventDate = evento.data ? new Date(evento.data) : null;
                 if (eventDate && Date.now() > eventDate.getTime()) {
-                    unsubscribeBtn.disabled = true;
-                    unsubscribeBtn.style.backgroundColor = '#008000';
-                    unsubscribeBtn.style.cursor = 'not-allowed';
-                    unsubscribeBtn.textContent = 'Evento realizado';
+                    setSubscribeButtonState(unsubscribeBtn, SubscribeButtonStates.EVENTO_REALIZADO);
                 }
             }
         });
@@ -287,7 +349,9 @@ function fillEventListAsUser(dataSnapshot) {
     const uid = localStorage.getItem('uid');
     if (!uid) {
         console.warn('UID não encontrado no localStorage.');
+        enviarErroParaSentry("UID não foi encontrado no localStorage. Por isso, os eventos não serão carregados.");
         hideItem(loading);
+        alert("Reinicie a página.");
         return;
     }
 
@@ -334,7 +398,9 @@ function fillEventListAsUser(dataSnapshot) {
                 eventCard.appendChild(unsubscribeBtn);
 
                 // Verifica a dificuldade (para mostrar o aviso se precisar)
-                checkForDifficult(uid, value.dificuldade, eventDate, eventCard);
+                let pontuacaoNecessaria = value.pontuacaoNecessaria;
+                if (pontuacaoNecessaria === null || pontuacaoNecessaria === undefined) pontuacaoNecessaria = 0; // dificuldade padrão
+                checkForDifficult(uid, pontuacaoNecessaria, eventDate, eventCard);
 
                 eventContainer.appendChild(eventCard);
             });
@@ -436,7 +502,7 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn) {
 
             // Busca dados do evento
             return getDataFromDatabase(EventsDatabaseRef, eventId)
-                .then(eventoSnap => {
+                .then(async eventoSnap => {
                     const evento = eventoSnap.val();
                     if (!evento) {
                         alert("Evento não encontrado.");
@@ -445,7 +511,7 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn) {
 
                     // Verifica pontuação mínima para eventos médios
                     const pontos = parseFloat(userData.pontos) || 0;
-                    const pontuacaoNecessaria = getPontuacaoMinimaParaDificuldade(evento.dificuldade);
+                    const pontuacaoNecessaria = await getPontuacaoMinimaParaEvento(eventId);
                     if (pontos < pontuacaoNecessaria) {
                         alert(`⚠️ Você precisa de, pelo menos, ${pontuacaoNecessaria} pontos para participar deste evento.`);
                         throw new Error("Pontuação insuficiente");
@@ -510,6 +576,11 @@ export async function unsubscribeUserFromEvent(eventId, uid) {
 
     // Remove a inscrição do usuário
     return remove(inscricaoRef)
+        .then(async () => {
+            // Verifica os eventos que o usuário está inscrito para checar
+            // se, em algum deles, ele não tem mais ponto suficiente para participar.
+            await checkSubscribedEventsRequiringMinimumPoints(uid);
+        })
         .catch(error => {
             console.error(`Erro ao remover inscrição do usuário ${user.val().nome}:`, error);
             enviarErroParaSentry(error);
@@ -517,3 +588,89 @@ export async function unsubscribeUserFromEvent(eventId, uid) {
         });
 }
 
+/**
+ * Verifica os eventos que o usuário do uid dado está inscrito
+ * e retira ele dos eventos que ele não está mais.
+ * @param uid uid do usuário que deseja atualizar
+ */
+export async function checkSubscribedEventsRequiringMinimumPoints(uid) {
+    // Obtém os eventos existentes
+    const eventsSnapshot = await getDataFromDatabase(EventsDatabaseRef);
+    if (!eventsSnapshot || !eventsSnapshot.exists())
+        throw new Error("Não foi possível obter a lista de eventos");
+
+    // Obtém os snaps dos eventos (preciso fazer isso pois o forEach
+    // não aceita comportamento assíncrono)
+    const events = [];
+    eventsSnapshot.forEach(snap => {
+        events.push(snap);
+    })
+
+    // Olha cada evento, vendo se necessita de ponto para estar nele
+    // e o usuário está nele
+    const verifications = events.map(async eventSnap => {
+        const eventId = eventSnap.key;
+        const event = eventSnap.val();
+        const pontuacaoNecessaria = event.pontuacaoNecessaria;
+
+        // Se não houver pontuação necessária, não tem motivo para olhar mais
+        if (pontuacaoNecessaria === 0) return;
+
+        // Verifica se o usuário está inscrito no evento
+        const userSubscribed = await isUserSubscribedInEvent(uid, eventId);
+        if (userSubscribed) {
+            // Se o usuário estiver presente no evento, a pontuação do evento deve ser descontada
+            const pontuacaoDoEvento =  calcularPontuacaoDoEvento(event) * ( (await isUserPresentInEvent(uid, eventId) ) ? 1 : 0);
+            const pontuacaoUsuario = (await getAttributeFromUser(uid, 'pontos')) - pontuacaoDoEvento;
+
+            // Se o usuário tiver menos pontos que o necessário, retira ele
+            if (pontuacaoUsuario < pontuacaoNecessaria) {
+                await unsubscribeUserFromEvent(eventId, uid);
+
+                // Se o usuário que foi retirado for o usuário atual, atualiza os botões de inscrever/desinscrever
+                if (uid === Auth.currentUser.uid) {
+                    const inscreverBtn = document.getElementById(`subscribeBtn-${eventId}`);
+                    inscreverBtn.style.display = "inline-block";
+
+                    const desinscreverBtn = document.getElementById(`unsubscribeBtn-${eventId}`);
+                    hideItem(desinscreverBtn);
+                }
+            }
+        }
+    })
+
+    // Espera todas as verificações
+    await Promise.all(verifications);
+}
+
+/**
+ * Verifica se o usuário do uid dado está inscrito no evento do id dado.
+ * @param {String} userUid uid do usuário
+ * @param {String} eventId id do evento
+ * @return {Boolean} se o usuário está ou não inscrito no evento
+ */
+async function isUserSubscribedInEvent(userUid, eventId) {
+    const inscricaoEvento = await getDataFromDatabase(InscricoesDatabaseRef, eventId + '/' + userUid);
+
+    // Se esse campo existe, o usuário está inscrito.
+    return inscricaoEvento && inscricaoEvento.exists();
+}
+
+/**
+ * Verifica se o usuário do uid dado está inscrito e presente no evento do id dado.
+ * @param {String} userUid uid do usuário
+ * @param {String} eventId id do evento
+ * @return {Boolean} se o usuário está ou não presente e inscrito no evento
+ */
+async function isUserPresentInEvent(userUid, eventId) {
+    const inscricaoEvento = await getDataFromDatabase(InscricoesDatabaseRef, eventId + '/' + userUid);
+
+    // Verifica se está inscrito
+    if (inscricaoEvento && inscricaoEvento.exists()) {
+        // Verifica se setá presente
+        return inscricaoEvento.val().presenca === true;
+    }
+
+    // Se chegou até aqui, o usuário não está inscrito ou não está presente
+    return false;
+}

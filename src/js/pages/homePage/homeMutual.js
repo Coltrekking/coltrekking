@@ -12,8 +12,9 @@ import {
     showItem,
     editPersonalInfoForm,
     userId, userClass, userCourse, validarCPF, getDataFromDatabase, PhotosDatabaseRef, getDataFromUser,
-    EventsDatabaseRef, refFromUser
+    EventsDatabaseRef, refFromUser, editPersonalInfoModal, editInfoSubmitBtn
 } from "../../utils";
+import {abrirAviso} from "../../modal.js";
 import {openTab} from "../../tabs";
 import {fillEventList} from "../../event";
 import {onValue, update} from "firebase/database";
@@ -260,7 +261,6 @@ async function loadCommon() {
     // Verifica a autenticação do usuário
     checkAuth()
 
-
     // Redirect logic after user is loaded
     if (isAdmin()) {
         if (!window.location.pathname.includes("Admin")) {
@@ -281,9 +281,8 @@ async function loadCommon() {
 
 
     //tratar o envio do formulário de edição de informações pessoais
-    if (editPersonalInfoForm) {
-        editPersonalInfoForm.onsubmit = function (event) {
-            event.preventDefault();
+    if (editInfoSubmitBtn) {
+        editInfoSubmitBtn.onclick = function () {
             const user = Auth.currentUser;
             if (!user) return;
 
@@ -311,7 +310,7 @@ async function loadCommon() {
                 if (userClass) userClass.innerHTML = `Turma: ${turma}`;
                 if (userCourse) userCourse.innerHTML = `Curso: ${curso}`;
 
-                hideItem(editPersonalInfoForm);
+                hideItem(editPersonalInfoModal);
             }).catch(err => {
                 console.error('Erro ao atualizar informações:', err);
                 enviarErroParaSentry(err);
@@ -320,6 +319,30 @@ async function loadCommon() {
             });
         };
     }
+
+    // Avisa para o usuár
+    warnIfCantSubscribeToEvents();
+}
+
+/**
+ * Se o usuário não tiver definido os atributos necessários (CPF, turma ou curso), ]
+ * exibe um alerta pedindo para ele preencher essas informações.
+ */
+function warnIfCantSubscribeToEvents() {
+    getDataFromUser(Auth.currentUser.uid)
+        .then(snapshot => {
+            const userData = snapshot.val();
+
+            if (!userData) return; // Se não tiver carregado os dados, só pula o aviso
+
+            // Se o usuário não tiver preenchido CPF, turma ou curso, exibe um aviso.
+            if (!userData.userId || !userData.userClass || !userData.userCourse) {
+                abrirAviso("Para conseguir se inscrever nos eventos, preencha seu CPF, turma e curso na seção de informações pessoais.").then();
+            }
+        }).catch(err => {
+            console.error('Erro ao verificar dados do usuário:', err);
+            enviarErroParaSentry(err);
+        });
 }
 
 // Carrega o que tem em comum

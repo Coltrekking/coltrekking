@@ -2,7 +2,6 @@ import {Auth, Database} from "../config/firebase";
 import {child, ref, get} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
 
-
 // Referências dos elementos da página
 export let loading = document.getElementById('loading');
 export let authElement = document.getElementById('auth');
@@ -10,6 +9,7 @@ export let homePage = document.getElementById('homePage');
 export let userEmail = document.getElementById('userEmail');
 export let userImg = document.getElementById('userImg');
 export let userName = document.getElementById('userName');
+export let welcome_message = document.getElementById('mensagem-boas-vindas');
 
 export let userId = document.getElementById('userId');
 export let userClass = document.getElementById('userClass');
@@ -18,8 +18,12 @@ export let cpf = document.getElementById('cpf');
 export let turma = document.getElementById('turma');
 export let curso = document.getElementById('curso');
 export let editPersonalInfoForm = document.getElementById('editPersonalInfoForm');
+export let editInfoSubmitBtn = document.getElementById("editInfoSubmitBtn");
+export let editPersonalInfoModal = document.getElementById('editPersonalInfoModal');
+// Guarda valores iniciais ao abrir o editor para poder restaurar caso o usuário cancele
+export let editPersonalInfoInitial = { cpf: "", turma: "", curso: "" };
 
-//definindo referências para os eventos
+//definindo referências para os elementos do html de evento
 export let eventForm = document.getElementById('eventForm');
 export let submitEventForm = document.getElementById('submitEventForm');
 export let editEventForm = document.getElementById('editEventForm');
@@ -30,7 +34,6 @@ export const EventsDatabaseRef = refFromDatabase("event/");
 export const InscricoesDatabaseRef = refFromDatabase("inscricoes/");
 export const PhotosDatabaseRef = refFromDatabase("photos/");
 export const UsersDatabaseRef = refFromDatabase("users/");
-
 // Remove elementos da aba
 export function hideItem(item) {
     if (item && item.style) {
@@ -50,6 +53,8 @@ export function showAuth() {
     hideItem(homePage);
     showItem(authElement);
 }
+
+
 
 /**
  * Retorna a referência da célula do banco de dados no caminho dado.
@@ -157,6 +162,8 @@ export function showUserContent(user) {
     // Exibe dados básicos do Auth
     if (userImg) userImg.src = user.photoURL ? user.photoURL : 'images/unknownUser.png';
     if (userName) userName.innerHTML = user.displayName || '';
+    let firstName = String(user.displayName).split(" ", 1)[0];
+    if (welcome_message) welcome_message.innerHTML = "Bem-vindo(a), " + firstName + "!";
     if (userEmail) userEmail.innerHTML = user.email || '';
 
     // Busca dados adicionais no BD
@@ -195,19 +202,47 @@ export function editPersonalInfo() {
         const data = snapshot.val() || {};
 
         // Preencher formulário com valores atuais
-        document.getElementById('cpf').value = data.userId || "";
-        document.getElementById('turma').value = data.userClass || "";
-        document.getElementById('curso').value = data.userCourse || "";
+        const cpfEl = document.getElementById('cpf');
+        const turmaEl = document.getElementById('turma');
+        const cursoEl = document.getElementById('curso');
+
+        // Salva os valores iniciais para possibilitar restauração caso o usuário cancele
+        editPersonalInfoInitial.cpf = data.userId || "";
+        editPersonalInfoInitial.turma = data.userClass || "";
+        editPersonalInfoInitial.curso = data.userCourse || "";
+
+        if (cpfEl) cpfEl.value = editPersonalInfoInitial.cpf;
+        if (turmaEl) turmaEl.value = editPersonalInfoInitial.turma;
+        if (cursoEl) cursoEl.value = editPersonalInfoInitial.curso;
     });
 
-    showItem(editPersonalInfoForm);
+    editPersonalInfoModal.style.display = "flex";
 }
 
 //cancelar edição de informações pessoais
 export function cancelEdit() {
-    if (!editPersonalInfoForm) return;
-    hideItem(editPersonalInfoForm);
-    editPersonalInfoForm.reset();
+    // Esconde o modal e restaura os valores iniciais.
+    hideItem(editPersonalInfoModal);
+
+    // Se ainda for um <form> com reset(), usa o reset nativo.
+    if (editPersonalInfoForm && typeof editPersonalInfoForm.reset === 'function') {
+        try {
+            editPersonalInfoForm.reset();
+            return;
+        } catch (e) {
+            // segue para a restauração manual
+            console.warn('form.reset() falhou, restaurando campos manualmente', e);
+        }
+    }
+
+    // Caso o editor tenha sido transformado em <div> (sem reset), restaura campos individuais
+    const cpfEl = document.getElementById('cpf');
+    const turmaEl = document.getElementById('turma');
+    const cursoEl = document.getElementById('curso');
+
+    if (cpfEl) cpfEl.value = editPersonalInfoInitial.cpf || "";
+    if (turmaEl) turmaEl.value = editPersonalInfoInitial.turma || "";
+    if (cursoEl) cursoEl.value = editPersonalInfoInitial.curso || "";
 }
 
 
@@ -265,6 +300,10 @@ export function showError(prefix, error) {
         enviarErroParaSentry(error);
     }
 }
+
+
+
+
 
 //let actionCodeSettings = {
 //    url: 'coltrekking-app-c3026.firebaseapp.com'

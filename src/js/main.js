@@ -11,25 +11,28 @@
 // capturar erros que possam acontecer a qualquer momento.
 import * as Sentry from "@sentry/browser";
 
-Sentry.init({
-    dsn: "https://905b41850b469eedf58c6cb003519961@o4511315340754944.ingest.us.sentry.io/4511315348422656",
-    integrations: [
-        Sentry.replayIntegration(),
-    ],
+// Só inicializa o Sentry se já não estiver inicializado e se
+// não estiver no localhost
+if ( !Sentry.isInitialized() && !window.location.href.includes("localhost")) {
+    Sentry.init({
+        dsn: "https://905b41850b469eedf58c6cb003519961@o4511315340754944.ingest.us.sentry.io/4511315348422656",
+        integrations: [
+            Sentry.replayIntegration(),
+        ],
 
-    // Session Replay (gravação de replay) //
+        // Session Replay (gravação de replay) //
 
-    // replaysSessionSampleRate: quantos % dos usuários terão seus replays gravados (mesmo se não
-    //                           houver nenhum problema)
-    // NOTE: se, em algum momento, precisar de ver o comportamento do usuário, pode trocar esse valor.
-    //       No geral, isso não é necessário.
-    replaysSessionSampleRate: 0.0,
+        // replaysSessionSampleRate: quantos % dos usuários terão seus replays gravados (mesmo se não
+        //                           houver nenhum problema)
+        // NOTE: se, em algum momento, precisar de ver o comportamento do usuário, pode trocar esse valor.
+        //       No geral, isso não é necessário para o projeto.
+        replaysSessionSampleRate: 0.0,
 
-    // replaysOnErrorSampleRate: quantos % dos usuários terão seus replays gravados quando um erro acontecer
-    // NOTE: recomendo 100% para, sempre que houver erro, ter o replay
-    replaysOnErrorSampleRate: 1.0,
-});
-
+        // replaysOnErrorSampleRate: quantos % dos usuários terão seus replays gravados quando um erro acontecer
+        // NOTE: recomendo 100% para, sempre que houver erro, ter o replay
+        replaysOnErrorSampleRate: 1.0,
+    });
+}
 /**
  * Identifica o aluno para o Sentry. Dessa forma, os erros gerados estarão
  * ligados a esse usuário.
@@ -57,15 +60,27 @@ const errosIgnorados = [
     "auth/network-request-failed"
 ]
 export function enviarErroParaSentry(error) {
+    // Não envia erros se estiver no localhost
+    if (window.location.href.includes("localhost")) return;
+
     let containAnyIgnoredError = false;
-    for (const erroIgnorado of errosIgnorados) {
-        if (error.code.includes(erroIgnorado)) {
-            containAnyIgnoredError = true;
-            break;
+
+    // Verifica se o erro deve ser ignorado
+    if (error && error.code) {
+        for (const erroIgnorado of errosIgnorados) {
+            if (error.code.includes(erroIgnorado)) {
+                containAnyIgnoredError = true;
+                break;
+            }
         }
     }
+
+    // Se o erro não deve ser ignorado, envia para o Sentry
     if (!containAnyIgnoredError) Sentry.captureException(error);
 }
+
+/* ========================= */
+
 
 /* ========================= */
 

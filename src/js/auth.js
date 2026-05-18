@@ -12,7 +12,7 @@ import {
     refFromDatabase,
     getDataFromDatabase, UsersDatabaseRef, refFromUser, getDataFromUser
 } from "./utils"
-
+import {abrirAviso, abrirConfirmacao} from "./modal.js";
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, deleteUser, reload } from "firebase/auth";
 import {child, set, update} from "firebase/database";
 import {enviarErroParaSentry, identificarUserParaSentry} from "/src/js/main";
@@ -21,8 +21,17 @@ import {enviarErroParaSentry, identificarUserParaSentry} from "/src/js/main";
 const Roles = Object.freeze({  // O `Object.freeze()` certifica que não é possível atualizar
     UNDEFINED: undefined,                      // os cargos no meio da execução do site.
     USER: 'user',
-    ADMIN: 'admin'
-    // Lembre-se: se adicionar um novo cargo, atualize a função currentUserHasAdminPower() para refletir o poder desse novo cargo!
+    ADMIN: 'admin',
+    SUPER: 'super'
+    // Lembre-se: se adicionar um novo cargo, atualize a hierarquia dele em `RolesHierarchy` também!
+});
+
+const RolesHierarchy = Object.freeze({
+    [Roles.UNDEFINED]: 0,
+    [Roles.USER]: 1,
+    [Roles.ADMIN]: 2,
+    [Roles.SUPER]: 99 // cargo máximo
+    // Se adicionar um novo cargo, defina a hierarquia dele aqui (quanto maior o número, mais poder)
 });
 
 // Traduz o conteúdo do site para português
@@ -37,7 +46,7 @@ let userLoadedPromise = null;
 let resolveUserLoaded = null;
 
 // Carrega o usuário
-// await waitForUser(); // Removed to avoid blocking module load on index.html
+// await waitForUser(); // Removido para evitar bloquear o carregamento do módulo
 // Verifica se ele está autenticado
 checkAuth()
 
@@ -292,7 +301,7 @@ export function signInWithGoogle() {
         })
         .then(roleSnap => {
             const role = roleSnap.val();
-            if (role === 'admin') {
+            if (hasAdminPower(role)) {
                 window.location.href = 'homeAdmin.html';
             } else {
                 window.location.href = 'homePage.html';
@@ -309,8 +318,9 @@ export function signInWithGoogle() {
 /**
  * Função que exclui a conta do usuário
  */
-export function deleteAccount() {
-    let confirmation = confirm("Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.");
+export async function deleteAccount() {
+    console.log("oi")
+    let confirmation = await abrirConfirmacao("Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.");
     if (confirmation) {
         showItem(loading);
         deleteUser(Auth.currentUser).then(function() {
@@ -411,16 +421,22 @@ export function loadUsers() {
                 row.appendChild(nameElem);
 
                 let actionBtn;
-                if (user.role !== "admin") {
-                    actionBtn = document.createElement("button");
-                    actionBtn.textContent = "Promover a Admin";
-                    actionBtn.className = "primary";
-                    actionBtn.onclick = () => promoteToAdmin(user.uid);
+                actionBtn = document.createElement("button");
+                // Se o usuário tiver cargo SUPER, o cargo dele não pode ser alterado.
+                if (getRolePower(user.role) !== getRolePower(Roles.SUPER)) {
+                    if (getRolePower(user.role) < getRolePower(Roles.ADMIN)) {
+                        actionBtn.textContent = "Promover a Admin";
+                        actionBtn.className = "primary";
+                        actionBtn.onclick = () => promoteToAdmin(user.uid);
+                    } else {
+                        actionBtn.textContent = "Remover Admin";
+                        actionBtn.className = "danger";
+                        actionBtn.onclick = () => demoteFromAdmin(user.uid);
+                    }
                 } else {
-                    actionBtn = document.createElement("button");
-                    actionBtn.textContent = "Remover Admin";
-                    actionBtn.className = "danger";
-                    actionBtn.onclick = () => demoteFromAdmin(user.uid);
+                    actionBtn.textContent = "Sem Permissão";
+                    actionBtn.className = "unable";
+                    actionBtn.onclick = () => abrirAviso("Este usuário tem o cargo máximo e não pode ser promovido ou rebaixado.");
                 }
 
                 row.appendChild(actionBtn);
@@ -436,7 +452,6 @@ export function loadUsers() {
         .catch(err => {
             console.error("Erro ao carregar usuários:", err);
             enviarErroParaSentry(err);
-
         });
 }
 
@@ -470,6 +485,15 @@ function demoteFromAdmin(uid) {
 }
 
 /**
+ * Retorna o poder hierárquico de um cargo. Se o cargo não existir, retorna -1.
+ * @param {String} role cargo a ser verificado
+ * @return {number} poder hierárquico do cargo (quanto maior, mais poder), ou -1 se o cargo for inválido.
+ */
+function getRolePower(role) {
+    return RolesHierarchy[role] || -1;
+}
+
+/**
  * Verifica se o usuário atual tem poder de admin (ou seja, se ele é,
  * pelo menos, admin). Se o usuário for um cargo maior que admin, essa
  * função também retornará verdadeiro.
@@ -486,7 +510,7 @@ export function currentUserHasAdminPower() {
  * @returns {boolean} se o usuário tem poder de admin.
  */
 export function hasAdminPower(role) {
-    return role === Roles.ADMIN;
+    return getRolePower(role) >= getRolePower(Roles.ADMIN);
 }
 
 /**

@@ -13,6 +13,7 @@ import {
     showItem,
     submitEventForm
 } from "../../utils";
+import {abrirModal, abrirConfirmacao, EntradasModal} from "../../modal";
 import {toggleUserManager, loadUsers, isAdmin} from "../../auth.js";
 import {toggleBlockManager, loadBlockManager} from "../../listaBloqueiosAdmin"
 import {
@@ -21,12 +22,18 @@ import {
     addPhotoBtn,
     loadCommonEvents
 } from "./homeMutual";
-import {atualizarEvento, cancelarFormEvento, criarEvento, fecharListaInscritos} from "../../eventAdmin";
+import {
+    atualizarEvento,
+    cancelarFormEvento,
+    criarEvento, editarPontuacaoNecessariaEventoAtual,
+    fecharListaInscritos,
+    getPontuacaoNecessariaEventoAtual, isUserEditingEvent
+} from "../../eventAdmin";
 import {Auth} from "/src/config/firebase";
 import {onValue, set} from "firebase/database";
 import {onAuthStateChanged} from "firebase/auth";
-import {fillEventList} from "/src/js/event";
 
+const editEventNeededPointsBtn = document.getElementById("eventoAlterarPontuacaoNecessaria");
 
 /**
  * Popula o select que define o evento que um elemento de fotos está relacionado.
@@ -86,10 +93,39 @@ function removeLink(eventKey, linkIndex) {
 }
 
 /**
+ * Pergunta qual deve ser o valor da nova pontuação necessária para o evento atual, mostrando a pontuação atual.
+ */
+async function perguntarNovaPontuacaoNecessaria() {
+    // Caso o usuário esteja editando, confirma se o usuário realmente quer fazer isso
+    if (isUserEditingEvent()) {
+        const confirmacao = await abrirConfirmacao(
+            `Se você editar a pontuação necessária, <b>todos</b> os usuários com <b>menos pontos que a nova pontuação necessária</b> serão, automaticamente, <b>removidos do evento</b>.<br>Deseja continuar?`
+        )
+        if (!confirmacao) return; // Se o usuário cancelar, para a função
+    }
+
+    const pontuacaoEvento = await getPontuacaoNecessariaEventoAtual();
+    const resultado = await abrirModal(
+        "Pontuação Necessária para Inscrição",
+        `A pontuação necessária para se inscrever nesse evento é <b>${pontuacaoEvento}</b>.<br>Deseja alterá-la para que valor?`,
+        EntradasModal.NUMERO,
+        {
+            minNumber: 0 // define o mínimo para ser 0
+        })
+
+    // Se o resultado for null, significa que o usuário cancelou a ação, então não faz nada
+    if (resultado === null) return;
+
+    // Se chegou até aqui, o usuário colocou algo válido e confirmou a ação
+    editarPontuacaoNecessariaEventoAtual(resultado);
+}
+
+/**
  * Carrega os eventos
  */
 function loadEvents() {
     onAuthStateChanged(Auth,user => {
+        if (!user) return;
         getDataFromUser(user.uid)
             .then(_ => {
                 populateEventSelectForPhotos();
@@ -101,6 +137,7 @@ function loadEvents() {
         // Popula a lista de eventos na aba de fotos
         populateEventSelectForPhotos();
     });
+
     // Trata a exibição do formulário de eventos
     document.getElementById('createEvent').onclick = function () {
         showItem(eventForm);
@@ -162,6 +199,8 @@ function loadEvents() {
 
         addLink(eventKey, url);
     };
+
+    editEventNeededPointsBtn.onclick = async () => perguntarNovaPontuacaoNecessaria();
 }
 
 function loadPage() {
