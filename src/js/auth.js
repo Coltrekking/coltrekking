@@ -292,15 +292,12 @@ export function signInWithGoogle() {
     const provider = new GoogleAuthProvider;
 
     signInWithPopup(Auth, provider)
-        .then(result => {
-            const user = result.user;
-
+        .then(_result => {
             // Pega o role do usuário
-            return getDataFromDatabase(refFromUser(user.uid), '/role');
+            return waitForUser();
         })
-        .then(roleSnap => {
-            const role = roleSnap.val();
-            if (hasAdminPower(role)) {
+        .then(_roleSnap => {
+            if (currentUserHasAdminPower()) {
                 window.location.href = 'homeAdmin.html';
             } else {
                 window.location.href = 'homePage.html';
