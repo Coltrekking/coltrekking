@@ -145,7 +145,6 @@ export async function waitForUser(tries = 100) {
     const tryWithDelay = async (remainingTries) => {
         if (remainingTries <= 0) {
             currentUserRole = Roles.UNDEFINED;
-            console.warn("Não foi possível carregar o usuário!");
             if (resolveUserLoaded) {
                 resolveUserLoaded(Roles.UNDEFINED);
                 resolveUserLoaded = null;
@@ -534,7 +533,8 @@ export function checkAuth() {
                     }
                 }
             } else {
-                window.location.href = "index.html";
+                if (!window.location.pathname.includes("index.html"))
+                    window.location.href = "index.html";
             }
         }
     );
