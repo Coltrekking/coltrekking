@@ -6,8 +6,11 @@
     <title>Coltrekking - Home</title>
     <link rel="shortcut icon" href="/assets/images/logo.png" type="image/x-icon">
     <link rel="stylesheet" href="css/style.css">
+
+    <!-- Fontes -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Bebas+Neue&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Anton&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap">
 </head>
 
 <body>
@@ -19,18 +22,29 @@
         </header>
 
         <div id="userInfo" class="center">
-            <div class="user-header">
-                <img id="userImg" alt="Imagem do usuário">
-                <h3 id="mensagem-boas-vindas" class="center">Bem-vindo(a), André!</h3>
+            <div class="user-top-bar"> <!-- Bem Vindo & Botão de Configurações -->
+                <div class="user-header">
+                    <img id="userImg" alt="Imagem do usuário">
+                    <div>
+                        <h3 id="mensagem-boas-vindas">Bem-vindo(a), </h3>
+                    </div>
+                </div>
+
+                <button id="editPersonalInfoBtn"  type="button" class="icon-button">
+                    <!-- Eu acho que não precisa desse texto indicando que o botão é para editar as informações -->
+                    <!-- <span style="margin-top: 3px; font-size: 20px; color: forestgreen;">Editar Informações Pessoais</span> -->
+
+                    <img src="/assets/icons/config-icon.svg" alt="Editar Informações Pessoais" class="config-icon">
+                </button>
+
             </div>
-            <p id="userPoints">Pontuação: 0</p>
+
+            <p id="userPoints">Pontuação: </p>
 
             <button id="signOutBtn" class="alternative">Sair</button>
-            <button id="editPersonalInfoBtn" class="alternative">Editar Informações Pessoais</button>
-            <button id="deleteAccountBtn" class="danger">Excluir conta</button>
 
             <div class="modal-overlay" style="display: none;" id="editPersonalInfoModal">
-                <form class="modal-content" id="editPersonalInfoForm">
+                <div id="editPersonalInfoForm" class="modal-content">
                     <label>Nome:</label>
                     <p id="userName"></p>
 
@@ -53,9 +67,14 @@
                         <option value="Eletrônica">Eletrônica</option>
                     </select><br>
 
-                    <button type="submit" id="submitProfileForm">Salvar</button>
+                    <button id="deleteAccountBtn" class="danger" style="height: 5vh; width: auto; padding: 0 25px 0 25px; margin-top: 10px;">
+                        <!-- <img src="/assets/icons/delete-icon.svg" class="icon" alt="Lixeira"> -->
+                        <span>Excluir conta</span>
+                    </button>
+
+                    <button type="submit" id="editInfoSubmitBtn">Salvar</button>
                     <button id="cancelEditBtn" type="button">Cancelar</button>
-                </form>
+                </div>
             </div>
         </div>
 

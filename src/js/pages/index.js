@@ -10,6 +10,9 @@ import {onAuthStateChanged} from "firebase/auth";
 onAuthStateChanged(Auth, async (user) => {
     // Verifica se o usuário já está logado
     if (user) {
+        // Deixa a tela escura para indicar que está redirecionando (para
+        // não deixar o usuário clicar em nada)
+        document.getElementById("loginModal").style.display = "flex";
         // Espera pelo usuário
         await waitForUser()
         // Redireciona para a devida página

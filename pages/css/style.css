@@ -155,6 +155,7 @@ button {
     box-sizing: border-box;
 }
 
+/* Botão que só tem ícone*/
 .icon-button {
     background: none;
     border: none;
@@ -162,11 +163,39 @@ button {
     height: auto;
     margin: 0;
     padding: 0 0 0 10px;
+    flex-shrink: 0;
+    cursor: pointer;
 }
 
 .icon-button > img {
     height: 1.2em;
     width: auto;
+}
+
+.icon {
+    width: auto;
+    height: 1.2em;
+    margin: 0 0 -3px;
+}
+
+/* Botão com Ícone + Texto */
+.button-iconed {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+
+    width: auto;
+    height: auto;
+
+    margin-top: 10px;
+    font-size: 1.3em;
+    box-sizing: border-box;
+}
+
+.button-iconed > span {
+    line-height: 1;
+    display: inline-block;
 }
 
 button:hover {
@@ -219,12 +248,46 @@ p {
     border-radius: 100%;
 }
 
+.user-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    gap: 15px;
+    margin-bottom: 10px;
+}
 
 .user-header {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 12px;
+    flex-wrap: wrap;
+    flex: 1;
+}
+
+.admin-badge {
+    font-family: 'Google Sans', sans-serif;
+    color: forestgreen;
+    display: block;
+    margin-top: 5px;
+}
+
+.icon-button > img.config-icon {
+    width: max(35px, 3vw);
+    height: auto;
+}
+
+@media (max-width: 500px) {
+    /* Deixa o botão de configurações no topo da tela */
+    .icon-button > img.config-icon {
+        position: absolute;
+        top: 2px;
+        right: 0;
+    }
+    #userInfo {
+        position: relative; /* Para poder posicionar o botão no canto */
+    }
 }
 
 .user-header #userImg {
@@ -237,6 +300,9 @@ p {
 .user-header h3 {
     margin: 0;
     display: inline-block;
+    max-width: 45vw;
+    text-align: left;
+    font-size: 4rem;
 }
 
 /* Estilo do rodapé */
@@ -615,6 +681,11 @@ textarea {
     font-style: italic;
 }
 
+#deleteAccountBtn {
+    display: block;
+    margin: 20px auto 0;
+}
+
 /* == Modal == */
 
 /* Fundo escuro que cobre toda a tela */
@@ -641,6 +712,9 @@ textarea {
     text-align: center;
     width: 100%;
     max-width: min(90vw, 800px);
+
+    max-height: 85vh;
+    overflow-y: auto; /* Para aparecer a barra de scroll caso haja overflow */
 }
 
 .modal-content h3 {
@@ -676,3 +750,5 @@ textarea {
     transition: transform 0.1s ease-in-out;
     transform: scale(0.98);
 }
+
+

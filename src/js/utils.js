@@ -1,6 +1,7 @@
 import {Auth, Database} from "../config/firebase";
 import {child, ref, get} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
+import {getUserRole} from "/src/js/auth";
 
 // Referências dos elementos da página
 export let loading = document.getElementById('loading');
@@ -10,13 +11,11 @@ export let userEmail = document.getElementById('userEmail');
 export let userImg = document.getElementById('userImg');
 export let userName = document.getElementById('userName');
 export let welcome_message = document.getElementById('mensagem-boas-vindas');
+export let userRoleEl = document.getElementById('userRole');
 
 export let userId = document.getElementById('userId');
 export let userClass = document.getElementById('userClass');
 export let userCourse = document.getElementById('userCourse');
-export let cpf = document.getElementById('cpf');
-export let turma = document.getElementById('turma');
-export let curso = document.getElementById('curso');
 export let editPersonalInfoForm = document.getElementById('editPersonalInfoForm');
 export let editInfoSubmitBtn = document.getElementById("editInfoSubmitBtn");
 export let editPersonalInfoModal = document.getElementById('editPersonalInfoModal');
@@ -61,7 +60,7 @@ export function showAuth() {
  * @param path caminho para a célula, como `users/AjdkaJDJId892` ou `event/`
  * @param chName nome da criança/atributo (por exemplo, `email` ou `uid`), se
  *        quiser um filho de `path`.
- * @returns {DatabaseReference}
+ * @returns DatabaseReference
  */
 export function refFromDatabase(path, chName=null) {
     let refPath = path;
@@ -123,7 +122,7 @@ export function getDataFromDatabase(path, chName=null) {
  * Retorna a referência da célula do banco de dados do usuário com o uid dado.
  * A referência tem o caminho da forma `users/uid`.
  * @param uid UID do usuário.
- * @return {DatabaseReference} Referência do usuário com o uid dado.
+ * @return DatabaseReference Referência do usuário com o uid dado.
  */
 export function refFromUser(uid) {
     return child(UsersDatabaseRef, uid);
@@ -165,6 +164,7 @@ export function showUserContent(user) {
     let firstName = String(user.displayName).split(" ", 1)[0];
     if (welcome_message) welcome_message.innerHTML = "Bem-vindo(a), " + firstName + "!";
     if (userEmail) userEmail.innerHTML = user.email || '';
+    if (userRoleEl) userRoleEl.innerText = getUserRole();
 
     // Busca dados adicionais no BD
     getDataFromUser(user.uid).then(snapshot => {

@@ -20,29 +20,27 @@
             <hr>
         </header>
 
-        <div id="userInfo" class="center" style="position: relative;">
-            <div class="user-header">
-                <img id="userImg" alt="Imagem do usuário">
-                <div>
-                    <h3 id="mensagem-boas-vindas" class="center">Bem-vindo(a), </h3>
-                    <br>
-                    <span style="font-family: 'Google Sans', sans-serif; color: forestgreen;">Você está no menu para admins</span>
+        <div id="userInfo" class="center">
+            <div class="user-top-bar"> <!-- Bem Vindo & Botão de Configurações -->
+                <div class="user-header">
+                    <img id="userImg" alt="Imagem do usuário">
+                    <div>
+                        <h3 id="mensagem-boas-vindas">Bem-vindo(a), </h3>
+                        <span class="admin-badge">Você está no menu para admins</span>
+                    </div>
                 </div>
-            </div>
-            <p id="userPoints">Pontuação: </p>
 
-            <!-- Div pro botão de editar -->
-            <div style="position: absolute; top: 10px; right: 20px; z-index: 10;">
-                <button id="editPersonalInfoBtn"  style="display: flex; align-items: center; gap: 12px;"  id="dsaasdas" type="button" class="icon-button">
+                <!-- Botão de configurações -->
+                <button id="editPersonalInfoBtn" type="button" class="icon-button">
                     <!-- Eu acho que não precisa desse texto indicando que o botão é para editar as informações -->
                     <!-- <span style="margin-top: 3px; font-size: 20px; color: forestgreen;">Editar Informações Pessoais</span> -->
-
-                    <img src="/assets/icons/config-icon.svg" alt="Editar Informações Pessoais" class="edit-icon" style="width: 40px; height: auto;">
+                    <img src="/assets/icons/config-icon.svg" alt="Editar Informações Pessoais" class="config-icon">
                 </button>
             </div>
 
+            <p id="userPoints">Pontuação: </p>
+
             <button id="signOutBtn" class="alternative">Sair</button>
-            <!--<button id="editPersonalInfoBtn" class="alternative">Editar Informações Pessoais</button>-->
             <button id="toggleUserManagerBtn" class="alternative">Gerenciar Usuários</button>
 
             <div class="modal-overlay" style="display: none;" id="editPersonalInfoModal">
@@ -52,6 +50,9 @@
 
                     <label>Email:</label>
                     <p id="userEmail"></p>
+
+                    <label>Cargo:</label>
+                    <p id="userRole"></p>
 
                     <label>CPF:</label><br>
                     <input type="text" id="cpf" required><br>
@@ -69,9 +70,14 @@
                         <option value="Eletrônica">Eletrônica</option>
                     </select><br>
 
+                    <button id="deleteAccountBtn" class="danger" style="height: 5vh; width: auto; padding: 0 25px 0 25px; margin-top: 10px;">
+                        <!-- <img src="/assets/icons/delete-icon.svg" class="icon" alt="Lixeira"> -->
+                        <span>Excluir conta</span>
+                    </button>
+
+                    <br>
                     <button type="submit" id="editInfoSubmitBtn">Salvar</button>
                     <button id="cancelEditBtn" type="button">Cancelar</button>
-                    <button id="deleteAccountBtn" class="danger">Excluir conta</button>
                 </div>
             </div>
 

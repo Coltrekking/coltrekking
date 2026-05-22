@@ -10,7 +10,6 @@ import {
     editPersonalInfo,
     hideItem,
     showItem,
-    editPersonalInfoForm,
     userId, userClass, userCourse, validarCPF, getDataFromDatabase, PhotosDatabaseRef, getDataFromUser,
     EventsDatabaseRef, refFromUser, editPersonalInfoModal, editInfoSubmitBtn
 } from "../../utils";
@@ -347,3 +346,4 @@ function warnIfCantSubscribeToEvents() {
 
 // Carrega o que tem em comum
 await loadCommon()
+
