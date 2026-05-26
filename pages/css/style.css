@@ -225,11 +225,21 @@ p {
     background-color: red;
 }
 
-#loading {
+.loading-icon {
+    width: 100px;
+    height: auto;
     position: absolute;
-    top: calc(50% - 100px);
-    left: calc(50% - 100px);
     z-index: 1;
+
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 #auth img {
@@ -278,17 +288,7 @@ p {
     height: auto;
 }
 
-@media (max-width: 500px) {
-    /* Deixa o botão de configurações no topo da tela */
-    .icon-button > img.config-icon {
-        position: absolute;
-        top: 2px;
-        right: 0;
-    }
-    #userInfo {
-        position: relative; /* Para poder posicionar o botão no canto */
-    }
-}
+
 
 .user-header #userImg {
     width: auto;
@@ -686,6 +686,15 @@ textarea {
     margin: 20px auto 0;
 }
 
+
+
+.event-title {
+    text-align: center;
+
+    width: 80%;
+    margin-left: 10%; /* para ficar centralizado */
+}
+
 /* == Modal == */
 
 /* Fundo escuro que cobre toda a tela */
@@ -693,12 +702,11 @@ textarea {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    right: 0;
+    bottom: 0;
     background-color: rgba(0, 0, 0, 0.6);
     z-index: 9999; /* Garante que fique por cima de tudo no site */
 
-    /* Centralizar o conteúdo */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -751,4 +759,30 @@ textarea {
     transform: scale(0.98);
 }
 
+.close-image-modal-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+
+.close-image-modal-button > img {
+    height: max(35px, 4vw);
+    width: auto;
+}
+
+@media (max-width: 500px) { /* Se a tela tiver 500px ou menos de largura*/
+    /* Deixa o botão de configurações no topo da tela */
+    .icon-button > img.config-icon {
+        position: absolute;
+        top: 2px;
+        right: 0;
+    }
+
+    #userInfo {
+        position: relative; /* Para poder posicionar o botão de configurações no canto */
+    }
+}

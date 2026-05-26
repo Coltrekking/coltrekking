@@ -2,16 +2,19 @@
 import {Auth} from "../config/firebase";
 import {formattedDate} from "./date"
 import {
-    eventCount,
-    refFromDatabase,
-    hideItem,
-    loading,
+    EventsDatabaseRef,
+    getAttributeFromUser,
     getDataFromDatabase,
+    getDataFromUser,
+    hideItem,
     InscricoesDatabaseRef,
-    getDataFromUser, EventsDatabaseRef, refFromUser, getAttributeFromUser, userId
+    loading,
+    PhotosDatabaseRef,
+    refFromDatabase,
+    refFromUser, showLoading
 } from "./utils";
 import {abrirModal, EntradasModal} from "./modal";
-import {currentUserHasAdminPower, isAdmin} from "./auth";
+import {isAdmin} from "./auth";
 import {exportarInscricoesCSV, exportarInscricoesXLSX, listarInscritos, removeEvent, updateEvent} from "./eventAdmin";
 import {remove, set, update} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
@@ -58,129 +61,187 @@ function checkForDifficult(userUid, pontuacaoNecessaria, eventDate, eventCard) {
 }
 
 /**
+ * Preenche um card de evento com as informações dadas.
+ */
+function fillEventCard(eventContainer, item, uid) {
+    const value = item.value;
+    if (document.getElementById(item.key)) return; // evita duplicação
+
+    const eventCard = document.createElement('div');
+    eventCard.className = 'event-card';
+    eventCard.style.position = "relative";
+    eventCard.id = item.key;
+
+    // Cria e estiliza o botão de ver as imagens do evento
+    const seeImagesBtn = document.createElement("button");
+    seeImagesBtn.id = `evento-imagens-${item.key}`;
+    seeImagesBtn.title = "Imagens";
+    seeImagesBtn.className = "icon-button";
+    seeImagesBtn.style.position = "absolute";
+    seeImagesBtn.style.right = "15px";
+    seeImagesBtn.style.zIndex = "3";
+
+    const seeImagesImg = document.createElement("img");
+    seeImagesImg.src = "/assets/icons/image-icon.svg";
+    seeImagesImg.alt = "Fotos";
+    seeImagesImg.className = "icon";
+    seeImagesImg.style.height = "2.5em";
+
+    seeImagesBtn.appendChild(seeImagesImg);
+    eventCard.appendChild(seeImagesBtn);
+
+    // Esconde o botão se não houver fotos
+    getEventPhotos(item.key).then(links => {
+        if (links.length === 0) {
+            seeImagesBtn.style.display = "none";
+            eventCard.removeChild(seeImagesBtn);
+        }
+    });
+
+    // Coloca as informações do evento
+    eventCard.insertAdjacentHTML('beforeend', `
+                    <h3 class="event-title">${value.nome}</h3>
+                    <h4>${value.descricao || '---'}</h4>
+                    <p>Data: ${value.data ? formattedDate(value.data) : '---'}</p>
+                    <p>Ponto de Encontro: ${value.localEncontro || '---'}</p>
+                    <p>Data de Inscrição: ${value.dataInscricao ? formattedDate(value.dataInscricao) : '---'}</p>
+                    <p>Data da Preleção: ${value.dataPrelecao ? formattedDate(value.dataPrelecao) : '---'}</p>
+                    <p>Local da preleção: ${value.localPrelecao || '---'}</p>
+                    <p>Dificuldade: ${value.dificuldade || '---'}</p>
+                    <p>Distância: ${value.distancia || '---'} km</p>
+                    <p>Subida: ${value.subida || '---'} m</p>
+                    <p>Descida: ${value.descida || '---'} m</p>
+                    <p>Trajeto: ${value.trajeto || '---'}</p>
+                `);
+
+    /* inserir altimentria depois (precisa do cloud storage)
+    <p>Altimetria:<br>
+        ${value.percursoAltimetria
+        ? `<img src="${value.percursoAltimetria}" alt="altimetria" style="max-width: 100%;">`
+        : '---'}
+    </p>
+    */
+
+    // Se o usuário for admin, mostra os botões de admin
+    if (isAdmin()) {
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = 'Remover';
+        removeBtn.className = 'danger eventBtn';
+        removeBtn.onclick = () => removeEvent(item.key);
+
+        const editBtn = document.createElement('button');
+        editBtn.textContent = 'Editar';
+        editBtn.className = 'alternative eventBtn';
+        editBtn.onclick = () => updateEvent(item.key);
+
+        const listarBtn = document.createElement('button');
+        listarBtn.textContent = 'Listar Inscritos';
+        listarBtn.className = 'alternative eventBtn';
+        listarBtn.onclick = () => listarInscritos(item.key);
+
+        const exportarCSV = document.createElement('button');
+        exportarCSV.textContent = 'Baixar Planilha de Inscrições';
+        exportarCSV.className = 'alternative eventBtn';
+        exportarCSV.onclick = () => {
+            // Pergunta ao usuário o formato para exportar
+            abrirModal(
+                "Exportar Inscrições",
+                "Deseja exportar em qual formato?",
+                EntradasModal.SELECAO,
+                {opcoes:
+                        {"xlsx": "Excel/Google Planilhas (.xlsx)", "csv": "CSV (.csv)"}
+                }
+            ).then(resultado => {
+                if (resultado) {
+                    switch (resultado) {
+                        case "csv":
+                            exportarInscricoesCSV(item.key, value.nome);
+                            break;
+                        case "xlsx":
+                            exportarInscricoesXLSX(item.key, value.nome);
+                            break;
+                    }
+                }
+            });
+        }
+
+        eventCard.appendChild(removeBtn);
+        eventCard.appendChild(editBtn);
+        eventCard.appendChild(listarBtn);
+        eventCard.appendChild(exportarCSV);
+    }
+
+    // Cria o botão de inscrever e desinscrever
+    const eventDate = value.data ? new Date(value.data) : null;
+    let [subscribeBtn, unsubscribeBtn] = createSubscribeButton(value, item.key, uid, eventDate);
+    eventCard.appendChild(subscribeBtn);
+    eventCard.appendChild(unsubscribeBtn);
+
+    // Verifica a dificuldade (para mostrar o aviso se precisar)
+    let pontuacaoNecessaria = value.pontuacaoNecessaria;
+    if (pontuacaoNecessaria === null || pontuacaoNecessaria === undefined) pontuacaoNecessaria = 0; // dificuldade padrão
+    checkForDifficult(uid, pontuacaoNecessaria, eventDate, eventCard);
+
+    // Conecta o botão de imagens com a função de apresentar as fotos
+    seeImagesBtn.addEventListener('click', _ => {
+        showEventPhotos(value.nome, item.key).then(_ => {});
+    });
+
+    eventContainer.appendChild(eventCard);
+}
+
+/**
+ * Cria e preenche os elementos do container de eventos em comum entre o homePage
+ * de usuário e o de admin.
+ * @param dataSnapshot snapshot dos eventos
+ */
+function fillEventContainer(dataSnapshot) {
+    // Obtém o uid do usuário local
+    const uid = localStorage.getItem('uid');
+    if (!uid) {
+        console.warn('UID não encontrado no localStorage.');
+        enviarErroParaSentry("UID não foi encontrado no localStorage. Por isso, os eventos não serão carregados.");
+        hideItem(loading);
+        alert("Reinicie a página.");
+        return;
+    }
+
+    // Começa a criar e preencher //
+
+    const eventContainer = document.getElementById('eventContainer');
+    const eventCount = document.getElementById('eventCount');
+    eventContainer.innerHTML = ''; // limpa container
+    eventCount.innerHTML = 'Carregando eventos...';
+
+    // Transforma o snapshot em um array e ordena //
+
+    const eventosArray = [];
+    dataSnapshot.forEach(item => {
+        eventosArray.push({ key: item.key, value: item.val() });
+    });
+
+    eventosArray.sort((a, b) => {
+        const tA = a.value.dataInscricao ? new Date(a.value.dataInscricao).getTime() : 0;
+        const tB = b.value.dataInscricao ? new Date(b.value.dataInscricao).getTime() : 0;
+        return tB - tA; // mais recente primeiro
+    });
+
+    eventCount.innerHTML = 'Total de eventos: ' + eventosArray.length;
+
+    // Preenche os cards dos eventos
+    eventosArray.forEach(item => {
+        fillEventCard(eventContainer, item, uid);
+    });
+}
+
+/**
  * Preenche a lista de eventos com a data _(informações)_ dadas,
  * mostrando opções de administrador.
  * @param dataSnapshot informações dos eventos
  */
 function fillEventListAsAdmin(dataSnapshot) {
-    const eventContainer = document.getElementById('eventContainer');
-    eventContainer.innerHTML = '';
-
-    const events = dataSnapshot.size;
-    eventCount.innerHTML = 'Total de eventos: ' + events;
-
-    const user = Auth.currentUser;
-    const isAdmin = currentUserHasAdminPower();
-
-    // Transforma snapshot em array para ordenar
-    const eventsArray = [];
-    dataSnapshot.forEach(item => {
-        eventsArray.push({ key: item.key, value: item.val() });
-    });
-
-    // Ordena pelo campo dataInscricao (mais recente acima)
-    eventsArray.sort((a, b) => {
-        const tA = a.value.dataInscricao ? new Date(a.value.dataInscricao).getTime() : 0;
-        const tB = b.value.dataInscricao ? new Date(b.value.dataInscricao).getTime() : 0;
-        return tB - tA; // decrescente
-    });
-
-    // Cria os cards ordenados
-    eventsArray.forEach(item => {
-        const value = item.value;
-        if (document.getElementById(item.key)) return;
-
-        const eventCard = document.createElement('div');
-        eventCard.className = 'event-card';
-        eventCard.id = item.key;
-
-        eventCard.innerHTML = `
-            <h3>${value.nome}</h3>
-            <h4>${value.descricao || '---'}</h4>
-            <p>Data: ${value.data ? formattedDate(value.data) : '---'}</p>
-            <p>Ponto de Encontro: ${value.localEncontro || '---'}</p>
-            <p>Data de Inscrição: ${value.dataInscricao ? formattedDate(value.dataInscricao) : '---'}</p>
-            <p>Data da Preleção: ${value.dataPrelecao ? formattedDate(value.dataPrelecao) : '---'}</p>
-            <p>Local da preleção: ${value.localPrelecao || '---'}</p>
-            <p>Dificuldade: ${value.dificuldade || '---'}</p>
-            <p>Distância: ${value.distancia || '---'} km</p>
-            <p>Subida: ${value.subida || '---'} m</p>
-            <p>Descida: ${value.descida || '---'} m</p>
-            <p>Trajeto: ${value.trajeto || '---'}</p>
-        `;
-
-        /* inserir altimentria depois (precisa do cloud storage)
-            <p>Altimetria:<br>
-                ${value.percursoAltimetria
-                ? `<img src="${value.percursoAltimetria}" alt="altimetria" style="max-width: 100%;">`
-                : '---'}
-            </p>
-        */
-
-        const eventDate = value.data ? new Date(value.data) : null;
-        let [subscribeBtn, unsubscribeBtn] = createSubscribeButton(value, item.key, user.uid, eventDate);
-
-        if (isAdmin) {
-            const removeBtn = document.createElement('button');
-            removeBtn.textContent = 'Remover';
-            removeBtn.className = 'danger eventBtn';
-            removeBtn.onclick = () => removeEvent(item.key);
-
-            const editBtn = document.createElement('button');
-            editBtn.textContent = 'Editar';
-            editBtn.className = 'alternative eventBtn';
-            editBtn.onclick = () => updateEvent(item.key);
-
-            const listarBtn = document.createElement('button');
-            listarBtn.textContent = 'Listar Inscritos';
-            listarBtn.className = 'alternative eventBtn';
-            listarBtn.onclick = () => listarInscritos(item.key);
-
-            const exportarCSV = document.createElement('button');
-            exportarCSV.textContent = 'Baixar Planilha de Inscrições';
-            exportarCSV.className = 'alternative eventBtn';
-            exportarCSV.onclick = () => {
-                // Pergunta ao usuário o formato para exportar
-                abrirModal(
-                    "Exportar Inscrições",
-                    "Deseja exportar em qual formato?",
-                    EntradasModal.SELECAO,
-                    {opcoes:
-                        {"xlsx": "Excel/Google Planilhas (.xlsx)", "csv": "CSV (.csv)"}
-                    }
-                ).then(resultado => {
-                    if (resultado) {
-                        switch (resultado) {
-                            case "csv":
-                                exportarInscricoesCSV(item.key, value.nome);
-                                break;
-                            case "xlsx":
-                                exportarInscricoesXLSX(item.key, value.nome);
-                                break;
-                        }
-                    }
-                });
-            }
-
-            eventCard.appendChild(removeBtn);
-            eventCard.appendChild(editBtn);
-            eventCard.appendChild(listarBtn);
-            eventCard.appendChild(exportarCSV);
-        }
-
-        eventCard.appendChild(subscribeBtn);
-        eventCard.appendChild(unsubscribeBtn);
-
-        // Verifica a dificuldade (para mostrar o aviso se precisar)
-        let pontuacaoNecessaria = value.pontuacaoNecessaria;
-        if (pontuacaoNecessaria === null || pontuacaoNecessaria === undefined) pontuacaoNecessaria = 0; // dificuldade padrão
-        checkForDifficult(user.uid, pontuacaoNecessaria, eventDate, eventCard);
-
-        eventContainer.appendChild(eventCard);
-    });
-
-    hideItem(loading);
-
+    // Preenche o container de eventos
+    fillEventContainer(dataSnapshot)
 }
 
 
@@ -330,88 +391,8 @@ function createSubscribeButton(evento, key, userUid, eventDate) {
  * @param dataSnapshot informações dos eventos
  */
 function fillEventListAsUser(dataSnapshot) {
-    const eventContainer = document.getElementById('eventContainer');
-    const eventCount = document.getElementById('eventCount');
-    eventContainer.innerHTML = ''; // limpa container
-    eventCount.innerHTML = 'Carregando eventos...';
-
-    const eventosArray = [];
-    dataSnapshot.forEach(item => {
-        eventosArray.push({ key: item.key, value: item.val() });
-    });
-
-    eventosArray.sort((a, b) => {
-        const tA = a.value.dataInscricao ? new Date(a.value.dataInscricao).getTime() : 0;
-        const tB = b.value.dataInscricao ? new Date(b.value.dataInscricao).getTime() : 0;
-        return tB - tA; // mais recente primeiro
-    });
-
-    const uid = localStorage.getItem('uid');
-    if (!uid) {
-        console.warn('UID não encontrado no localStorage.');
-        enviarErroParaSentry("UID não foi encontrado no localStorage. Por isso, os eventos não serão carregados.");
-        hideItem(loading);
-        alert("Reinicie a página.");
-        return;
-    }
-
-    getDataFromUser(uid)
-        .then(_userSnapshot => {
-            eventCount.innerHTML = 'Total de eventos: ' + eventosArray.length;
-
-            eventosArray.forEach(item => {
-                const value = item.value;
-                if (document.getElementById(item.key)) return; // evita duplicação
-
-                const eventCard = document.createElement('div');
-                eventCard.className = 'event-card';
-                eventCard.id = item.key;
-
-                eventCard.innerHTML = `
-                    <h3>${value.nome}</h3>
-                    <h4>${value.descricao || '---'}</h4>
-                    <p>Data: ${value.data ? formattedDate(value.data) : '---'}</p>
-                    <p>Ponto de Encontro: ${value.localEncontro || '---'}</p>
-                    <p>Data de Inscrição: ${value.dataInscricao ? formattedDate(value.dataInscricao) : '---'}</p>
-                    <p>Data da Preleção: ${value.dataPrelecao ? formattedDate(value.dataPrelecao) : '---'}</p>
-                    <p>Local da preleção: ${value.localPrelecao || '---'}</p>
-                    <p>Dificuldade: ${value.dificuldade || '---'}</p>
-                    <p>Distância: ${value.distancia || '---'} km</p>
-                    <p>Subida: ${value.subida || '---'} m</p>
-                    <p>Descida: ${value.descida || '---'} m</p>
-                    <p>Trajeto: ${value.trajeto || '---'}</p>
-                `;
-
-                /* inserir altimentria depois (precisa do cloud storage)
-                <p>Altimetria:<br>
-                    ${value.percursoAltimetria
-                    ? `<img src="${value.percursoAltimetria}" alt="altimetria" style="max-width: 100%;">`
-                    : '---'}
-                </p>
-                */
-
-                // Cria o botão de inscrever e desinscrever
-                const eventDate = value.data ? new Date(value.data) : null;
-                let [subscribeBtn, unsubscribeBtn] = createSubscribeButton(value, item.key, uid, eventDate);
-
-                eventCard.appendChild(subscribeBtn);
-                eventCard.appendChild(unsubscribeBtn);
-
-                // Verifica a dificuldade (para mostrar o aviso se precisar)
-                let pontuacaoNecessaria = value.pontuacaoNecessaria;
-                if (pontuacaoNecessaria === null || pontuacaoNecessaria === undefined) pontuacaoNecessaria = 0; // dificuldade padrão
-                checkForDifficult(uid, pontuacaoNecessaria, eventDate, eventCard);
-
-                eventContainer.appendChild(eventCard);
-            });
-
-            hideItem(loading);
-        })
-        .catch(err => {
-            enviarErroParaSentry(err);
-            console.error('Erro ao buscar usuário:', err);
-            hideItem(loading);
-        });
+    // Preenche os elementos em comum
+    fillEventContainer(dataSnapshot);
 }
 
 /**
@@ -673,4 +654,66 @@ async function isUserPresentInEvent(userUid, eventId) {
 
     // Se chegou até aqui, o usuário não está inscrito ou não está presente
     return false;
+}
+
+/**
+ * Carrega e mostra as fotos do evento dado.
+ * @param {String} eventName nome do evento que será apresentado no título do modal
+ * @param {String} eventId id do evento que as fotos serão apresentadas
+ */
+async function showEventPhotos(eventName, eventId) {
+    showLoading();
+    const photosContainer = document.getElementById("eventPhotoList");
+
+    // Limpa o que tinha no modal
+    photosContainer.innerHTML = "";
+
+    // Obtém os links e lista eles //
+
+    // Mostra o título dos eventos
+    const tituloFotos = document.createElement("h3");
+    tituloFotos.textContent = `${eventName}`;
+    photosContainer.appendChild(tituloFotos);
+
+    // Obtém os links
+    const links = await getEventPhotos(eventId);
+
+    // Se não tiver nenhum link, mostra uma mensagem de que não tem fotos
+    if (links.length === 0) {
+        const mensagem = document.createElement("p");
+        mensagem.textContent = "Não há fotos para este evento.";
+        photosContainer.appendChild(mensagem);
+        return;
+    }
+
+    const pSubtitulo = document.createElement("p");
+    pSubtitulo.textContent = "Link das fotos:";
+    photosContainer.appendChild(pSubtitulo);
+
+    // Lista cada link
+    links.forEach(link => {
+        // Cria um elemento p e, dentro dele, um a com o link para a foto
+        const pEl = document.createElement("p");
+        const aEl = document.createElement("a");
+        aEl.href = link;
+        aEl.textContent = link;
+        pEl.appendChild(aEl);
+        photosContainer.appendChild(pEl);
+    });
+
+    hideItem(loading);
+    // Deixa o conteúdo visível agora que terminou de carregar as fotos
+    document.getElementById("modalOverlayFotosEvento").style.display = "flex";
+}
+
+/**
+ * Retorna os links das fotos do evento dado.
+ * @param eventId id do evento que se deseja obter os links das fotos
+ * @return {Promise<Array>} uma promessa que resolve para um array de links das fotos do evento dado.
+ */
+function getEventPhotos(eventId) {
+    return getDataFromDatabase(PhotosDatabaseRef, eventId).then(snapshot => {
+        // Obtém os links
+        return snapshot.val() || [];
+    });
 }

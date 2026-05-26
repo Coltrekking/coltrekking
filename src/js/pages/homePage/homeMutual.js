@@ -134,10 +134,12 @@ function fillPhotoListAsUser() {
         // monta os cards
         eventsArray.forEach(eventItem => {
             const eventKey  = eventItem.key;
-            const eventData = eventItem.value;
+            //const eventData = eventItem.value;
 
-            getDataFromDatabase(PhotosDatabaseRef, eventKey)
-                .then(photoSnap => {
+            // Põe o link das fotos no botão de imagem (dentro de cada div de evento, na lista dos eventos)
+            getDataFromDatabase(PhotosDatabaseRef, eventKey).then(_photoSnap => {
+                //const linkEl = document.getElementById("");
+                /*
                 const links = photoSnap.val() || [];
 
                 const photoCard = document.createElement('div');
@@ -165,6 +167,7 @@ function fillPhotoListAsUser() {
                 `;
 
                 photoContainer.appendChild(photoCard);
+                 */
             });
         });
     });
@@ -248,6 +251,10 @@ export function loadCommonEvents() {
     document.getElementById("instructionBtn").onclick = (event) => {
         openTab('instrucoes', event);
     };
+
+    document.getElementById("fecharMenuFotos").onclick = _ => {
+        hideItem(document.getElementById("modalOverlayFotosEvento"));
+    }
 }
 
 /**
@@ -255,6 +262,9 @@ export function loadCommonEvents() {
  * Isso serve para não precisar repetir código.
  */
 async function loadCommon() {
+    // Não acho que tenha necessidade de colocar loading bem no início
+    // showLoading();
+
     // Carrega o usuário (por padrão)
     await waitForUser();
     // Verifica a autenticação do usuário
@@ -319,7 +329,8 @@ async function loadCommon() {
         };
     }
 
-    // Avisa para o usuár
+    // Avisa para o usuário preencher os dados necessários para se
+    // inscrever nos eventos, caso ele ainda não tenha preenchido.
     warnIfCantSubscribeToEvents();
 }
 

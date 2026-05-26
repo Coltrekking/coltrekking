@@ -43,8 +43,16 @@ export function hideItem(item) {
 // Oculta elementos da aba
 export function showItem(item) {
     if (item && item.style) {
-        item.style.display = 'block';
+        if (item === loading) item.style.display = 'flex';
+        else item.style.display = 'block';
     }
+}
+
+/**
+ * Mostra o elemento de loading, para indicar que algo está carregando.
+ */
+export function showLoading() {
+    showItem(loading);
 }
 
 // Mostrar conteúdo para usuários não autenticados
@@ -52,8 +60,6 @@ export function showAuth() {
     hideItem(homePage);
     showItem(authElement);
 }
-
-
 
 /**
  * Retorna a referência da célula do banco de dados no caminho dado.

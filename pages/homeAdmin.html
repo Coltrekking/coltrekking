@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coltrekking - Home</title>
     <link rel="shortcut icon" href="/assets/images/logo.png" type="image/x-icon">
     <link rel="stylesheet" href="css/style.css">
@@ -208,6 +209,18 @@
                 <input type="text" id="photoURL"><br>
                 <button id="addPhotoBtn">Adicionar Link de Fotos</button>
                 <button id="cancelPhotoAdminFormBtn" type="button" class="danger">Cancelar</button>
+            </div>
+        </div>
+
+        <!-- Modal que lista os links das fotos de um evento -->
+        <div id="modalOverlayFotosEvento" class="modal-overlay" style="display: none;">
+            <div class="modal-content" style="position: relative; min-height: 20px;">
+                <button id="fecharMenuFotos" title="Fechar" class="icon-button close-image-modal-button">
+                    <img src="/assets/icons/close-icon.svg" alt="Fechar" class="icon">
+                </button>
+                <div id="eventPhotoList"> <!-- Fotos do eventos -->
+
+                </div>
             </div>
         </div>
 
