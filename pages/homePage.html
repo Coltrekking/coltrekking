@@ -87,7 +87,7 @@
         <hr>
         <div class="tab-bar">
             <button id="eventBtn" class="tab-button active">Eventos</button>
-            <button id="photoBtn" class="tab-button">Photos</button>
+            <button id="photoBtn" class="tab-button">Fotos</button>
             <button id="blockListBtn" class="tab-button">Bloqueios</button>
             <button id="instructionBtn" class="tab-button">Instruções Gerais</button>
         </div>
@@ -102,11 +102,13 @@
         </div>
 
         <div id="photos" class="tab-content">
-            <h2>Photos</h2>
-            <p>Galeria de fotos dos eventos.</p>
-            <div id="photoContainer">
-                <p id="photoCount">Carregando fotos...</p>
-            </div>
+            <h2>Fotos</h2>
+            <p class="big-text" style="margin-bottom: 5px;"><b>Atenção!</b> <br> Agora, as fotos mudaram!</p>
+            <p class="big-text">Para ver as fotos de um evento, clique no ícone
+                <img src="/assets/icons/image-icon.svg" alt="Ícone de fotos" class="icon" style="height: max(15px, 1.5vw); width: auto; margin: 0 3px 0 3px;">
+                do evento na página dos eventos.</p>
+            <p style="font-size: max(12px, 1.2vw); font-style: italic;">Se o evento não possuir fotos, o ícone <u>não</u> será exibido.</p>
+            <img src="/assets/images/tutorial_fotos/nova_seção_fotos.png" alt="Nova seção de fotos" style="width: 100%; max-width: 800px; margin-top: 20px; border: 3px dashed #000;">
         </div>
 
         <!-- Modal que lista os links das fotos de um evento -->
@@ -118,6 +120,7 @@
                 <div id="eventPhotoList"> <!-- Fotos do eventos -->
 
                 </div>
+                <p id="noImagePhotoModal" style="display: none;">Não há fotos para esse evento.</p>
             </div>
         </div>
 

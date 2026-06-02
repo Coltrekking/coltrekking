@@ -2,6 +2,7 @@ import {Auth, Database} from "../config/firebase";
 import {child, ref, get} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
 import {getUserRole} from "/src/js/auth";
+import {abrirAlerta} from "/src/js/modal";
 
 // Referências dos elementos da página
 export let loading = document.getElementById('loading');
@@ -43,7 +44,8 @@ export function hideItem(item) {
 // Oculta elementos da aba
 export function showItem(item) {
     if (item && item.style) {
-        if (item === loading) item.style.display = 'flex';
+        let _loading = document.getElementById('loading'); // Para ter certeza que o loading
+        if (_loading && item === _loading) item.style.display = 'flex';
         else item.style.display = 'block';
     }
 }
@@ -183,7 +185,7 @@ export function showUserContent(user) {
         if ((userId && userId.innerHTML === 'CPF: N/A') ||
             (userClass && userClass.innerHTML === 'Turma: N/A') ||
             (userCourse && userCourse.innerHTML === 'Curso: N/A')) {
-            alert('⚠️ Algumas informações do usuário estão faltando.\n' +
+            abrirAlerta('⚠️ Algumas informações do usuário estão faltando.\n' +
                 'Sem elas não será possível realizar inscrições.\n' +
                 'Por favor, edite suas informações pessoais.');
         }
@@ -295,14 +297,14 @@ export function showError(prefix, error) {
     if (error.code) {
         switch (error.code) {
             case 'auth/popup-closed-by-user':
-                alert(prefix + ' ' + 'Pop-up fechado pelo usuário antes da operação ser concluída!');
+                abrirAlerta(prefix + ' ' + 'Pop-up fechado pelo usuário antes da operação ser concluída!');
                 break;
             default:
-                alert(prefix + ' ' + error.message);
+                abrirAlerta(prefix + ' ' + error.message);
                 enviarErroParaSentry(error);
         }
     } else {
-        alert('Erro desconhecido: ' + error);
+        abrirAlerta('Erro desconhecido: ' + error);
         enviarErroParaSentry(error);
     }
 }

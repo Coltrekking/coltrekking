@@ -12,7 +12,7 @@ import {
     refFromDatabase,
     getDataFromDatabase, UsersDatabaseRef, refFromUser, getDataFromUser
 } from "./utils"
-import {abrirAviso, abrirConfirmacao} from "./modal.js";
+import {abrirAlerta, abrirAviso, abrirConfirmacao} from "./modal.js";
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, deleteUser, reload } from "firebase/auth";
 import {child, set, update} from "firebase/database";
 import {enviarErroParaSentry, identificarUserParaSentry} from "/src/js/main";
@@ -320,7 +320,7 @@ export async function deleteAccount() {
     if (confirmation) {
         showItem(loading);
         deleteUser(Auth.currentUser).then(function() {
-            alert("Conta excluída com sucesso!");
+            abrirAlerta("Conta excluída com sucesso!");
             window.location.href = 'index.html';
         }).catch(function(error) {
             showError("Erro ao excluir conta: ", error);
@@ -337,7 +337,7 @@ export function toggleUserManager() {
     const user = Auth.currentUser;
 
     if (!user) {
-        alert("Você precisa estar logado para gerenciar usuários.");
+        abrirAlerta("Você precisa estar logado para gerenciar usuários.");
         return;
     }
 
@@ -349,7 +349,7 @@ export function toggleUserManager() {
         getDataFromDatabase(refFromUser(uid), '/role')
             .then(_snap => {
                 if (!currentUserHasAdminPower()) {
-                    alert("Você não tem permissão para gerenciar usuários.");
+                    abrirAlerta("Você não tem permissão para gerenciar usuários.");
                     return;
                 }
 
@@ -456,7 +456,7 @@ function promoteToAdmin(uid) {
 
     update(refFromUser(uid), { role: Roles.ADMIN })
         .then(() => {
-            alert("Usuário promovido a admin!");
+            abrirAlerta("Usuário promovido a admin!");
             loadUsers(); // atualiza a lista
         })
         .catch(err => {
@@ -470,7 +470,7 @@ function promoteToAdmin(uid) {
 function demoteFromAdmin(uid) {
     update(refFromUser(uid), { role: Roles.USER })
         .then(() => {
-            alert("Admin removido!");
+            abrirAlerta("Admin removido!");
             loadUsers(); // atualiza a lista
         })
         .catch(err => {
@@ -525,7 +525,7 @@ export function checkAuth() {
                 if (!userEmail.endsWith("@teiacoltec.org")) {
                     // Se não for a conta do site coltrekking
                     if (userEmail !== "sitecoltrekking@gmail.com") {
-                        alert("Acesso negado. Conta não autorizada. Por favor, use um email institucional (@teiacoltec.org) para se autenticar.");
+                        abrirAlerta("Acesso negado. Conta não autorizada. Por favor, use um email institucional (@teiacoltec.org) para se autenticar.");
                         userSignOut();
                     }
                 }

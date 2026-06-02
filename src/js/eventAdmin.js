@@ -23,7 +23,8 @@ import {
 } from "/src/js/event";
 import {enviarErroParaSentry} from "/src/js/main";
 import {Auth} from "/src/config/firebase";
-import * as XLSX from 'xlsx'; // Planilha
+import * as XLSX from 'xlsx';
+import {abrirAlerta, abrirConfirmacao} from "/src/js/modal"; // Planilha
 
 export function criarEvento() {
     hideItem(eventForm);
@@ -68,7 +69,7 @@ export function criarEvento() {
             //percursoAltimetria: percursoAltimetria
         })
             .then(function () {
-                alert('Evento criado com sucesso!');
+                abrirAlerta('Evento criado com sucesso!');
                 hideItem(loading);
                 hideItem(eventForm);
             }).catch(function (error) {
@@ -77,7 +78,7 @@ export function criarEvento() {
                 showItem(eventForm);
         });
     } else {
-        alert('Por favor, preencha todos os campos do evento.');
+        abrirAlerta('Por favor, preencha todos os campos do evento.');
         hideItem(loading);
         showItem(eventForm);
     }
@@ -87,9 +88,8 @@ export function criarEvento() {
  * Lógica para retirar usuários com pontuação insuficiente, dependendo da dificuldade do evento.
  * @param eventId id do evento
  * @param pontuacaoEvento pontuação do evento
- * @param dificuldade dificuldade do evento
  */
-function retirarUsuariosComPontuacaoInsuficiente(eventId, pontuacaoEvento, dificuldade) {
+function retirarUsuariosComPontuacaoInsuficiente(eventId, pontuacaoEvento) {
     return getDataFromDatabase(refFromDatabase(InscricoesDatabaseRef, eventId))
         .then(snapshot => {
             // Atualiza a pontuação de cada inscrito
@@ -132,7 +132,7 @@ function retirarUsuariosComPontuacaoInsuficiente(eventId, pontuacaoEvento, dific
 export async function atualizarEvento() {
     let key = eventForm.dataset.editingKey;
     if (!key) {
-        alert('Erro: nenhum evento em edição.');
+        await abrirAlerta('Erro: nenhum evento em edição.');
         return;
     }
 
@@ -198,7 +198,7 @@ export async function atualizarEvento() {
                 // Verifica a dificuldade do evento (se precisar de pontuação mínima).
                 // Se houver usuários que não têm a pontuação mínima, retira eles do evento
                 if (getPontuacaoMinimaParaEvento(key) > 0) {
-                    await retirarUsuariosComPontuacaoInsuficiente(key, calcularPontuacaoDoEvento(dataToUpdate), dificuldade);
+                    await retirarUsuariosComPontuacaoInsuficiente(key, calcularPontuacaoDoEvento(dataToUpdate));
                 }
 
                 if (currentListingSubscribeEvent === key)
@@ -209,7 +209,7 @@ export async function atualizarEvento() {
                 showItem(submitEventForm);   // mostra de novo o botão de criar
                 hideItem(editEventForm);     // esconde o botão de editar
 
-                alert('Evento atualizado com sucesso!');
+                await abrirAlerta('Evento atualizado com sucesso!');
 
                 currentEditingEvent = null;
                 currentEditingEventData = {};
@@ -223,14 +223,14 @@ export async function atualizarEvento() {
 
 
     } else {
-        alert('Por favor, preencha todos os campos para atualizar o evento.');
+        await abrirAlerta('Por favor, preencha todos os campos para atualizar o evento.');
     }
 }
 
 // Cancela o formulário de criação/edição de evento, limpando os campos
 // e escondendo o formulário
-export function cancelarFormEvento() {
-    if (confirm("Tem certeza que deseja cancelar? As alterações não serão salvas.")) {
+export async function cancelarFormEvento() {
+    if (await abrirConfirmacao("Tem certeza que deseja cancelar? As alterações não serão salvas.")) {
         currentEditingEvent = null;
         currentEditingEventData = {};
         eventForm.reset();
@@ -262,13 +262,13 @@ async function atualizarPontuacaoDosInscritosDoEvento(eventoId, adicionar) {
 }
 
 //botão para remover evento
-export function removeEvent(key) {
+export async function removeEvent(key) {
     let selectedItem = document.getElementById(key);
 
     // título dentro do elemento
     let eventName = selectedItem.querySelector('h3')?.textContent || 'evento';
 
-    let confirmation = confirm('Você tem certeza que deseja remover o evento: "' + eventName + '"?');
+    let confirmation = await abrirConfirmacao('Você tem certeza que deseja remover o evento: "' + eventName + '"?');
     if (confirmation) {
         // Referências
         let eventRef = refFromDatabase(EventsDatabaseRef, key); // eventos/{key}
@@ -358,7 +358,7 @@ export function updateEvent(key) {
         .then(snapshot => {
         const value = snapshot.val();
         if (!value) {
-            alert('Evento não encontrado no banco.');
+            abrirAlerta('Evento não encontrado no banco.');
             return;
         }
 
@@ -395,7 +395,7 @@ export function exportarInscricoesCSV(eventId, nomeEvento = 'Evento', dataInicio
     getDataFromDatabase(inscricoesRef)
         .then(snapshot => {
             if (!snapshot.exists()) {
-                alert(`Nenhuma inscrição encontrada para "${nomeEvento}".`);
+                abrirAlerta(`Nenhuma inscrição encontrada para "${nomeEvento}".`);
                 return;
             }
 
@@ -438,7 +438,7 @@ export function exportarInscricoesCSV(eventId, nomeEvento = 'Evento', dataInicio
         })
         .then(inscricoes => {
             if (!inscricoes || inscricoes.length === 0) {
-                alert('Nenhuma inscrição válida encontrada.');
+                abrirAlerta('Nenhuma inscrição válida encontrada.');
                 return;
             }
 
@@ -478,7 +478,7 @@ export function exportarInscricoesCSV(eventId, nomeEvento = 'Evento', dataInicio
         .catch(error => {
             console.error('Erro ao buscar inscrições:', error);
             enviarErroParaSentry(error);
-            alert('Erro ao buscar inscrições.');
+            abrirAlerta('Erro ao buscar inscrições.');
         });
 }
 
@@ -488,7 +488,7 @@ export function exportarInscricoesXLSX(eventId, nomeEvento = 'Evento', dataInici
     getDataFromDatabase(inscricoesRef)
         .then(snapshot => {
             if (!snapshot.exists()) {
-                alert(`Nenhuma inscrição encontrada para "${nomeEvento}".`);
+                abrirAlerta(`Nenhuma inscrição encontrada para "${nomeEvento}".`);
                 return;
             }
 
@@ -531,7 +531,7 @@ export function exportarInscricoesXLSX(eventId, nomeEvento = 'Evento', dataInici
         })
         .then(inscricoes => {
             if (!inscricoes || inscricoes.length === 0) {
-                alert('Nenhuma inscrição válida encontrada.');
+                abrirAlerta('Nenhuma inscrição válida encontrada.');
                 return;
             }
 
@@ -587,7 +587,7 @@ export function exportarInscricoesXLSX(eventId, nomeEvento = 'Evento', dataInici
         .catch(error => {
             console.error('Erro ao buscar inscrições:', error);
             enviarErroParaSentry(error);
-            alert('Erro ao buscar inscrições.');
+            abrirAlerta('Erro ao buscar inscrições.');
         });
 }
 
@@ -708,7 +708,7 @@ export function listarInscritos(eventId, onlyUpdate = false) {
                         } catch (err) {
                             console.error("Erro ao atualizar presença:", err);
                             enviarErroParaSentry(err);
-                            alert("Erro ao atualizar presença. Tente novamente.");
+                            await abrirAlerta("Erro ao atualizar presença. Tente novamente.");
                         }
                     });
 

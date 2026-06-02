@@ -10,10 +10,10 @@ import {
     editPersonalInfo,
     hideItem,
     showItem,
-    userId, userClass, userCourse, validarCPF, getDataFromDatabase, PhotosDatabaseRef, getDataFromUser,
+    userId, userClass, userCourse, validarCPF, getDataFromUser,
     EventsDatabaseRef, refFromUser, editPersonalInfoModal, editInfoSubmitBtn
 } from "../../utils";
-import {abrirAviso} from "../../modal.js";
+import {abrirAlerta, abrirAviso} from "../../modal.js";
 import {openTab} from "../../tabs";
 import {fillEventList} from "../../event";
 import {onValue, update} from "firebase/database";
@@ -26,164 +26,8 @@ const USER_PAGE_ADDRESS = "/homePage.html"
 const ADMIN_PAGE_ADDRESS = "/homeAdmin.html"
 
 export const createPhotoBtn = document.getElementById('createPhoto');
-export const addPhotoBtn    = document.getElementById('addPhotoBtn');
-export const photoContainer = document.getElementById('photoContainer');
+// export const addPhotoBtn    = document.getElementById('addPhotoBtn');
 export const photoAdminForm = document.getElementById('photoAdminForm');
-
-
-export function fillPhotoListAsAdmin() {
-    getDataFromDatabase(EventsDatabaseRef)
-        .then(eventsSnapshot => {
-            const eventsArray = [];
-
-            // transforma snapshot em array
-            eventsSnapshot.forEach(eventSnap => {
-                eventsArray.push({
-                    key: eventSnap.key,
-                    value: eventSnap.val()
-                });
-            });
-
-            // ordena por data de inscrição (mais recente primeiro)
-            eventsArray.sort((a, b) => {
-                const tA = a.value.dataInscricao
-                    ? new Date(a.value.dataInscricao).getTime()
-                    : 0;
-                const tB = b.value.dataInscricao
-                    ? new Date(b.value.dataInscricao).getTime()
-                    : 0;
-                return tB - tA;
-            });
-
-            // monta os cards
-            eventsArray.forEach(eventItem => {
-                const eventKey  = eventItem.key;
-                const eventData = eventItem.value;
-
-                getDataFromDatabase(PhotosDatabaseRef, eventKey)
-                    .then(photoSnap => {
-                        const links = photoSnap.val() || [];
-                        const photoCard = document.createElement('div');
-                        photoCard.className = 'photo-card';
-
-                        const dataFormatada = eventData.data
-                            ? new Date(eventData.data)
-                                .toLocaleDateString('pt-BR')
-                                .replace(/\//g, '.')
-                            : '---';
-
-                        let linksHTML = '---';
-
-                        if (links.length > 0) {
-                            linksHTML = links.map((link, index) => {
-                                let html = `
-                                    <a href="${link}" target="_blank">
-                                        ${eventData.nome}_${dataFormatada}
-                                    </a>
-                                `;
-
-                                if (isAdmin()) {
-                                    html += `
-                                        <button class="danger"
-                                            onclick="removeLink('${eventKey}', ${index})">
-                                            Remover
-                                        </button>
-                                    `;
-                                }
-
-                                return html;
-                            }).join('<br><br>');
-                        }
-
-                        photoCard.innerHTML = `
-                            <h3>${eventData.nome}</h3>
-                            <p>${linksHTML}</p>
-                        `;
-
-                        photoContainer.appendChild(photoCard);
-                    });
-            });
-        });
-}
-
-function fillPhotoListAsUser() {
-    photoContainer.innerHTML = '';
-
-    getDataFromDatabase(EventsDatabaseRef).then(eventsSnapshot => {
-        const eventsArray = [];
-
-        // transforma snapshot em array
-        eventsSnapshot.forEach(eventSnap => {
-            eventsArray.push({
-                key: eventSnap.key,
-                value: eventSnap.val()
-            });
-        });
-
-        // ordena por data de inscrição (mais recente primeiro)
-        eventsArray.sort((a, b) => {
-            const tA = a.value.dataInscricao
-                ? new Date(a.value.dataInscricao).getTime()
-                : 0;
-            const tB = b.value.dataInscricao
-                ? new Date(b.value.dataInscricao).getTime()
-                : 0;
-            return tB - tA;
-        });
-
-        // monta os cards
-        eventsArray.forEach(eventItem => {
-            const eventKey  = eventItem.key;
-            //const eventData = eventItem.value;
-
-            // Põe o link das fotos no botão de imagem (dentro de cada div de evento, na lista dos eventos)
-            getDataFromDatabase(PhotosDatabaseRef, eventKey).then(_photoSnap => {
-                //const linkEl = document.getElementById("");
-                /*
-                const links = photoSnap.val() || [];
-
-                const photoCard = document.createElement('div');
-                photoCard.className = 'photo-card';
-
-                const dataFormatada = eventData.data
-                    ? new Date(eventData.data)
-                        .toLocaleDateString('pt-BR')
-                        .replace(/\//g, '.')
-                    : '---';
-
-                let linksHTML = '---';
-
-                if (links.length > 0) {
-                    linksHTML = links.map(link => `
-                        <a href="${link}" target="_blank">
-                            ${eventData.nome}_${dataFormatada}
-                        </a>
-                    `).join('<br>');
-                }
-
-                photoCard.innerHTML = `
-                    <h3>${eventData.nome}</h3>
-                    <p>${linksHTML}</p>
-                `;
-
-                photoContainer.appendChild(photoCard);
-                 */
-            });
-        });
-    });
-}
-
-/**
- * Preenche a lista de fotos
- */
-export function fillPhotoList() {
-    photoContainer.innerHTML = '';
-    if (isAdmin()) {
-        fillPhotoListAsAdmin();
-    } else {
-        fillPhotoListAsUser();
-    }
-}
 
 /**
  * Carrega os eventos comuns da página
@@ -195,7 +39,6 @@ export function loadCommonEvents() {
 
         getDataFromUser(user.uid)
             .then(_snapshot => {
-                fillPhotoList(); // todos veem
 
                 if (isAdmin()) {
                     //populateEventSelectForPhotos();
@@ -225,7 +68,6 @@ export function loadCommonEvents() {
     const photoBtn = document.getElementById("photoBtn");
     if (photoBtn) photoBtn.onclick = (event) => {
         openTab('photos', event);
-        fillPhotoList();
     };
 
     const blockListBtn = document.getElementById("blockListBtn");
@@ -243,7 +85,6 @@ export function loadCommonEvents() {
     };
     document.getElementById("photoBtn").onclick = (event) => {
         openTab('photos', event);
-        fillPhotoList();
     };
     document.getElementById("blockListBtn").onclick = (event) => {
         openTab('lista-blocks', event);
@@ -273,12 +114,12 @@ async function loadCommon() {
     // Redirect logic after user is loaded
     if (isAdmin()) {
         if (!window.location.pathname.includes("Admin")) {
-            alert("Você será redirecionado para a página de administrador.")
+            await abrirAlerta("Você será redirecionado para a página de administrador.")
             window.location.href = ADMIN_PAGE_ADDRESS;
         }
     } else {
         if (window.location.pathname.includes("Admin")) {
-            alert("Você não tem permissão de acessar essa página!")
+            await abrirAlerta("Você não tem permissão de acessar essa página!")
             window.location.href = USER_PAGE_ADDRESS;
         }
     }
@@ -303,7 +144,7 @@ async function loadCommon() {
             const cpfLimpo = cpf.replace(/[^\d]+/g, '');
 
             if (!validarCPF(cpfLimpo)) {
-                alert('CPF inválido. Verifique e tente novamente.');
+                abrirAlerta('CPF inválido. Verifique e tente novamente.');
                 return;
             }
 
@@ -312,7 +153,7 @@ async function loadCommon() {
                 userClass: turma,
                 userCourse: curso
             }).then(() => {
-                alert('Informações atualizadas com sucesso!');
+                abrirAlerta('Informações atualizadas com sucesso!');
 
                 // Atualiza os elementos da página imediatamente
                 if (userId) userId.innerHTML = `CPF: ${cpfLimpo}`;
@@ -324,7 +165,7 @@ async function loadCommon() {
                 console.error('Erro ao atualizar informações:', err);
                 enviarErroParaSentry(err);
 
-                alert('Erro ao atualizar informações. Tente novamente.');
+                abrirAlerta('Erro ao atualizar informações. Tente novamente.');
             });
         };
     }

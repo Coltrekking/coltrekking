@@ -3,6 +3,7 @@ import {getDataFromDatabase, getDataFromUser, refFromUser, UsersDatabaseRef} fro
 import {currentUserHasAdminPower, hasAdminPower} from "/src/js/auth";
 import {update} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
+import {abrirAlerta} from "/src/js/modal";
 
 // abre/fecha a área de gerenciamento de bloqueios
 export function toggleBlockManager() {
@@ -11,7 +12,7 @@ export function toggleBlockManager() {
     const user = Auth.currentUser;
 
     if (!user) {
-        alert("Você precisa estar logado para gerenciar bloqueios.");
+        abrirAlerta("Você precisa estar logado para gerenciar bloqueios.");
         return;
     }
 
@@ -21,7 +22,7 @@ export function toggleBlockManager() {
         getDataFromUser(uid)
             .then(_snap => {
                 if (!currentUserHasAdminPower()) {
-                    alert("Você não tem permissão para gerenciar bloqueios.");
+                    abrirAlerta("Você não tem permissão para gerenciar bloqueios.");
                     return;
                 }
 
@@ -38,7 +39,7 @@ export function toggleBlockManager() {
                 console.error("Erro ao verificar role (toggleBlockManager):", err);
                 enviarErroParaSentry(err);
 
-                alert("Erro ao verificar permissões. Tente novamente.");
+                abrirAlerta("Erro ao verificar permissões. Tente novamente.");
             });
     });
 }
@@ -124,14 +125,14 @@ export function loadBlockManager() {
 function blockUser(uid) {
     update(refFromUser(uid), { able: false })
         .then(() => {
-            alert("Usuário bloqueado com sucesso!");
+            abrirAlerta("Usuário bloqueado com sucesso!");
             loadBlockManager();
         })
         .catch(err => {
             console.error("Erro ao bloquear usuário:", err);
             enviarErroParaSentry(err);
 
-            alert("Erro ao bloquear usuário. Verifique permissões.");
+            abrirAlerta("Erro ao bloquear usuário. Verifique permissões.");
         });
 }
 
@@ -139,12 +140,12 @@ function blockUser(uid) {
 function unblockUser(uid) {
     update(refFromUser(uid), { able: true })
         .then(() => {
-            alert("Usuário desbloqueado com sucesso!");
+            abrirAlerta("Usuário desbloqueado com sucesso!");
             loadBlockManager();
         })
         .catch(err => {
             console.error("Erro ao desbloquear usuário:", err);
             enviarErroParaSentry(err);
-            alert("Erro ao desbloquear usuário. Verifique permissões.");
+            abrirAlerta("Erro ao desbloquear usuário. Verifique permissões.");
         });
 }

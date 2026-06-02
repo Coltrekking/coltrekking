@@ -11,13 +11,20 @@ import {
     loading,
     PhotosDatabaseRef,
     refFromDatabase,
-    refFromUser, showLoading
+    refFromUser, showItem, showLoading
 } from "./utils";
-import {abrirModal, EntradasModal} from "./modal";
+import {abrirAlerta, abrirConfirmacao, abrirModal, EntradasModal} from "./modal";
 import {isAdmin} from "./auth";
 import {exportarInscricoesCSV, exportarInscricoesXLSX, listarInscritos, removeEvent, updateEvent} from "./eventAdmin";
 import {remove, set, update} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
+
+// Ícones para as ações relacionadas às imagens dos eventos
+// (o ícone que aperta para abrir a tela de imagens)
+const EventImagesIcons = {
+    "add": "/assets/icons/add-image-icon.svg",
+    "view": "/assets/icons/image-icon.svg"
+}
 
 /**
  * Retorna a quantidade mínima de pontos para se inscrever
@@ -62,15 +69,26 @@ function checkForDifficult(userUid, pontuacaoNecessaria, eventDate, eventCard) {
 
 /**
  * Preenche um card de evento com as informações dadas.
+ * @param eventContainer o container onde o cartão deve ficar
+ * @param item o item do evento, com a chave e o valor (informações do evento)
+ * @param uid o uid do usuário
+ * @param updating se está atualizando um cartão. Se estiver, ele *não* vai criar um novo cartão.
  */
-function fillEventCard(eventContainer, item, uid) {
+function fillEventCard(eventContainer, item, uid, updating = false) {
     const value = item.value;
-    if (document.getElementById(item.key)) return; // evita duplicação
+    if (!updating && document.getElementById(item.key)) return; // evita duplicação
 
-    const eventCard = document.createElement('div');
-    eventCard.className = 'event-card';
-    eventCard.style.position = "relative";
-    eventCard.id = item.key;
+    let eventCard = null;
+    if (updating) { // Se estiver atualizando, tenta obter o cartão
+        eventCard = document.getElementById(item.key);
+        if (eventCard) eventCard.replaceChildren(); // limpa o cartão para preencher com as informações atualizadas
+    }
+    if (!eventCard) { // Se o cartão não existir, cria um novo
+        eventCard = document.createElement('div');
+        eventCard.className = 'event-card';
+        eventCard.style.position = "relative";
+        eventCard.id = item.key;
+    }
 
     // Cria e estiliza o botão de ver as imagens do evento
     const seeImagesBtn = document.createElement("button");
@@ -82,19 +100,28 @@ function fillEventCard(eventContainer, item, uid) {
     seeImagesBtn.style.zIndex = "3";
 
     const seeImagesImg = document.createElement("img");
-    seeImagesImg.src = "/assets/icons/image-icon.svg";
+    seeImagesImg.id = "evento-imagens-img-" + item.key;
+    seeImagesImg.src = EventImagesIcons.view;
     seeImagesImg.alt = "Fotos";
     seeImagesImg.className = "icon";
     seeImagesImg.style.height = "2.5em";
 
-    seeImagesBtn.appendChild(seeImagesImg);
-    eventCard.appendChild(seeImagesBtn);
+    if (!seeImagesImg.parentElement)
+        seeImagesBtn.appendChild(seeImagesImg);
+    if (!seeImagesBtn.parentElement)
+        eventCard.appendChild(seeImagesBtn);
 
-    // Esconde o botão se não houver fotos
+    // Esconde o botão se não houver fotos (ou, se for admin,
+    // troca para algo que indique para adicionar uma foto)
     getEventPhotos(item.key).then(links => {
         if (links.length === 0) {
-            seeImagesBtn.style.display = "none";
-            eventCard.removeChild(seeImagesBtn);
+            // Se o usuário não for admin, não mostra o botão
+            if (!isAdmin()) {
+                seeImagesBtn.style.display = "none";
+                eventCard.removeChild(seeImagesBtn);
+            } else { // Se for admin, troca para a foto de adicionar imagem
+                seeImagesImg.src = EventImagesIcons.add;
+            }
         }
     });
 
@@ -184,10 +211,37 @@ function fillEventCard(eventContainer, item, uid) {
 
     // Conecta o botão de imagens com a função de apresentar as fotos
     seeImagesBtn.addEventListener('click', _ => {
-        showEventPhotos(value.nome, item.key).then(_ => {});
+        showEventPhotos(value.nome, item.key).then(_ => { });
     });
 
-    eventContainer.appendChild(eventCard);
+    if (!eventCard.parentElement)
+        eventContainer.appendChild(eventCard);
+}
+
+/**
+ * Atualiza o card do evento com o id dado.
+ * @param eventId id do evento
+ */
+function updateEventCard(eventId) {
+    const eventContainer = document.getElementById('eventContainer');
+
+    // Obtém as informações
+    getDataFromDatabase(EventsDatabaseRef, eventId).then(snapshot => {
+        const data = snapshot.val();
+        if (!data) // Se não encontrou as informações do evento, lança um erro
+            throw new Error(`Evento com id ${eventId} não encontrado para atualizar o card.`);
+
+        // Cria um novo card com as informações atualizadas
+        /*const newEventCard = document.createElement('div');
+        newEventCard.className = 'event-card';
+        newEventCard.style.position = "relative";
+        newEventCard.id = eventId;*/
+
+        // Preenche o novo card com as informações atualizadas
+        fillEventCard(eventContainer, {key: eventId, value: data}, localStorage.getItem('uid'), true);
+    }).catch(err => {
+        enviarErroParaSentry(err);
+    });
 }
 
 /**
@@ -202,7 +256,7 @@ function fillEventContainer(dataSnapshot) {
         console.warn('UID não encontrado no localStorage.');
         enviarErroParaSentry("UID não foi encontrado no localStorage. Por isso, os eventos não serão carregados.");
         hideItem(loading);
-        alert("Reinicie a página.");
+        abrirAlerta("Reinicie a página.");
         return;
     }
 
@@ -365,7 +419,7 @@ function createSubscribeButton(evento, key, userUid, eventDate) {
 
         //camada extra de segurança
         if (Date.now() < eventStart.getTime()) {
-            alert("⚠️ Inscrições ainda não começaram para este evento.");
+            abrirAlerta("⚠️ Inscrições ainda não começaram para este evento.");
             return;
         }
 
@@ -400,6 +454,8 @@ function fillEventListAsUser(dataSnapshot) {
  * @param dataSnapshot informações dos eventos
  */
 export function fillEventList(dataSnapshot) {
+    // Isso aqui, atualmente, não é necessário, já que tanto o admin quanto o usuário comum tem a mesma visualização de eventos.
+    // Mas, caso queira colocar algo específico para cada tipo de usuário, pode alterar na respectiva função.
     if (isAdmin()) fillEventListAsAdmin(dataSnapshot, Auth.currentUser)
     else fillEventListAsUser(dataSnapshot, Auth.currentUser)
 }
@@ -460,7 +516,7 @@ export async function atualizarPontuacaoUsuario(uid, eventId, adicionar) {
 function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn) {
     const user = Auth.currentUser;
     if (!user) {
-        alert('Você precisa estar logado para se inscrever.');
+        abrirAlerta('Você precisa estar logado para se inscrever.');
         return Promise.reject(new Error("Usuário não autenticado"));
     }
 
@@ -472,12 +528,12 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn) {
             const userData = snapshot.val();
 
             if (!userData || !userData.userId || !userData.userClass || !userData.userCourse) {
-                alert("⚠️ Antes de se inscrever, preencha suas informações pessoais (RA, Turma e Curso).");
+                abrirAlerta("⚠️ Antes de se inscrever, preencha suas informações pessoais (RA, Turma e Curso).");
                 throw new Error("Dados pessoais incompletos");
             }
 
             if (userData.able === false) {
-                alert("Você está suspenso e não pode se inscrever em eventos.");
+                abrirAlerta("Você está suspenso e não pode se inscrever em eventos.");
                 throw new Error("Usuário bloqueado");
             }
 
@@ -486,7 +542,7 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn) {
                 .then(async eventoSnap => {
                     const evento = eventoSnap.val();
                     if (!evento) {
-                        alert("Evento não encontrado.");
+                        await abrirAlerta("Evento não encontrado.");
                         throw new Error("Evento inexistente");
                     }
 
@@ -494,7 +550,7 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn) {
                     const pontos = parseFloat(userData.pontos) || 0;
                     const pontuacaoNecessaria = await getPontuacaoMinimaParaEvento(eventId);
                     if (pontos < pontuacaoNecessaria) {
-                        alert(`⚠️ Você precisa de, pelo menos, ${pontuacaoNecessaria} pontos para participar deste evento.`);
+                        await abrirAlerta(`⚠️ Você precisa de, pelo menos, ${pontuacaoNecessaria} pontos para participar deste evento.`);
                         throw new Error("Pontuação insuficiente");
                     }
 
@@ -510,7 +566,7 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn) {
             });
         })
         .then(() => {
-            alert('Inscrição realizada com sucesso!');
+            abrirAlerta('Inscrição realizada com sucesso!');
             subscribeBtn.style.display = 'none';
             unsubscribeBtn.style.display = 'inline-block';
         })
@@ -518,30 +574,35 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn) {
             if (!["Dados pessoais incompletos", "Usuário bloqueado", "Inscrição antes do horário", "Pontuação insuficiente"].includes(error.message)) {
                 console.error('Erro ao inscrever:', error);
                 enviarErroParaSentry(error);
-                alert('Erro ao realizar inscrição. Tente novamente.');
+                abrirAlerta('Erro ao realizar inscrição. Tente novamente.');
             }
         });
 }
 
 // função para cancelar inscrição
 async function unsubscribeFromEvent(eventId, unsubscribeBtn, subscribeBtn) {
-    const confirmar = confirm("Tem certeza que deseja cancelar sua inscrição?");
+    const confirmar = await abrirConfirmacao("Tem certeza que deseja cancelar sua inscrição?");
     if (!confirmar) return;
 
     const user = Auth.currentUser;
     if (!user) {
-        alert('Você precisa estar logado para cancelar a inscrição.');
+        await abrirAlerta('Você precisa estar logado para cancelar a inscrição.');
         return;
     }
 
     const uid = user.uid;
 
+    // Mostra o loading enquanto processa a retirada do usuário do evento
+    showItem(loading);
+
     // Retira o usuário do evento
     unsubscribeUserFromEvent(eventId, uid).then(() => {
-        alert('Inscrição removida com sucesso!');
+        abrirAlerta('Inscrição removida com sucesso!');
         unsubscribeBtn.style.display = 'none';
         subscribeBtn.style.display = 'inline-block';
-    })
+    }).finally(_ => {
+        hideItem(loading);
+    });
 }
 
 export async function unsubscribeUserFromEvent(eventId, uid) {
@@ -565,7 +626,7 @@ export async function unsubscribeUserFromEvent(eventId, uid) {
         .catch(error => {
             console.error(`Erro ao remover inscrição do usuário ${user.val().nome}:`, error);
             enviarErroParaSentry(error);
-            alert('Erro ao cancelar inscrição. Tente novamente.');
+            abrirAlerta('Erro ao cancelar inscrição. Tente novamente.');
         });
 }
 
@@ -657,6 +718,66 @@ async function isUserPresentInEvent(userUid, eventId) {
 }
 
 /**
+ * Adiciona o link dado à lista de fotos do evento.
+ * @param {String} eventId id do evento
+ * @param {String} link link para as fotos
+ */
+function _addLinkToPhotoList(eventId, link) {
+    const photosContainer = document.getElementById("eventPhotoList");
+
+    // Cria um elemento p e, dentro dele, um a com o link para a foto
+    const pEl = document.createElement("p");
+    const aEl = document.createElement("a");
+
+    let displayLink = link;
+
+    if (link.startsWith("https://"))
+        displayLink = link.slice(8);
+    else if (link.startsWith("http://"))
+        displayLink = link.slice(7);
+    else {
+        // Se o link não começa com "http" ou "https", adiciona, automaticamente, isso.
+        // NOTA: sem isso, o link levaria para uma sub-página da página do coltrekking
+        // (tipo coltrekking.web.app/bit.ly/dj8ds292k, considerando que o link é
+        // `bit.ly/dj8ds292k`
+        link = link.padStart(link.length + 8, "https://")
+    }
+
+    aEl.href = link;
+    aEl.innerText = displayLink;
+    aEl.target = "_blank";
+
+    pEl.appendChild(aEl);
+
+    // Se for admin, cria um botão de lixeira para poder apagar o link
+    if (isAdmin()) {
+        const removeBtn = document.createElement("button");
+        removeBtn.title = "Remover Imagem";
+        removeBtn.className = "danger icon-button remove-img-btn";
+
+        const removeImg = document.createElement("img");
+        removeImg.src = "/assets/icons/delete-icon.svg";
+        removeImg.alt = "Fotos";
+        removeImg.className = "icon";
+
+        removeBtn.onclick = () => {
+            removeBtn.disabled = true; // Evita múltiplos cliques enquanto processa a remoção
+            removeLink(eventId, link).then(_ => {
+                photosContainer.removeChild(pEl); // Remove o elemento da lista de fotos (atualizar visualmente)
+            })
+        }
+
+        removeBtn.appendChild(removeImg);
+        pEl.appendChild(removeBtn);
+    }
+
+    photosContainer.appendChild(pEl);
+    const mensagem = document.getElementById("noImagePhotoModal");
+    hideItem(mensagem);
+}
+
+
+/**
  * Carrega e mostra as fotos do evento dado.
  * @param {String} eventName nome do evento que será apresentado no título do modal
  * @param {String} eventId id do evento que as fotos serão apresentadas
@@ -664,9 +785,11 @@ async function isUserPresentInEvent(userUid, eventId) {
 async function showEventPhotos(eventName, eventId) {
     showLoading();
     const photosContainer = document.getElementById("eventPhotoList");
+    const eventoSemFotoMensagem = document.getElementById("noImagePhotoModal");
 
-    // Limpa o que tinha no modal
-    photosContainer.innerHTML = "";
+    // Limpa o que tinha no modal e tira a mensagem de evento sem foto
+    photosContainer.replaceChildren();
+    hideItem(eventoSemFotoMensagem);
 
     // Obtém os links e lista eles //
 
@@ -680,26 +803,31 @@ async function showEventPhotos(eventName, eventId) {
 
     // Se não tiver nenhum link, mostra uma mensagem de que não tem fotos
     if (links.length === 0) {
-        const mensagem = document.createElement("p");
-        mensagem.textContent = "Não há fotos para este evento.";
-        photosContainer.appendChild(mensagem);
-        return;
+
+        showItem(eventoSemFotoMensagem);
+
+    } else { // Se houver imagens
+
+        const pSubtitulo = document.createElement("p");
+        pSubtitulo.id = "photoLinksSubtitle";
+        pSubtitulo.textContent = "Link das fotos:";
+        photosContainer.appendChild(pSubtitulo);
+
+        // Lista cada link
+        links.forEach(link => {
+            _addLinkToPhotoList(eventId, link);
+        });
     }
 
-    const pSubtitulo = document.createElement("p");
-    pSubtitulo.textContent = "Link das fotos:";
-    photosContainer.appendChild(pSubtitulo);
+    // Se for admin, cria um botão para adicionar uma nova imagem
+    if (isAdmin()) {
+        const btnAddImg = document.getElementById("addPhotoModalBtn");
 
-    // Lista cada link
-    links.forEach(link => {
-        // Cria um elemento p e, dentro dele, um a com o link para a foto
-        const pEl = document.createElement("p");
-        const aEl = document.createElement("a");
-        aEl.href = link;
-        aEl.textContent = link;
-        pEl.appendChild(aEl);
-        photosContainer.appendChild(pEl);
-    });
+        if (btnAddImg)
+            btnAddImg.onclick = _ => {
+            askForPhotoForEvent(eventId);
+        };
+    }
 
     hideItem(loading);
     // Deixa o conteúdo visível agora que terminou de carregar as fotos
@@ -715,5 +843,84 @@ function getEventPhotos(eventId) {
     return getDataFromDatabase(PhotosDatabaseRef, eventId).then(snapshot => {
         // Obtém os links
         return snapshot.val() || [];
+    });
+}
+
+/**
+ * Pergunta ao usuário pela foto que ele deseja colocar no evento dado.
+ * @param eventId evento que será adicionada a foto.
+ */
+async function askForPhotoForEvent(eventId) {
+    if (!isAdmin()) return; // se não for admin, ignora
+    // Pergunta ao usuário o link
+    const url = await abrirModal(
+        "Adicionar Imagens",
+        "Digite o link das fotos",
+        EntradasModal.TEXTO,
+        {
+            BtnOkTexto: "Adicionar"
+        });
+
+    // Verifica se realmente houve respota
+    if (url) {
+        addLink(eventId, url);
+        _addLinkToPhotoList(eventId, String(url));
+    }
+}
+
+/**
+ * Adiciona o link dado às fotos do evento dado.
+ * @param eventKey id do evento
+ * @param url link das fotos
+ */
+function addLink(eventKey, url) {
+    if (!isAdmin()) return;
+
+    if (!eventKey || !url) {
+        abrirAlerta('Selecione o evento e informe o link.');
+        return;
+    }
+
+    getDataFromDatabase(PhotosDatabaseRef, eventKey).then(snapshot => {
+        const links = snapshot.val() || [];
+        links.push(url);
+
+        set(refFromDatabase(PhotosDatabaseRef, eventKey), links)
+            .then(() => {
+                updateEventCard(eventKey);
+            });
+    });
+}
+
+/**
+ * Remove o link (com o índice dado) das fotos do evento dado
+ * @param eventKey id do evento
+ * @param url link para remover
+ * @return {Promise} promessa que resolve quando o link for removido do banco de dados
+ */
+async function removeLink(eventKey, url) {
+    if (!isAdmin()) return false;
+    if (! (await abrirConfirmacao('Deseja remover este link?'))) return false;
+
+    return getDataFromDatabase(PhotosDatabaseRef, eventKey).then(async snapshot => {
+        const links = snapshot.val() || [];
+        links.splice(links.indexOf(url), 1);
+
+        await set(refFromDatabase(PhotosDatabaseRef, eventKey), links)
+            .then(async () => {
+                // Obtém a lista de eventos e verifica se está vazia. Se tiver,
+                // mostra a mensagem indicando que não há fotos.
+                await getEventPhotos(eventKey).then(links => {
+                    if (links.length <= 0) {
+                        // Aparece a mensagem de vazia
+                        const mensagem = document.getElementById("noImagePhotoModal");
+                        showItem(mensagem);
+                        // Desaparece o subtítulo dos links
+                        const subtitulo = document.getElementById("photoLinksSubtitle");
+                        if (subtitulo) hideItem(subtitulo);
+                    }
+                   updateEventCard(eventKey);
+                });
+            });
     });
 }

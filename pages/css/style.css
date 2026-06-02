@@ -175,6 +175,9 @@ button {
 .icon {
     width: auto;
     height: 1.2em;
+}
+
+.close-modal-icon {
     margin: 0 0 -3px;
 }
 
@@ -217,6 +220,26 @@ p {
     margin: 0;
 }
 
+.big-text {
+    font-size: max(15px, 1.5vw);
+}
+
+.medium-text {
+    font-size: max(12px, 1.2vw);
+}
+
+.small-text {
+    font-size: max(10px, 1vw);
+}
+
+.super-small-text {
+    font-size: max(7px, 0.7vw);
+}
+
+.italic-text {
+    font-style: italic;
+}
+
 .alternative {
     background-color: #f29c2c;
 }
@@ -233,6 +256,11 @@ p {
 
     animation: spin 1s linear infinite;
 }
+
+#loading {
+    z-index: 100000;
+}
+
 @keyframes spin {
     from {
         transform: rotate(0deg);
@@ -288,7 +316,21 @@ p {
     height: auto;
 }
 
+.remove-img-btn {
+    margin: 0 0 0 5px !important;
+    padding: 1px 3px !important;
+    z-index: 3;
+    height: 100%;
+}
 
+.remove-img-btn > img {
+    height: 1em !important;
+    width: auto !important;
+
+    margin: 0 !important;
+    display: block;
+    vertical-align: middle;
+}
 
 .user-header #userImg {
     width: auto;

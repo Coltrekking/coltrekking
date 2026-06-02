@@ -22,6 +22,10 @@ if (!document.getElementById("modalOverlay")) {
                     <input type="number" id="modalNumberElement" style="display: none">
                 </div>
                 
+                <div class="modal-botoes">
+                    <input type="text" id="modalTextElement" style="display: none">
+                </div>
+                
                 <p id="modalInvalidValueMessage" class="soft-warn startHidden" style="color: orange;">Insira algo válido!</p> <!-- esse texto não é o final! -->
     
                 <div class="modal-botoes">
@@ -50,7 +54,8 @@ const Modal = {
     BtnCancelar: document.getElementById('modalBtnCancelar'),
 
     SelectElement: document.getElementById('modalSelectElement'),
-    NumberElement: document.getElementById("modalNumberElement")
+    NumberElement: document.getElementById("modalNumberElement"),
+    TextElement: document.getElementById("modalTextElement")
 }
 
 // As entradas(como Sim/Não) que o modal aceita.
@@ -58,10 +63,12 @@ export const EntradasModal = Object.freeze({
     SIM_OU_NAO: 'sim_ou_nao',
     OK: 'ok',
     SELECAO: 'selecao',
-    NUMERO: 'numero'
+    NUMERO: 'numero',
+    TEXTO: 'texto'
     // Lembre-se: se adicionar mais tipos de entrada aqui,
-    // adicione o tratamento deles na função `abrirModal` e
-    // documente a entrada no comentário da função.
+    // adicione o tratamento deles na função `abrirModal`
+    // (como fazer a limpeza deles toda vez que um modal é
+    // aberto) e documente a entrada no comentário da função.
 })
 
 /**
@@ -83,7 +90,7 @@ export const EntradasModal = Object.freeze({
  * @param {string} mensagem O texto descritivo
  * @param {string} tipoDeEntrada tipo de entrada que o modal deve aceitar.
  * @param {{}} opcoes opções a respeito da entrada. Cada tipo de entrada **pode** ter opções específicas.
- * @returns {Promise} Retorna uma promise com o valor que o usuário colocou. Se o usuário cancelou, retorna null
+ * @returns {Promise<Any>} Retorna uma promise com o valor que o usuário colocou. Se o usuário cancelou, retorna null
  */
 export function abrirModal(titulo, mensagem, tipoDeEntrada, opcoes = {}) {
     let opcoesPadroes = {
@@ -101,6 +108,9 @@ export function abrirModal(titulo, mensagem, tipoDeEntrada, opcoes = {}) {
         // Entrada de Número
         minNumber: "",  // número mínimo
         maxNumber: "",   // número máximo
+
+        // Entrada de Texto
+        // (nada)
     };
 
     // Une as opções dadas com as padrões
@@ -115,14 +125,16 @@ export function abrirModal(titulo, mensagem, tipoDeEntrada, opcoes = {}) {
         // Esconde todas as entradas (por padrão)
         hideItem(Modal.SelectElement);
         hideItem(Modal.NumberElement)
+        hideItem(Modal.TextElement);
         hideItem(Modal.BtnCancelar);
         hideItem(Modal.BtnOk);
 
-        // Coloca as propriedades padrões
+        // Coloca as propriedades padrões (limpa os elementos)
         Modal.BtnOk.innerText = opcoes.BtnOkTexto;
         Modal.BtnCancelar.innerText = opcoes.BtnCancelarTexto;
-        Modal.SelectElement.innerHTML = ""; // Limpa opções anteriores
-        Modal.NumberElement.value = ""; // Limpa valor anterior
+        Modal.SelectElement.innerHTML = "";
+        Modal.NumberElement.value = "";
+        Modal.TextElement.value = "";
 
         // Coloca o OK e Cancelar como padrão (vão aparecer quase todas as vezes)
         showItem(Modal.BtnOk);
@@ -159,6 +171,10 @@ export function abrirModal(titulo, mensagem, tipoDeEntrada, opcoes = {}) {
                 Modal.NumberElement.min = opcoes.minNumber;
                 Modal.NumberElement.max = opcoes.maxNumber;
                 break;
+
+            case EntradasModal.TEXTO:
+                showItem(Modal.TextElement);
+                break;
         }
 
         showItem(Modal);
@@ -189,6 +205,10 @@ export function abrirModal(titulo, mensagem, tipoDeEntrada, opcoes = {}) {
 
                     // Se chegou até aqui, é um número válido.
                     resolve(valorNumerico)
+                    break;
+
+                case EntradasModal.TEXTO:
+                    resolve(Modal.TextElement.value);
                     break;
 
                 default: // Resolve a Promise como verdadeira
@@ -228,6 +248,16 @@ export function abrirModal(titulo, mensagem, tipoDeEntrada, opcoes = {}) {
  */
 export function abrirAviso(mensagem) {
     return abrirModal("Aviso", mensagem, EntradasModal.OK, { BtnOkTextoEntradaOk: "Entendi" });
+}
+
+/**
+ * Cria um alerta para um usuário, com apenas um botão de "Ok" para fechar.
+ * Retorna uma Promise que é resolvida quando o usuário clicar em "Ok".
+ * @param mensagem a mensagem que será mostrada ao usuário.
+ * @return {Promise} Promise que é resolvida quando o usuário clicar em "Ok".
+ */
+export function abrirAlerta(mensagem) {
+    return abrirModal("", mensagem, EntradasModal.OK);
 }
 
 /**
