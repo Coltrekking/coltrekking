@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coltrekking - Área Admin</title>
+    <link rel="shortcut icon" href="/assets/images/logo.png" type="image/x-icon">
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Fontes -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Bebas+Neue&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Anton&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap">
+</head>
+
+<body>
+    <!-- Tela de loading -->
+    <div class="modal-overlay" id="loading" style="display: none;">
+        <img src="/assets/icons/loading.svg" alt="Carregando..." class="loading-icon">
+    </div>
+
+    <div id="adminPage" class="center">
+        <header>
+            <img src="/assets/images/coltrekkingHorizontal.png" id="imgHP" alt="Logo Coltrekking">
+        </header>
+
+        <hr>
+
+        <div class="user-top-bar"> <!-- Bem Vindo & Botão de Configurações -->
+            <div class="flex-center">
+                <h3 class="center">Área Admin</h3>
+            </div>
+        </div>
+        <a href="/homeAdmin">
+            <button class="alternative" style="width: 20vw;">
+                Voltar para a página inicial
+            </button>
+        </a>
+
+        <hr>
+
+        <div class="tab-bar">
+            <button id="geralAdminBtn" class="tab-button active">Geral</button>
+            <button id="usuariosAdminBtn" class="tab-button">Usuários</button>
+            <button id="instrucoesGeraisAdminBtn" class="tab-button">Instruções Gerais</button>
+        </div>
+
+        <div id="geralAdmin" class="tab-content active">
+            <h2>Geral</h2>
+            <p>Bem-vindo à página de administradores! Aqui, você conseguirá acessar todos os recursos de gerenciamento.</p>
+        </div>
+
+        <div id="usuariosAdmin" class="tab-content">
+            <h2>Usuários</h2>
+            <!--
+            <button id="manageBlockBtn" type="button" class="alternative">Gerenciar
+                Bloqueios</button>
+            -->
+
+            <!-- Campo de busca -->
+            <div id="userSearchContainer" style="margin-bottom: 15px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                <!-- Barra de pesquisa -->
+                <div style="width: 100%;">
+                    <input type="text" id="userSearch" placeholder="Buscar usuário por nome..."/>
+                </div>
+                <!-- Opções a mais de filtro -->
+                <div class="flex-center" style="gap: 5px;">
+                    <span class="text" style="margin-left: 15px;">Cargo:</span>
+                    <select class="text small-text" style="height: max(24px, 2.4vw); width: 240px;" id="userSearchRole">
+                        <option value="todos">Todos</option>
+                        <option value="admin">Admin</option>
+                        <option value="user">Usuário</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Lista renderizada pelo JS -->
+            <div id="userList"></div>
+        </div>
+
+        <div id="instrucoesGeraisAdmin" class="tab-content">
+            <h2>Instruções Gerais</h2>
+        </div>
+
+        <footer id="mainFooter">
+            <div class="footer-content">
+                <p>Site desenvolvido por
+                    <a href="https://www.linkedin.com/in/j%C3%BAlia-martins-souza-997ba6350/" target="_blank">Júlia Martins Souza</a>
+                    e por <a href="https://www.linkedin.com/in/andré-dias-de-paula-3430ba406/" target="_blank">André Dias de Paula</a>
+                    para o Projeto de Ensino Coltrekking do Colégio Técnico da UFMG</p>
+                <h3><img src="/assets/images/logoColtec.png" id="imgColtec" alt="Logo Coltec"> &copy; 2026 Coltrekking.
+                    Todos os
+                    direitos reservados.</h3>
+                <div class="footer-links">
+                    <a href="https://www.coltec.ufmg.br" target="_blank">Institucional</a>
+                </div>
+            </div>
+        </footer>
+        </div>
+
+    <!-- Scripts -->
+    <script type="module" src="/src/js/pages/adminPage/adminPage.js"></script>
+</body>
+
+</html>

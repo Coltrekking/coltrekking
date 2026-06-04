@@ -57,6 +57,13 @@ export function showLoading() {
     showItem(loading);
 }
 
+/**
+ * Retira o elemento de loading.
+ */
+export function hideLoading() {
+    hideItem(loading);
+}
+
 // Mostrar conteúdo para usuários não autenticados
 export function showAuth() {
     hideItem(homePage);

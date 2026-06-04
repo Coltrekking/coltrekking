@@ -12,13 +12,13 @@ import {
     refFromDatabase,
     getDataFromDatabase, UsersDatabaseRef, refFromUser, getDataFromUser
 } from "./utils"
-import {abrirAlerta, abrirAviso, abrirConfirmacao} from "./modal.js";
+import {abrirAlerta, abrirConfirmacao} from "./modal.js";
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, deleteUser, reload } from "firebase/auth";
 import {child, set, update} from "firebase/database";
 import {enviarErroParaSentry, identificarUserParaSentry} from "/src/js/main";
 
 // Lista de Cargos de um usuário
-const Roles = Object.freeze({  // O `Object.freeze()` certifica que não é possível atualizar
+export const Roles = Object.freeze({  // O `Object.freeze()` certifica que não é possível atualizar
     UNDEFINED: undefined,                      // os cargos no meio da execução do site.
     USER: 'user',
     ADMIN: 'admin',
@@ -419,7 +419,7 @@ export function loadUsers() {
                 let actionBtn;
                 actionBtn = document.createElement("button");
                 // Se o usuário tiver cargo SUPER, o cargo dele não pode ser alterado.
-                if (getRolePower(user.role) !== getRolePower(Roles.SUPER)) {
+                /*if (getRolePower(user.role) !== getRolePower(Roles.SUPER)) {
                     if (getRolePower(user.role) < getRolePower(Roles.ADMIN)) {
                         actionBtn.textContent = "Promover a Admin";
                         actionBtn.className = "primary";
@@ -433,7 +433,7 @@ export function loadUsers() {
                     actionBtn.textContent = "Sem Permissão";
                     actionBtn.className = "unable";
                     actionBtn.onclick = () => abrirAviso("Este usuário tem o cargo máximo e não pode ser promovido ou rebaixado.");
-                }
+                }*/
 
                 row.appendChild(actionBtn);
                 userCard.appendChild(row);
@@ -451,41 +451,14 @@ export function loadUsers() {
         });
 }
 
-// Função para promover um usuário a admin
-function promoteToAdmin(uid) {
 
-    update(refFromUser(uid), { role: Roles.ADMIN })
-        .then(() => {
-            abrirAlerta("Usuário promovido a admin!");
-            loadUsers(); // atualiza a lista
-        })
-        .catch(err => {
-            console.error("Erro ao promover usuário:", err);
-            enviarErroParaSentry(err);
-
-        });
-}
-
-// Função para remover a role de admin
-function demoteFromAdmin(uid) {
-    update(refFromUser(uid), { role: Roles.USER })
-        .then(() => {
-            abrirAlerta("Admin removido!");
-            loadUsers(); // atualiza a lista
-        })
-        .catch(err => {
-            console.error("Erro ao remover admin:", err);
-            enviarErroParaSentry(err);
-
-        });
-}
 
 /**
  * Retorna o poder hierárquico de um cargo. Se o cargo não existir, retorna -1.
  * @param {String} role cargo a ser verificado
  * @return {number} poder hierárquico do cargo (quanto maior, mais poder), ou -1 se o cargo for inválido.
  */
-function getRolePower(role) {
+export function getRolePower(role) {
     return RolesHierarchy[role] || -1;
 }
 
@@ -530,8 +503,10 @@ export function checkAuth() {
                     }
                 }
             } else {
-                if (!window.location.pathname.includes("index.html"))
+                const currentPath = window.location.pathname;
+                if (!currentPath.includes("index.html") && currentPath !== "/" ) {
                     window.location.href = "index.html";
+                }
             }
         }
     );

@@ -44,7 +44,9 @@ export function toggleBlockManager() {
     });
 }
 
-// carrega todos os usuários com botões de bloquear/desbloquear
+/**
+ * Carrega todos os usuários com botões de bloquear/desbloquear
+ */
 export function loadBlockManager() {
     const blockList = document.getElementById("blockList");
     blockList.innerHTML = "<p>Carregando usuários...</p>";
@@ -117,7 +119,6 @@ export function loadBlockManager() {
         .catch(err => {
             console.error("Erro ao carregar usuários para bloqueio:", err)
             enviarErroParaSentry(err);
-
         });
 }
 
