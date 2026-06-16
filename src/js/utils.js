@@ -194,7 +194,7 @@ export function showUserContent(user) {
             (userCourse && userCourse.innerHTML === 'Curso: N/A')) {
             abrirAlerta('⚠️ Algumas informações do usuário estão faltando.\n' +
                 'Sem elas não será possível realizar inscrições.\n' +
-                'Por favor, edite suas informações pessoais.');
+                'Por favor, edite suas informações pessoais.').then();
         }
 
         hideItem(authElement);
@@ -304,7 +304,10 @@ export function showError(prefix, error) {
     if (error.code) {
         switch (error.code) {
             case 'auth/popup-closed-by-user':
-                abrirAlerta(prefix + ' ' + 'Pop-up fechado pelo usuário antes da operação ser concluída!');
+                //abrirAlerta(prefix + ' ' + 'Pop-up fechado pelo usuário antes da operação ser concluída!');
+                break;
+            case 'auth/user-cancelled':
+                //abrirAlerta('Você cancelou sua autenticação!');
                 break;
             default:
                 abrirAlerta(prefix + ' ' + error.message);
@@ -315,10 +318,6 @@ export function showError(prefix, error) {
         enviarErroParaSentry(error);
     }
 }
-
-
-
-
 
 //let actionCodeSettings = {
 //    url: 'coltrekking-app-c3026.firebaseapp.com'

@@ -12,8 +12,7 @@ import {
     submitEventForm
 } from "../../utils";
 import {abrirModal, abrirConfirmacao, EntradasModal} from "../../modal";
-import {loadUsers, isAdmin} from "../../auth.js";
-import {loadBlockManager} from "../../listaBloqueiosAdmin"
+import {isAdmin} from "../../auth.js";
 import {
     createPhotoBtn,
     loadCommonEvents
@@ -105,12 +104,6 @@ function loadEvents() {
     }
 
     //document.getElementById('toggleUserManagerBtn').onclick = () => toggleUserManager();
-
-    const userSearchInput = document.getElementById('userSearch');
-    userSearchInput.oninput = () => loadUsers();
-
-    const blockSearchInput = document.getElementById('blockSearch');
-    blockSearchInput.oninput = () => loadBlockManager();
 
     editEventNeededPointsBtn.onclick = async () => perguntarNovaPontuacaoNecessaria();
 }

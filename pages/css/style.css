@@ -505,24 +505,27 @@ select {
     font-size: 1.1em;
     line-height: 1.4;
     padding: 6px 8px;
-    height: auto;
+    height: max(24px, 2.4vw);
+    width: min(20vw, 240px);
     min-height: 48px;
     box-sizing: border-box;
 }
 
 #userSearchContainer span {
     max-height: none; /* antes: 3px causava corte */
-    font-size: 1.05rem;
+    /*font-size: 1.05rem;*/
+    font-size: max(13px, 1.3vw);
     display: inline-flex;
     align-items: center; /* centraliza verticalmente em relação ao select */
     margin-left: 0.6rem; /* espaço à esquerda semelhante ao anterior */
 }
 
 #userSearchContainer input {
-    padding: 6px;
-    width: 70%;
-    max-width: 400px;
+    /*padding: 6px;*/
+    /*width: 70%;*/
+    max-width: 50vw;
     min-height: 2vh;
+    font-size: 2vh;
 }
 
 textarea {

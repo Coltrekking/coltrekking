@@ -11,8 +11,7 @@
 // capturar erros que possam acontecer a qualquer momento.
 import * as Sentry from "@sentry/browser";
 
-// Só inicializa o Sentry se já não estiver inicializado e se
-// não estiver no localhost
+// Só inicializa o Sentry se já não estiver inicializado e se não estiver no localhost
 if ( !Sentry.isInitialized() && !window.location.href.includes("localhost")) {
     Sentry.init({
         dsn: "https://905b41850b469eedf58c6cb003519961@o4511315340754944.ingest.us.sentry.io/4511315348422656",
@@ -78,9 +77,6 @@ export function enviarErroParaSentry(error) {
     // Se o erro não deve ser ignorado, envia para o Sentry
     if (!containAnyIgnoredError) Sentry.captureException(error);
 }
-
-/* ========================= */
-
 
 /* ========================= */
 

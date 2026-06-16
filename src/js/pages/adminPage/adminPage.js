@@ -7,11 +7,7 @@
 import {isAdmin, waitForUser} from "/src/js/auth";
 import {openTab} from "/src/js/tabs";
 import {hideItem, loading, showItem} from "/src/js/utils";
-import {loadUsersOnUserPage, roleUserSelect, searchInput} from "/src/js/pages/adminPage/adminUtils";
-
-function openBlockManager() {
-    
-}
+import {loadUsersOnUserPage, roleUserSelect, searchInput, stateUserSelect} from "/src/js/pages/adminPage/adminUtils";
 
 /**
  * Carrega a aba de usuários.
@@ -35,6 +31,8 @@ function loadEvents() {
     searchInput.addEventListener("input", loadUsersOnUserPage.bind(null, false));
     // Quando o filtro de cargo atualizar
     roleUserSelect.addEventListener("change", loadUsersOnUserPage);
+    // Quando o filtro de situação atualizar
+    stateUserSelect.addEventListener("change", loadUsersOnUserPage);
 }
 
 /**
@@ -56,7 +54,6 @@ async function loadPage() {
  * Mostra a mensagem de sem permissão.
  */
 function showNoPermission() {
-    console.log("Sem permissão");
     document.getElementById("adminPage").remove();
 }
 

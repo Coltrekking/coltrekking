@@ -15,7 +15,9 @@
 </head>
 
 <body>
-    <!-- Tela de loading -->
+<div id="darkOverlay" class="modal-overlay" style="display: none;"></div>
+
+<!-- Tela de loading -->
     <div class="modal-overlay" id="loading" style="display: none;">
         <img src="/assets/icons/loading.svg" alt="Carregando..." class="loading-icon">
     </div>
@@ -34,7 +36,7 @@
         </div>
         <a href="/homeAdmin">
             <button class="alternative" style="width: 20vw;">
-                Voltar para a página inicial
+                Voltar para a página principal
             </button>
         </a>
 
@@ -66,12 +68,22 @@
                 </div>
                 <!-- Opções a mais de filtro -->
                 <div class="flex-center" style="gap: 5px;">
-                    <span class="text" style="margin-left: 15px;">Cargo:</span>
-                    <select class="text small-text" style="height: max(24px, 2.4vw); width: 240px;" id="userSearchRole">
-                        <option value="todos">Todos</option>
-                        <option value="admin">Admin</option>
-                        <option value="user">Usuário</option>
-                    </select>
+                    <div>
+                        <label for="userSearchRole"><span class="text">Cargo:</span></label>
+                        <select class="text small-text" id="userSearchRole">
+                            <option value="todos">Todos</option>
+                            <option value="admin">Admin</option>
+                            <option value="user">Usuário</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="userSearchState"><span class="text">Situação:</span></label>
+                        <select class="text small-text" id="userSearchState">
+                            <option value="todos">Todas</option>
+                            <option value="blocked">Bloqueado</option>
+                            <option value="unblocked">Desbloqueado</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -100,6 +112,7 @@
         </div>
 
     <!-- Scripts -->
+    <script type="module" src="/src/js/main.js"></script>
     <script type="module" src="/src/js/pages/adminPage/adminPage.js"></script>
 </body>
 

@@ -13,7 +13,7 @@ import {
     getDataFromDatabase, UsersDatabaseRef, refFromUser, getDataFromUser
 } from "./utils"
 import {abrirAlerta, abrirConfirmacao} from "./modal.js";
-import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, deleteUser, reload } from "firebase/auth";
+import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, deleteUser, reload } from "firebase/auth";
 import {child, set, update} from "firebase/database";
 import {enviarErroParaSentry, identificarUserParaSentry} from "/src/js/main";
 
@@ -33,6 +33,11 @@ const RolesHierarchy = Object.freeze({
     [Roles.SUPER]: 99 // cargo máximo
     // Se adicionar um novo cargo, defina a hierarquia dele aqui (quanto maior o número, mais poder)
 });
+
+// Domínio do email institucional do Coltec
+const DOMINIO_COLTEC = "@teiacoltec.org";
+// Email do site
+const SITE_EMAIL = "sitecoltrekking@gmail.com";
 
 // Traduz o conteúdo do site para português
 Auth.languageCode = 'pt-BR';
@@ -186,101 +191,38 @@ export function isAdmin() {
     return currentUserHasAdminPower();
 }
 
-// Função que centraliza e trata a autenticação
-onAuthStateChanged(Auth, (user) => {
-    hideItem(loading);
-    if (user) {
-        checkAuth();
-        getDataFromDatabase(UsersDatabaseRef, user.uid)
-        .then(snapshot => {
-            updateUserRoleVar(snapshot);
-
-            if (!snapshot.exists()) {
-                // Cria usuário com role "user" e able: true por padrão
-                const userData = {
-                    uid: user.uid,
-                    nome: user.displayName || '',
-                    email: user.email,
-                    role: "user",
-                    able: true,
-                    pontos: 0 // <-- novo campo de pontuação inicial
-                };
-
-
-
-                return set(child(UsersDatabaseRef, user.uid), userData).then(() => {
-                    console.log('Usuário criado com sucesso!');
-                    return userData;
-                });
-            } else {
-                const data = snapshot.val();
-
-                let updates = {};
-
-                // Se não tiver role, define como "user"
-                if (!data.role) {
-                    updates.role = "user";
-                    data.role = "user";
-                }
-
-                // Se não tiver o campo able, define como true
-                if (data.able === undefined) {
-                    updates.able = true;
-                    data.able = true;
-                }
-
-                // Se não tiver o campo pontos, inicia com 0
-                if (data.pontos === undefined) {
-                    updates.pontos = 0;
-                    data.pontos = 0;
-                }
-
-                if (Object.keys(updates).length > 0) {
-                    return update(refFromUser(user.uid), updates).then(() => {
-                        console.log('Dados de usuário atualizados:', updates);
-                        return data;
-                    });
-                }
-
-                return data;
-            }
-        })
-        .then(userData => {
-            // Identifica o usuário para o Sentry
-            identificarUserParaSentry(user.uid, user.email, userData);
-
-            // Salva UID no localStorage
-            localStorage.setItem('uid', user.uid);
-
-            // 🔢 Atualiza a pontuação na tela (se houver elemento)
-            const pontosEl = document.getElementById('userPoints');
-            if (pontosEl) {
-                pontosEl.innerHTML = `Pontuação: ${userData.pontos || 0}`;
-            }
-
-            // Exibe o conteúdo normal
-            showUserContent(user, userData.role, userData.able);
-        })
-            .catch(error => {
-                enviarErroParaSentry(error);
-                console.error("Erro ao ler/criar usuário:", error);
-            });
-
-    } else {
-        localStorage.removeItem('uid');
-        showAuth();
-    }
-});
-
 /**
  * Função que permite o user sair de sua conta
  */
 export function userSignOut() {
     signOut(Auth).then(function() {
+        localStorage.removeItem("isLogged");
         window.location.href = 'index.html';
     }).catch(function(error) {
         showError("Erro ao sair: ", error);
     });
+}
+
+/**
+ * Função chamada após o usuário fazer login (pelo signInWithPopup
+ * ou signInWithRedirect).
+ * @private
+ */
+async function _onSignIn() {
+    // Desaparece o carregamento (essa função ser chamada aqui
+    // só é necessária quando o login é feito pelo signInWithRedirect)
+    hideItem(loading);
+
+    await waitForUser();
+
+    let hasAdminPower = currentUserHasAdminPower();
+    if (hasAdminPower) {
+        if (!window.location.href.includes("homeAdmin"))
+            window.location.href = 'homeAdmin.html';
+    } else {
+        if (!window.location.href.includes("homePage"))
+            window.location.href = 'homePage.html';
+    }
 }
 
 /**
@@ -291,20 +233,22 @@ export function signInWithGoogle() {
 
     const provider = new GoogleAuthProvider;
 
+    // NOTA: em alguns navegadores com o Safari (principalmente no mobile),
+    // o signInWithPopup pode não funcionar. Para isso, no catch, há um
+    // signInWithRedirect.
     signInWithPopup(Auth, provider)
-        .then(_result => {
-            // Pega o role do usuário
-            return waitForUser();
-        })
-        .then(_roleSnap => {
-            if (currentUserHasAdminPower()) {
-                window.location.href = 'homeAdmin.html';
-            } else {
-                window.location.href = 'homePage.html';
-            }
+        .then(async _result => {
+            await _onSignIn();
         })
         .catch(error => {
-            showError("Erro ao logar com o Google: ", error);
+            // Se der erro de popup, usa o signInWithRedirect
+            if (error.code === 'auth/popup-blocked') {
+                signInWithRedirect(Auth, provider).catch(error => {
+                    showError("Erro ao redirecionar e logar com o Google (isso não deveria acontecer, pois é logado no signInWithRedirect). Mensagem de erro: ", error);
+                });
+            } else {
+                showError("Erro ao logar com o Google: ", error);
+            }
         })
         .finally(() => {
             hideItem(loading);
@@ -315,7 +259,6 @@ export function signInWithGoogle() {
  * Função que exclui a conta do usuário
  */
 export async function deleteAccount() {
-    console.log("oi")
     let confirmation = await abrirConfirmacao("Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.");
     if (confirmation) {
         showItem(loading);
@@ -337,7 +280,7 @@ export function toggleUserManager() {
     const user = Auth.currentUser;
 
     if (!user) {
-        abrirAlerta("Você precisa estar logado para gerenciar usuários.");
+        abrirAlerta("Você precisa estar logado para gerenciar usuários.").then( );
         return;
     }
 
@@ -349,7 +292,7 @@ export function toggleUserManager() {
         getDataFromDatabase(refFromUser(uid), '/role')
             .then(_snap => {
                 if (!currentUserHasAdminPower()) {
-                    abrirAlerta("Você não tem permissão para gerenciar usuários.");
+                    abrirAlerta("Você não tem permissão para gerenciar usuários.").then( );
                     return;
                 }
 
@@ -494,13 +437,9 @@ export function checkAuth() {
             if (user) {
                 const userEmail = user.email;
 
-                // Verifica se o email termina com o endereço de email institucional
-                if (!userEmail.endsWith("@teiacoltec.org")) {
-                    // Se não for a conta do site coltrekking
-                    if (userEmail !== "sitecoltrekking@gmail.com") {
-                        abrirAlerta("Acesso negado. Conta não autorizada. Por favor, use um email institucional (@teiacoltec.org) para se autenticar.");
-                        userSignOut();
-                    }
+                // Verifica se o email é válido
+                if (!isEmailValid(userEmail)) {
+                    logOutUserWithAlert("Acesso negado. Conta não autorizada. Por favor, use um email institucional (@teiacoltec.org) para se autenticar.");
                 }
             } else {
                 const currentPath = window.location.pathname;
@@ -511,3 +450,159 @@ export function checkAuth() {
         }
     );
 }
+
+/**
+ * Verifica se o email dado é valido.
+ * O email é válido se:
+ * - terminar com o domínio institucional do Coltec
+ * - for a conta do site (sitecoltrekking@gmail.com)
+ * @param email email a verificar
+ * @return {boolean} se o email é válido ou não
+ */
+function isEmailValid(email) {
+    // Verifica se o email termina com o endereço de email institucional
+    if (email.endsWith(DOMINIO_COLTEC))
+        return true;
+
+    // Se chegou até aqui, não termina com o domínio do coltec //
+
+    // Se for a conta do site coltrekking, também é válida
+    if (email === SITE_EMAIL)
+        return true;
+
+    // Se chegou até aqui, não é válido
+    return false;
+}
+
+/**
+ * Desloga o usuário e exibe um alerta.
+ * @param message {String} mensagem a ser exibida no alerta. Se não for definida, será exibida uma mensagem padrão.
+ */
+let _hasLoggedOut = false; // variável para evitar múltiplos alertas/deslogamentos
+function logOutUserWithAlert(message) {
+    if (_hasLoggedOut) return;
+    _hasLoggedOut = true;
+    abrirAlerta(message).then(_ => {
+        // Desloga o usuário
+        userSignOut();
+        // Redireciona o usuário para a página de login
+        const currentPath = window.location.pathname;
+        if (!currentPath.includes("index.html") && currentPath !== "/" ) {
+            window.location.href = "index.html";
+        }
+    });
+}
+
+// Função que centraliza e trata a autenticação
+onAuthStateChanged(Auth, (user) => {
+    hideItem(loading);
+    _hasLoggedOut = false;
+    if (user) {
+        // Verifica se a conta é válida
+        checkAuth();
+        if (!isEmailValid(user.email)) { // Esse if já existe no checkAuth(), mas coloquei aqui para evitar problemas
+            logOutUserWithAlert("Acesso negado. Conta não autorizada. Por favor, use um email institucional (@teiacoltec.org) para se autenticar.");
+            return;
+        }
+
+        // Se chegou aqui, o email é válido //
+
+        // Define que está logado
+        localStorage.setItem("isLogged", "true");
+        getDataFromDatabase(UsersDatabaseRef, user.uid)
+            .then(snapshot => {
+                updateUserRoleVar(snapshot);
+
+                if (!snapshot.exists()) {
+                    // Cria usuário com role "user" e able: true por padrão
+                    const userData = {
+                        uid: user.uid,
+                        nome: user.displayName || '',
+                        email: user.email,
+                        role: "user",
+                        able: true,
+                        pontos: 0 // <-- novo campo de pontuação inicial
+                    };
+
+
+                    return set(child(UsersDatabaseRef, user.uid), userData).then(() => {
+                        console.log('Usuário criado com sucesso!');
+                        return userData;
+                    });
+                } else {
+                    const data = snapshot.val();
+
+                    let updates = {};
+
+                    // Se não tiver role, define como "user"
+                    if (!data.role) {
+                        updates.role = "user";
+                        data.role = "user";
+                    }
+
+                    // Se não tiver o campo able, define como true
+                    if (data.able === undefined) {
+                        updates.able = true;
+                        data.able = true;
+                    }
+
+                    // Se não tiver o campo pontos, inicia com 0
+                    if (data.pontos === undefined) {
+                        updates.pontos = 0;
+                        data.pontos = 0;
+                    }
+
+                    if (Object.keys(updates).length > 0) {
+                        return update(refFromUser(user.uid), updates).then(() => {
+                            console.log('Dados de usuário atualizados:', updates);
+                            return data;
+                        });
+                    }
+
+                    return data;
+                }
+            })
+            .then(userData => {
+                // Identifica o usuário para o Sentry
+                identificarUserParaSentry(user.uid, user.email, userData);
+
+                // Salva UID no localStorage
+                localStorage.setItem('uid', user.uid);
+
+                // Atualiza a pontuação na tela (se houver elemento)
+                const pontosEl = document.getElementById('userPoints');
+                if (pontosEl) {
+                    pontosEl.innerHTML = `Pontuação: ${userData.pontos || 0}`;
+                }
+
+                // Exibe o conteúdo normal
+                showUserContent(user, userData.role, userData.able);
+            })
+            .catch(error => {
+                enviarErroParaSentry(error);
+                console.error("Erro ao ler/criar usuário:", error);
+            });
+
+    } else {
+        localStorage.removeItem('uid');
+        showAuth();
+
+        // Se o usuário deslogou, redireciona para a página de login (se não estiver)
+        const currentPath = window.location.pathname;
+        if (!currentPath.includes("index.html") && currentPath !== "/" ) {
+            window.location.href = "index.html";
+        }
+    }
+});
+
+// Tratamento da autenticação **usando o signInWithRedirect**.
+// O onAuthStateChanged() também é chamado normalmente, mas o _onSignIn()
+// não é chamado no signInWithRedirect -- por isso, ele é chamado aqui.
+getRedirectResult(Auth)
+    .then(credential => {
+        if (credential)
+            _onSignIn().then( );
+    })
+    .catch(error => {
+        showError("Erro no login com Google usando redirect: ", error);
+    });

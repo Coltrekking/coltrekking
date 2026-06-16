@@ -250,13 +250,16 @@ function updateEventCard(eventId) {
  * @param dataSnapshot snapshot dos eventos
  */
 function fillEventContainer(dataSnapshot) {
+    if (!Auth.currentUser) return;
     // Obtém o uid do usuário local
     const uid = localStorage.getItem('uid');
     if (!uid) {
-        console.warn('UID não encontrado no localStorage.');
+        // Isso só acontece se o usuário (na maioria das vezes) porque o usuário
+        // está com o email inválido. Nesse caso, só retorna.
+        /*console.warn('UID não encontrado no localStorage.');
         enviarErroParaSentry("UID não foi encontrado no localStorage. Por isso, os eventos não serão carregados.");
         hideItem(loading);
-        abrirAlerta("Reinicie a página.");
+        abrirAlerta("Reinicie a página.");*/
         return;
     }
 
@@ -419,7 +422,7 @@ function createSubscribeButton(evento, key, userUid, eventDate) {
 
         //camada extra de segurança
         if (Date.now() < eventStart.getTime()) {
-            abrirAlerta("⚠️ Inscrições ainda não começaram para este evento.");
+            abrirAlerta("⚠️ Inscrições ainda não começaram para este evento.").then( );
             return;
         }
 
@@ -516,7 +519,7 @@ export async function atualizarPontuacaoUsuario(uid, eventId, adicionar) {
 function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn) {
     const user = Auth.currentUser;
     if (!user) {
-        abrirAlerta('Você precisa estar logado para se inscrever.');
+        abrirAlerta('Você precisa estar logado para se inscrever.').then( );
         return Promise.reject(new Error("Usuário não autenticado"));
     }
 
@@ -528,12 +531,12 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn) {
             const userData = snapshot.val();
 
             if (!userData || !userData.userId || !userData.userClass || !userData.userCourse) {
-                abrirAlerta("⚠️ Antes de se inscrever, preencha suas informações pessoais (RA, Turma e Curso).");
+                abrirAlerta("⚠️ Antes de se inscrever, preencha suas informações pessoais (RA, Turma e Curso).").then( );
                 throw new Error("Dados pessoais incompletos");
             }
 
             if (userData.able === false) {
-                abrirAlerta("Você está suspenso e não pode se inscrever em eventos.");
+                abrirAlerta("Você está suspenso e não pode se inscrever em eventos.").then( );
                 throw new Error("Usuário bloqueado");
             }
 

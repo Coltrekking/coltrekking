@@ -15,6 +15,7 @@
 </head>
 
 <body>
+    <div id="darkOverlay" class="modal-overlay" style="display: none;"></div>
     <div class="modal-overlay" id="loading" style="display: none;">
         <img src="/assets/icons/loading.svg" alt="Carregando..." class="loading-icon">
     </div>
@@ -88,19 +89,6 @@
                     <button type="submit" id="editInfoSubmitBtn">Salvar</button>
                     <button id="cancelEditBtn" type="button">Cancelar</button>
                 </div>
-            </div>
-
-            <div id="userManager" class="center" style="display: none;">
-                <h3>Gerenciamento de Usuários</h3>
-
-                <!-- Campo de busca -->
-                <div id="userSearchContainer" style="margin-bottom: 15px;">
-                    <input type="text" id="userSearch" placeholder="Buscar usuário por nome..."
-                        style="padding: 6px; width: 70%; max-width: 300px;" />
-                </div>
-
-                <!-- Lista renderizada pelo JS -->
-                <div id="userList"></div>
             </div>
         </div>
 
@@ -259,22 +247,9 @@
                     <p>Faltas sem aviso prévio ou justificativa plausível também levam à suspensão temporária ou
                         definitiva.</p>
                 </div>
-
-                <a><button type="button" class="alternative">Gerenciar
-                    Bloqueios</button></a>
-
-                <div id="blockManager" class="center" style="display: none; margin-top:12px;">
-                    <h3>Gerenciamento de Bloqueios</h3>
-
-                    <!-- Campo de pesquisa -->
-                    <input type="text" id="blockSearch" placeholder="Buscar usuário por nome..."
-                        style="padding: 6px; width: 70%; max-width: 300px;" />
-
-                    <!-- Lista renderizada pelo JS -->
-                    <div id="blockList"></div>
-                </div>
-
             </div>
+
+            <p class="big-text" style="margin-bottom: 5px;"><b>Atenção!</b> <br> Se você está procurando o botão de gerenciar bloqueios, vá para a <b>Área Admin</b>!</p>
         </div>
 
         <div id="instrucoes" class="tab-content">

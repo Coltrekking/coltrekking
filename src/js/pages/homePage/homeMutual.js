@@ -19,11 +19,7 @@ import {fillEventList} from "../../event";
 import {onValue, update} from "firebase/database";
 import {onAuthStateChanged} from "firebase/auth";
 import {enviarErroParaSentry} from "/src/js/main";
-
-// Endereço da página de usuário
-const USER_PAGE_ADDRESS = "/homePage.html"
-// Endereço da página de admin
-const ADMIN_PAGE_ADDRESS = "/homeAdmin.html"
+import {ADMIN_HOME_PAGE_ADDRESS, USER_HOME_PAGE_ADDRESS} from "/src/js/pages/pages";
 
 export const createPhotoBtn = document.getElementById('createPhoto');
 // export const addPhotoBtn    = document.getElementById('addPhotoBtn');
@@ -111,16 +107,20 @@ async function loadCommon() {
     // Verifica a autenticação do usuário
     checkAuth()
 
-    // Redirect logic after user is loaded
+    // Redireciona o usuário
     if (isAdmin()) {
         if (!window.location.pathname.includes("Admin")) {
-            await abrirAlerta("Você será redirecionado para a página de administrador.")
-            window.location.href = ADMIN_PAGE_ADDRESS;
+            //abrirAlerta("Você será redirecionado para a página de administrador.").then();
+            //document.getElementById("darkOverlay").style.display = "flex";
+            window.location.href = ADMIN_HOME_PAGE_ADDRESS;
+            return;
         }
     } else {
         if (window.location.pathname.includes("Admin")) {
-            await abrirAlerta("Você não tem permissão de acessar essa página!")
-            window.location.href = USER_PAGE_ADDRESS;
+            document.getElementById("darkOverlay").style.display = "flex";
+            window.location.href = USER_HOME_PAGE_ADDRESS;
+            abrirAlerta("Você não tem permissão de acessar essa página!").then();
+            return;
         }
     }
 
@@ -130,7 +130,7 @@ async function loadCommon() {
     });
 
 
-    //tratar o envio do formulário de edição de informações pessoais
+    // Tratar o envio do formulário de edição de informações pessoais
     if (editInfoSubmitBtn) {
         editInfoSubmitBtn.onclick = function () {
             const user = Auth.currentUser;
@@ -180,6 +180,7 @@ async function loadCommon() {
  * exibe um alerta pedindo para ele preencher essas informações.
  */
 function warnIfCantSubscribeToEvents() {
+    if (!Auth.currentUser) return; // Se o usuário não tiver carregado/logado
     getDataFromUser(Auth.currentUser.uid)
         .then(snapshot => {
             const userData = snapshot.val();

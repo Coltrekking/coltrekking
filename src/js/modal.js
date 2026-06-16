@@ -41,7 +41,6 @@ if (!document.getElementById("modalOverlay")) {
     document.body.insertAdjacentHTML('beforeend', modalHTML);
 }
 
-
 // Referências para os elementos de modal
 const Modal = {
     Overlay: document.getElementById('modalOverlay'),
@@ -71,6 +70,11 @@ export const EntradasModal = Object.freeze({
     // aberto) e documente a entrada no comentário da função.
 })
 
+const FILA_MODAIS = []; // fila de modais para evitar que mais de um modal seja aberto ao mesmo tempo
+
+// Se o modal está atualmente aberto
+let modalEstaAberto = false;
+
 /**
  * Função para exibir o modal e aguardar a resposta do usuário.
  * Os tipos de entrada são:
@@ -93,10 +97,26 @@ export const EntradasModal = Object.freeze({
  * @returns {Promise<Any>} Retorna uma promise com o valor que o usuário colocou. Se o usuário cancelou, retorna null
  */
 export function abrirModal(titulo, mensagem, tipoDeEntrada, opcoes = {}) {
+    if (modalEstaAberto) {
+        return new Promise((resolve) => {
+            // Adiciona na fila para abrir depois
+            FILA_MODAIS.push({
+                titulo: titulo,
+                mensagem: mensagem,
+                tipoDeEntrada: tipoDeEntrada,
+                opcoes: opcoes,
+                promise: resolve
+            });
+        });
+    }
+    modalEstaAberto = true;
+
+    const fila_promise = opcoes && opcoes.FilaPromise;
     let opcoesPadroes = {
         BtnOkTexto: "Confirmar",
         BtnCancelarTexto: "Cancelar",
         ValorInvalidoMensagem: "Insira um valor válido para confirmar.",
+        FilaPromise: null,
 
         // Entrada do botão OK
         BtnOkTextoEntradaOk: "Ok",
@@ -117,6 +137,10 @@ export function abrirModal(titulo, mensagem, tipoDeEntrada, opcoes = {}) {
     opcoes = { ...opcoesPadroes, ...opcoes };
 
     return new Promise((resolve) => {
+        function _resolver(...args) {
+            resolve(...args);
+            if (fila_promise) fila_promise(...args);
+        }
         // Preenche os textos
         Modal.Titulo.innerHTML = titulo;
         Modal.Mensagem.innerHTML = mensagem;
@@ -190,7 +214,7 @@ export function abrirModal(titulo, mensagem, tipoDeEntrada, opcoes = {}) {
             switch (tipoDeEntrada) {
                 case EntradasModal.SELECAO:
                     const valorSelecionado = Modal.SelectElement.value;
-                    resolve(valorSelecionado);
+                    _resolver(valorSelecionado);
                     break;
 
                 case EntradasModal.NUMERO:
@@ -204,15 +228,15 @@ export function abrirModal(titulo, mensagem, tipoDeEntrada, opcoes = {}) {
                     }
 
                     // Se chegou até aqui, é um número válido.
-                    resolve(valorNumerico)
+                    _resolver(valorNumerico)
                     break;
 
                 case EntradasModal.TEXTO:
-                    resolve(Modal.TextElement.value);
+                    _resolver(Modal.TextElement.value);
                     break;
 
                 default: // Resolve a Promise como verdadeira
-                    resolve(true);
+                    _resolver(true);
             }
 
             if (success) fecharModal();
@@ -226,13 +250,13 @@ export function abrirModal(titulo, mensagem, tipoDeEntrada, opcoes = {}) {
             fecharModal();
             switch (tipoDeEntrada) {
                 case EntradasModal.SIM_OU_NAO:
-                    resolve(false);
+                    _resolver(false);
                     break;
 
                 default:
-                    resolve(null);
+                    _resolver(null);
             }
-            resolve(null); // Resolve a Promise como nada
+            _resolver(null); // Resolve a Promise como nada
         };
 
         // Mostra o modal
@@ -272,4 +296,9 @@ export function abrirConfirmacao(mensagem) {
 
 function fecharModal() {
     Modal.Overlay.style.display = 'none';
+    modalEstaAberto = false;
+    if (FILA_MODAIS.length > 0) {
+        const proximoModal = FILA_MODAIS.shift();
+        abrirModal(proximoModal.titulo, proximoModal.mensagem, proximoModal.tipoDeEntrada, { ...proximoModal.opcoes, FilaPromise: proximoModal.promise }).then();
+    }
 }
