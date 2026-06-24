@@ -39,8 +39,9 @@ export default defineConfig({
         rollupOptions: {
             input: {
                 main: resolve(__dirname, './pages/index.html'),
-                home: resolve(__dirname, './pages/homePage.html'),
-                admin: resolve(__dirname, './pages/homeAdmin.html'),
+                homePage: resolve(__dirname, './pages/homePage.html'),
+                homeAdmin: resolve(__dirname, './pages/homeAdmin.html'),
+                areaAdmin: resolve(__dirname, "./pages/areaAdmin.html"),
                 404: resolve(__dirname, './pages/404.html'),
 
                 // Adicione novas páginas no seguinte formato:

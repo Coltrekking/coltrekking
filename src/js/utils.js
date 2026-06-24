@@ -1,8 +1,8 @@
 import {Auth, Database} from "../config/firebase";
-import {child, ref, get} from "firebase/database";
+import {child, ref, get, set, update} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
-import {getUserRole} from "/src/js/auth";
-import {abrirAlerta} from "/src/js/modal";
+import {getUserRole, isAdmin} from "/src/js/auth";
+import {abrirAlerta, abrirModal, EntradasModal} from "/src/js/modal";
 
 // Referências dos elementos da página
 export let loading = document.getElementById('loading');
@@ -34,6 +34,8 @@ export const EventsDatabaseRef = refFromDatabase("event/");
 export const InscricoesDatabaseRef = refFromDatabase("inscricoes/");
 export const PhotosDatabaseRef = refFromDatabase("photos/");
 export const UsersDatabaseRef = refFromDatabase("users/");
+export const GeralDatabaseRef = refFromDatabase("geral/");
+
 // Remove elementos da aba
 export function hideItem(item) {
     if (item && item.style) {
@@ -296,7 +298,7 @@ export function validarCPF(cpf) {
     return digitoK === parseInt(cpf.charAt(10));
 }
 
-//centralizar e traduzir erros
+// Traduz e mostra erros
 export function showError(prefix, error) {
     hideItem(loading);
     console.error(error.code);
@@ -310,17 +312,11 @@ export function showError(prefix, error) {
                 //abrirAlerta('Você cancelou sua autenticação!');
                 break;
             default:
-                abrirAlerta(prefix + ' ' + error.message);
+                abrirAlerta(prefix + ' ' + error.message).then( );
                 enviarErroParaSentry(error);
         }
     } else {
-        abrirAlerta('Erro desconhecido: ' + error);
+        abrirAlerta('Erro desconhecido: ' + error).then( );
         enviarErroParaSentry(error);
     }
 }
-
-//let actionCodeSettings = {
-//    url: 'coltrekking-app-c3026.firebaseapp.com'
-//}
-
-

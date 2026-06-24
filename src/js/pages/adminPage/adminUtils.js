@@ -14,6 +14,8 @@ import {abrirAlerta, abrirAviso} from "/src/js/modal";
 import {enviarErroParaSentry} from "/src/js/main";
 import {getRolePower, Roles} from "/src/js/auth";
 import {update} from "firebase/database";
+import {isEqual} from 'lodash'; // Para comparar arrays de objetos no loadUsersOnUserPage
+
 
 // Elementos //
 const userList = document.getElementById("userList");
@@ -26,6 +28,13 @@ export const stateUserSelect = document.getElementById("userSearchState");
 // Deve ser o mesmo valor que está no html!
 const TODOS_SELECT = "todos";
 
+// A última lista de usuários carregada. Usada para evitar recarregar atoa
+let ultimaListaUsuarios = null
+
+/**
+ * Carrega os usuários na página de usuários
+ * @param shouldShowLoading se deve mostrar a tela de carregamento para o usuário
+ */
 export function loadUsersOnUserPage(shouldShowLoading = true) {
     //userList.innerHTML = "<p>Carregando usuários...</p>";
     if(shouldShowLoading) showLoading();
@@ -80,6 +89,12 @@ export function loadUsersOnUserPage(shouldShowLoading = true) {
                 return (a.nome || "").localeCompare(b.nome || "");
             });
 
+
+            if (ultimaListaUsuarios && isEqual(users, ultimaListaUsuarios))
+                return;
+
+            ultimaListaUsuarios = users;
+
             // Limpa a lista logo antes de renderizar
             userList.innerHTML = "";
 
@@ -102,6 +117,7 @@ export function loadUsersOnUserPage(shouldShowLoading = true) {
             if (shouldShowLoading) hideLoading()
         });
 }
+
 
 
 /**

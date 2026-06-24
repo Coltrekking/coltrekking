@@ -23,7 +23,8 @@ import {enviarErroParaSentry} from "/src/js/main";
 // (o ícone que aperta para abrir a tela de imagens)
 const EventImagesIcons = {
     "add": "/assets/icons/add-image-icon.svg",
-    "view": "/assets/icons/image-icon.svg"
+    "view": "/assets/icons/image-icon.svg",
+    "no_image": "/assets/icons/no-image-icon.svg"
 }
 
 /**
@@ -99,12 +100,16 @@ function fillEventCard(eventContainer, item, uid, updating = false) {
     seeImagesBtn.style.right = "15px";
     seeImagesBtn.style.zIndex = "3";
 
+    const styleHeight = "max(40px, 2.5em)";
     const seeImagesImg = document.createElement("img");
     seeImagesImg.id = "evento-imagens-img-" + item.key;
-    seeImagesImg.src = EventImagesIcons.view;
+    seeImagesImg.src = "assets/icons/loading.svg";//EventImagesIcons.view;
     seeImagesImg.alt = "Fotos";
     seeImagesImg.className = "icon";
-    seeImagesImg.style.height = "2.5em";
+    seeImagesImg.classList.add("loading-animation");
+    seeImagesImg.style.height = "max(40px, 2.5em)";
+
+    //seeImagesImg.style.display = 'none'; // Desaparece até terminar de configurar (ou seja, até colocar a imagem certa)
 
     if (!seeImagesImg.parentElement)
         seeImagesBtn.appendChild(seeImagesImg);
@@ -114,15 +119,15 @@ function fillEventCard(eventContainer, item, uid, updating = false) {
     // Esconde o botão se não houver fotos (ou, se for admin,
     // troca para algo que indique para adicionar uma foto)
     getEventPhotos(item.key).then(links => {
+        seeImagesImg.src = EventImagesIcons.view; // Inicialmente, considera que tem fotos
         if (links.length === 0) {
-            // Se o usuário não for admin, não mostra o botão
-            if (!isAdmin()) {
-                seeImagesBtn.style.display = "none";
-                eventCard.removeChild(seeImagesBtn);
+            if (!isAdmin()) { // Se o usuário não for admin, mostra o botão como sem imagem
+                seeImagesImg.src = EventImagesIcons.no_image;
             } else { // Se for admin, troca para a foto de adicionar imagem
                 seeImagesImg.src = EventImagesIcons.add;
             }
         }
+        seeImagesImg.classList.remove("loading-animation"); // Retira a animação de carregamento
     });
 
     // Coloca as informações do evento
@@ -799,6 +804,8 @@ async function showEventPhotos(eventName, eventId) {
     // Mostra o título dos eventos
     const tituloFotos = document.createElement("h3");
     tituloFotos.textContent = `${eventName}`;
+    tituloFotos.style.width = "80%"; // para evitar que o texto fique atrás do botão de fechar
+    tituloFotos.style.marginLeft = "10%"; // para centralizar (a largura fica 80% e, logo, a margem direita fica 10% tbm)
     photosContainer.appendChild(tituloFotos);
 
     // Obtém os links

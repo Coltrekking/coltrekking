@@ -1,13 +1,24 @@
 /**
- * Página de administração.
+ * Página de administração do coltrekking.
  *
  * @author André Dias
  * @since 2024-06
  */
 import {isAdmin, waitForUser} from "/src/js/auth";
 import {openTab} from "/src/js/tabs";
-import {hideItem, loading, showItem} from "/src/js/utils";
-import {loadUsersOnUserPage, roleUserSelect, searchInput, stateUserSelect} from "/src/js/pages/adminPage/adminUtils";
+import {GeralDatabaseRef, getDataFromDatabase, hideItem, loading, showItem} from "/src/js/utils";
+import {
+    loadUsersOnUserPage,
+    roleUserSelect,
+    searchInput,
+    stateUserSelect
+} from "/src/js/pages/adminPage/adminUtils";
+import {enviarErroParaSentry} from "/src/js/main";
+import {createInstrucoesGeraisCard, loadInstrucoesGerais} from "/src/js/pages/common/instrucoesGerais";
+import {ADMIN_HOME_PAGE_ADDRESS, USER_HOME_PAGE_ADDRESS} from "/src/js/pages/pages";
+
+// Elementos //
+export const instrucoesGeraisCardsAreaAdmin = document.getElementById("instrucoesGeraisCardsAreaAdmin");
 
 /**
  * Carrega a aba de usuários.
@@ -18,6 +29,9 @@ function loadUserTab() {
     loadUsersOnUserPage();
 }
 
+/**
+ * Carrega os eventos(listeners) do site
+ */
 function loadEvents() {
     // Botões do tab-bar
     document.getElementById("geralAdminBtn").onclick = (event) => openTab("geralAdmin", event);
@@ -35,6 +49,8 @@ function loadEvents() {
     stateUserSelect.addEventListener("change", loadUsersOnUserPage);
 }
 
+
+
 /**
  * Carrega a página. Essa função deve ser chamada apenas após a verificação de permissão.
  */
@@ -43,17 +59,21 @@ async function loadPage() {
     // Espera o usuário
     await waitForUser();
 
-    // Se for admin, carrega a página. Se não, mostra a mensagem de sem permissão.
-    if (!isAdmin()) showNoPermission();
+    // Se não for admin, apaga a página e redireciona pro homepage
+    if (!isAdmin()) {
+        removePage();
+        window.location.href = USER_HOME_PAGE_ADDRESS;
+    }
 
-    loadEvents()
+    loadEvents();
+    loadInstrucoesGerais(instrucoesGeraisCardsAreaAdmin);
     hideItem(loading);
 }
 
 /**
- * Mostra a mensagem de sem permissão.
+ * Remove os elementos da página
  */
-function showNoPermission() {
+function removePage() {
     document.getElementById("adminPage").remove();
 }
 

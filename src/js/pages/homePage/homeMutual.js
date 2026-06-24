@@ -20,10 +20,14 @@ import {onValue, update} from "firebase/database";
 import {onAuthStateChanged} from "firebase/auth";
 import {enviarErroParaSentry} from "/src/js/main";
 import {ADMIN_HOME_PAGE_ADDRESS, USER_HOME_PAGE_ADDRESS} from "/src/js/pages/pages";
+import {loadInstrucoesGerais} from "/src/js/pages/common/instrucoesGerais";
 
 export const createPhotoBtn = document.getElementById('createPhoto');
 // export const addPhotoBtn    = document.getElementById('addPhotoBtn');
 export const photoAdminForm = document.getElementById('photoAdminForm');
+
+const instrucoesGeraisArea = document.getElementById("listaInstrucoes");
+
 
 /**
  * Carrega os eventos comuns da página
@@ -94,6 +98,7 @@ export function loadCommonEvents() {
     }
 }
 
+
 /**
  * Carrega os eventos e outras coisas que as páginas têm em comum.
  * Isso serve para não precisar repetir código.
@@ -109,17 +114,18 @@ async function loadCommon() {
 
     // Redireciona o usuário
     if (isAdmin()) {
-        if (!window.location.pathname.includes("Admin")) {
+        if (!window.location.href.includes("homeAdmin")) { // se não estiver admin na página
             //abrirAlerta("Você será redirecionado para a página de administrador.").then();
             //document.getElementById("darkOverlay").style.display = "flex";
             window.location.href = ADMIN_HOME_PAGE_ADDRESS;
             return;
         }
     } else {
-        if (window.location.pathname.includes("Admin")) {
-            document.getElementById("darkOverlay").style.display = "flex";
+        if (window.location.href.includes("homeAdmin")) { // se estiver na página admin
+            //document.getElementById("darkOverlay").style.display = "flex"; // essa linha faz o div de overlay escuro aparecer
+            //document.body.replaceChildren(); // essa linha apaga todos os elementos do body
             window.location.href = USER_HOME_PAGE_ADDRESS;
-            abrirAlerta("Você não tem permissão de acessar essa página!").then();
+            //abrirAlerta("Você não tem permissão de acessar essa página!").then(); // essa linha manda um aviso para o usuário
             return;
         }
     }
@@ -128,6 +134,7 @@ async function loadCommon() {
     onValue(EventsDatabaseRef, function (dataSnapshot) {
         fillEventList(dataSnapshot);
     });
+
 
 
     // Tratar o envio do formulário de edição de informações pessoais
@@ -173,6 +180,9 @@ async function loadCommon() {
     // Avisa para o usuário preencher os dados necessários para se
     // inscrever nos eventos, caso ele ainda não tenha preenchido.
     warnIfCantSubscribeToEvents();
+
+    // Carrega as instruções gerais
+    loadInstrucoesGerais(instrucoesGeraisArea)
 }
 
 /**

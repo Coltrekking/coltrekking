@@ -16,6 +16,7 @@ import {abrirAlerta, abrirConfirmacao} from "./modal.js";
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, deleteUser, reload } from "firebase/auth";
 import {child, set, update} from "firebase/database";
 import {enviarErroParaSentry, identificarUserParaSentry} from "/src/js/main";
+import {ADMIN_HOME_PAGE_ADDRESS, USER_HOME_PAGE_ADDRESS} from "/src/js/pages/pages";
 
 // Lista de Cargos de um usuário
 export const Roles = Object.freeze({  // O `Object.freeze()` certifica que não é possível atualizar
@@ -218,10 +219,10 @@ async function _onSignIn() {
     let hasAdminPower = currentUserHasAdminPower();
     if (hasAdminPower) {
         if (!window.location.href.includes("homeAdmin"))
-            window.location.href = 'homeAdmin.html';
+            window.location.href = ADMIN_HOME_PAGE_ADDRESS;
     } else {
         if (!window.location.href.includes("homePage"))
-            window.location.href = 'homePage.html';
+            window.location.href = USER_HOME_PAGE_ADDRESS;
     }
 }
 
@@ -442,7 +443,7 @@ export function checkAuth() {
                     logOutUserWithAlert("Acesso negado. Conta não autorizada. Por favor, use um email institucional (@teiacoltec.org) para se autenticar.");
                 }
             } else {
-                const currentPath = window.location.pathname;
+                const currentPath = window.location.href;
                 if (!currentPath.includes("index.html") && currentPath !== "/" ) {
                     window.location.href = "index.html";
                 }
@@ -486,7 +487,7 @@ function logOutUserWithAlert(message) {
         // Desloga o usuário
         userSignOut();
         // Redireciona o usuário para a página de login
-        const currentPath = window.location.pathname;
+        const currentPath = window.location.href;
         if (!currentPath.includes("index.html") && currentPath !== "/" ) {
             window.location.href = "index.html";
         }
@@ -587,8 +588,9 @@ onAuthStateChanged(Auth, (user) => {
         localStorage.removeItem('uid');
         showAuth();
 
-        // Se o usuário deslogou, redireciona para a página de login (se não estiver)
-        const currentPath = window.location.pathname;
+        // Se o usuário deslogou, redirecio
+        // na para a página de login (se não estiver)
+        const currentPath = window.location.href;
         if (!currentPath.includes("index.html") && currentPath !== "/" ) {
             window.location.href = "index.html";
         }

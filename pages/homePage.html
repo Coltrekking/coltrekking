@@ -49,7 +49,10 @@
 
             <p id="userPoints">Pontuação: </p>
 
-            <button id="signOutBtn" class="alternative">Sair</button>
+            <button id="signOutBtn" class="alternative">
+                <img src="/assets/icons/log-out-icon.svg" class="" style="height: 1.5em; margin-bottom: -0.5vw;" alt="Ícone de sair">
+                Sair
+            </button>
 
             <div class="modal-overlay" style="display: none;" id="editPersonalInfoModal">
                 <div id="editPersonalInfoForm" class="modal-content">
@@ -109,7 +112,11 @@
             <p class="big-text">Para ver as fotos de um evento, clique no ícone
                 <img src="/assets/icons/image-icon.svg" alt="Ícone de fotos" class="icon" style="height: max(15px, 1.5vw); width: auto; margin: 0 3px 0 3px;">
                 do evento na página dos eventos.</p>
-            <p style="font-size: max(12px, 1.2vw); font-style: italic;">Se o evento não possuir fotos, o ícone <u>não</u> será exibido.</p>
+            <p class="small-text italic-text" >
+                Se o evento não possuir fotos, o ícone
+                <img src="/assets/icons/no-image-icon.svg" alt="Ícone de sem fotos" class="icon" style="height: max(12px, 1.2vw); width: auto; margin-left: 2px; vertical-align: middle;">
+                será exibido.
+            </p>
             <img src="/assets/images/tutorial_fotos/nova_seção_fotos.png" alt="Nova seção de fotos" style="width: 100%; max-width: 800px; margin-top: 20px; border: 3px dashed #000;">
         </div>
 
@@ -145,51 +152,12 @@
         <div id="instrucoes" class="tab-content">
             <h2>Instruções Gerais</h2>
             <p>Orientações importantes para todos os participantes.</p>
-            <div id="instrucoesGerais">
-                <div class="instrucao-card">
-                    <h4>Recomendações</h4>
-                    <ul>
-                        <li>Chegar com 15 minutos de antecedência no ponto de encontro</li>
-                        <li>Informar qualquer condição médica especial (alergias, asma, etc.)</li>
-                        <li>Usar equipamentos em boas condições: mochila, sapato, roupa...</li>
-                        <li>Seguir as instruções dos guias e organizadores</li>
-                        <li>Respeitar o meio ambiente e não deixar lixo para trás</li>
-                        <li>Manter-se hidratado</li>
-                        <li>Usar protetor solar e repelente</li>
-                        <li>Em caso de emergência, comunicar imediatamente um organizador</li>
-                    </ul>
-                </div>
-                <div class="instrucao-card">
-                    <h4>O que levar e/ou usar</h4>
-                    <ul>
-                        <li>Blusa de manga comprida (de preferência com proteção UV)</li>
-                        <li>Calça</li>
-                        <li>Autorização dos pais (impressa ou escrita à mão)</li>
-                        <li>Carteira de Identidade</li>
-                        <li>Protetor solar</li>
-                        <li>Lanche</li>
-                        <li>Pelo menos 2 litros de água (garrafa PET)</li>
-                        <li>Saco plástico</li>
-                        <li>Boné</li>
-                        <li>Roupa de Banho e Toalha</li>
-                        <li>Repelente</li>
-                        <li>Muda de roupa limpa</li>
-                        <li>Dinheiro vivo</li>
-                        <li>Chinelo (para colocar na hora de voltar)</li>
-                    </ul>
-                </div>
-                <div class="instrucao-card">
-                    <h4>Sugestão de Lanche</h4>
-                    <ul>
-                        <li>Barra de cereal</li>
-                        <li>Frutas (evitar cítricas)</li>
-                        <li>Sanduíches naturais</li>
-                        <li>Tortas salgadas</li>
-                        <li>Castanhas</li>
-                        <li>Sucos</li>
-                        <li>Gatorade/Powerade</li>
-                    </ul>
-                </div>
+            <div class="listaDiv" id="listaInstrucoes">
+
+            </div>
+
+            <!-- Div apenas para o card de alerta -->
+            <div class="listaDiv">
                 <div class="instrucao-card alerta-card">
                     <h4>ATENÇÃO! Condicionamento Físico e Psicológico</h4>
                     <p>

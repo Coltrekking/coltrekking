@@ -30,11 +30,11 @@
         <hr>
 
         <div class="user-top-bar"> <!-- Bem Vindo & Botão de Configurações -->
-            <div class="flex-center">
+            <div class="flex-center w100">
                 <h3 class="center">Área Admin</h3>
             </div>
         </div>
-        <a href="/homeAdmin">
+        <a href="/homeAdmin.html">
             <button class="alternative" style="width: 20vw;">
                 Voltar para a página principal
             </button>
@@ -67,7 +67,7 @@
                     <input type="text" id="userSearch" placeholder="Buscar usuário por nome..."/>
                 </div>
                 <!-- Opções a mais de filtro -->
-                <div class="flex-center" style="gap: 5px;">
+                <div class="flex-center w100" style="gap: 5px;">
                     <div>
                         <label for="userSearchRole"><span class="text">Cargo:</span></label>
                         <select class="text small-text" id="userSearchRole">
@@ -93,6 +93,27 @@
 
         <div id="instrucoesGeraisAdmin" class="tab-content">
             <h2>Instruções Gerais</h2>
+            <p>Edite aqui as orientações importantes para todos os participantes.</p>
+
+            <!-- Div onde os cards de instrução serão colocados -->
+            <div class="listaDiv" id="instrucoesGeraisCardsAreaAdmin">
+
+            </div>
+
+            <!-- Div apenas para o card de alerta -->
+            <div class="listaDiv">
+                <div class="instrucao-card alerta-card">
+                    <h4>ATENÇÃO! Condicionamento Físico e Psicológico</h4>
+                    <p>
+                        É fundamental que todos os participantes estejam atentos ao seu condicionamento físico e
+                        psicológico.
+                        As trilhas e caminhadas exigem preparo, resistência e disposição para lidar com desafios
+                        naturais, como subidas,
+                        terrenos irregulares e condições climáticas diversas. Além disso, manter o equilíbrio emocional
+                        contribui para a segurança e o bem-estar de todo o grupo.
+                    </p>
+                </div>
+            </div>
         </div>
 
         <footer id="mainFooter">

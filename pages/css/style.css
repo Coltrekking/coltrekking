@@ -176,6 +176,24 @@ button {
     cursor: pointer;
 }
 
+.no-padding {
+    padding: 0;
+}
+
+.inline-flex {
+    display: inline-flex;
+}
+
+.brightness10 {
+    filter: brightness(10%);
+}
+
+.icon-on-button {
+    height: max(15px, 1.5vw);
+    width: auto;
+    margin: 0 3px 0 3px;
+}
+
 .icon-button > img {
     height: 1.2em;
     width: auto;
@@ -272,6 +290,10 @@ p {
     animation: spin 1s linear infinite;
 }
 
+.loading-animation {
+    animation: spin 1s linear infinite;
+}
+
 #loading {
     z-index: 100000;
 }
@@ -323,7 +345,14 @@ p {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.w100 {
     width: 100%;
+}
+
+.w20vw {
+    width: 20vw;
 }
 
 .admin-badge {
@@ -693,7 +722,7 @@ textarea {
 }
 
 /* Estilos para instruções gerais */
-#instrucoesGerais {
+.listaDiv {
     margin: 20px auto;
     max-width: 700px;
     text-align: left;
@@ -732,6 +761,13 @@ textarea {
     font-family: 'Anton', sans-serif;
     color: #151515;
     font-size: 1.5vw;
+}
+
+.instrucao-card select {
+    margin: 0;
+    height: 40px;
+    width: auto;
+    padding: 0 5px;
 }
 
 /* fator K*/

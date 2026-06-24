@@ -85,6 +85,7 @@ let modalEstaAberto = false;
  *   selecionado, e "Cancelar" retorna null.
  * - `EntradasModal.NUMERO`: O modal terá um campo de entrada numérica. O botão "Ok" retorna o número inserido (como número, não string), e "Cancelar" retorna null.
  *   É possível delimitar o número mínimo e máximo aceito usando as opções `minNumber` e `maxNumber`, respectivamente.
+ * - `EntradasModal.TEXTO`: O modal terá uma pequena caixa de texto. O botão "OK" retorna o texto escrito e "Cancelar" retorna null
  *
  * Opções gerais:
  * - BtnOkTexto: texto do botão "Ok"
@@ -130,7 +131,7 @@ export function abrirModal(titulo, mensagem, tipoDeEntrada, opcoes = {}) {
         maxNumber: "",   // número máximo
 
         // Entrada de Texto
-        // (nada)
+        textPlaceholder: "" // o texto que aparece por padrão
     };
 
     // Une as opções dadas com as padrões
@@ -198,6 +199,7 @@ export function abrirModal(titulo, mensagem, tipoDeEntrada, opcoes = {}) {
 
             case EntradasModal.TEXTO:
                 showItem(Modal.TextElement);
+                Modal.TextElement.value = opcoes.textPlaceholder;
                 break;
         }
 
@@ -299,6 +301,6 @@ function fecharModal() {
     modalEstaAberto = false;
     if (FILA_MODAIS.length > 0) {
         const proximoModal = FILA_MODAIS.shift();
-        abrirModal(proximoModal.titulo, proximoModal.mensagem, proximoModal.tipoDeEntrada, { ...proximoModal.opcoes, FilaPromise: proximoModal.promise }).then();
+        abrirModal(proximoModal.titulo, proximoModal.mensagem, proximoModal.tipoDeEntrada, { ...proximoModal.opcoes, FilaPromise: proximoModal.promise }).then( );
     }
 }

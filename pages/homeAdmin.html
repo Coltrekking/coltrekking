@@ -45,10 +45,13 @@
 
             <p id="userPoints">Pontuação: </p>
 
-            <button id="signOutBtn" class="alternative">Sair</button>
-            <a href="/areaAdmin">
+            <button id="signOutBtn" class="alternative">
+                <img src="/assets/icons/log-out-icon.svg" class="" style="height: 1.5em; margin-bottom: -0.5vw;" alt="Ícone de sair">
+                Sair
+            </button>
+            <a href="/areaAdmin.html">
                 <button class="alternative">
-                    <img src="/assets/icons/outside-page-icon.svg" class="" style="height: 1.5em; margin-bottom: -0.5vw;" alt="Página exterior">
+                    <img src="/assets/icons/admin-tool-icon.svg" class="" style="height: 1.5em; margin-bottom: -0.5vw;" alt="Ícone de admin">
                     Área Admin
                 </button>
             </a>
@@ -88,6 +91,10 @@
                     <br>
                     <button type="submit" id="editInfoSubmitBtn">Salvar</button>
                     <button id="cancelEditBtn" type="button">Cancelar</button>
+                    <br>
+
+                    <span class="text small-text"  id="pageVersionText"></span>
+
                 </div>
             </div>
         </div>
@@ -165,7 +172,8 @@
                 -->
 
                 <!-- Pontuação necessária para o evento -->
-                <p style="font-size: 1.4rem;"><i>Pontuação necessária para poder se inscrever no evento:</i></p>
+                <p class="big-text"><i>Pontuação necessária para poder se inscrever no evento:</i></p>
+                <p class="small-text"><i>Dica: se quiser que apenas <b>pessoas que já foram em um evento</b> consigam se inscrever, coloque como 1 ponto.</i></p>
                 <span id="eventoPontuacaoNecessaria" class="soft-warn text" style="font-style: normal; font-size: 2rem; margin: 0;">0 pontos</span>
 
                 <!-- Botão para editar a pontuação necessária-->
@@ -194,7 +202,7 @@
             <p class="big-text">Para ver as fotos de um evento, clique no ícone
                 <img src="/assets/icons/image-icon.svg" alt="Ícone de fotos" class="icon" style="height: max(15px, 1.5vw); width: auto; margin: 0 3px 0 3px;">
                 do evento na página dos eventos.</p>
-            <p class="medium-text italic-text">Se o evento não possuir fotos, o ícone <u>não</u> será exibido.</p>
+            <p class="medium-text italic-text">Se o evento não possuir fotos, o ícone <img src="/assets/icons/add-image-icon.svg" alt="Ícone de sem fotos" class="icon" style="height: max(15px, 1.5vw); width: auto; margin: 0 3px 0 3px; vertical-align: middle;"> será exibido.</p>
             <img src="/assets/images/tutorial_fotos/nova_seção_fotos.png" alt="Nova seção de fotos" style="width: 100%; max-width: 800px; margin-top: 20px; border: 3px dashed #000;">
 
             <h3>Adicionar ou remover fotos</h3>
@@ -202,7 +210,7 @@
             <p class="big-text">Para adicionar fotos a um evento, clique no ícone
                 <img src="/assets/icons/image-icon.svg" alt="Ícone de ver fotos" class="icon" style="height: max(15px, 1.5vw); width: auto; margin: 0 3px 0 3px;">
                 (ou
-                <img src="/assets/icons/add-image-icon.svg" alt="Ícone de adicionar foto" class="icon" style="height: max(15px, 1.5vw); width: auto; margin: 0 3px 0 3px;">,
+                <img src="/assets/icons/add-image-icon.svg" alt="Ícone de adicionar foto" class="icon" style="height: max(15px, 1.5vw); width: auto; margin: 0 3px 0 3px; vertical-align: middle;">,
                 se o evento não possuir fotos)
                 do evento na página dos eventos.
             </p>
@@ -249,57 +257,19 @@
                 </div>
             </div>
 
-            <p class="big-text" style="margin-bottom: 5px;"><b>Atenção!</b> <br> Se você está procurando o botão de gerenciar bloqueios, vá para a <b>Área Admin</b>!</p>
+            <p class="big-text" style="margin-bottom: 5px;"><b>Atenção!</b> <br> Se você está procurando o botão de gerenciar bloqueios, vá para a <b>Área Admin</b>!
+            O botão fica na parte de cima do site.</p>
         </div>
 
         <div id="instrucoes" class="tab-content">
             <h2>Instruções Gerais</h2>
             <p>Orientações importantes para todos os participantes.</p>
-            <div id="instrucoesGerais">
-                <div class="instrucao-card">
-                    <h4>Recomendações</h4>
-                    <ul>
-                        <li>Chegar com 15 minutos de antecedência no ponto de encontro</li>
-                        <li>Informar qualquer condição médica especial (alergias, asma, etc.)</li>
-                        <li>Usar equipamentos em boas condições: mochila, sapato, roupa...</li>
-                        <li>Seguir as instruções dos guias e organizadores</li>
-                        <li>Respeitar o meio ambiente e não deixar lixo para trás</li>
-                        <li>Manter-se hidratado</li>
-                        <li>Usar protetor solar e repelente</li>
-                        <li>Em caso de emergência, comunicar imediatamente um organizador</li>
-                    </ul>
-                </div>
-                <div class="instrucao-card">
-                    <h4>O que levar e/ou usar</h4>
-                    <ul>
-                        <li>Blusa de manga comprida (de preferência com proteção UV)</li>
-                        <li>Calça</li>
-                        <li>Autorização dos pais (impressa ou escrita à mão)</li>
-                        <li>Carteira de Identidade</li>
-                        <li>Protetor solar</li>
-                        <li>Lanche</li>
-                        <li>Pelo menos 2 litros de água (garrafa PET)</li>
-                        <li>Saco plástico</li>
-                        <li>Boné</li>
-                        <li>Roupa de Banho e Toalha</li>
-                        <li>Repelente</li>
-                        <li>Muda de roupa limpa</li>
-                        <li>Dinheiro vivo</li>
-                        <li>Chinelo (para colocar na hora de voltar)</li>
-                    </ul>
-                </div>
-                <div class="instrucao-card">
-                    <h4>Sugestão de Lanche</h4>
-                    <ul>
-                        <li>Barra de cereal</li>
-                        <li>Frutas (evitar cítricas)</li>
-                        <li>Sanduíches naturais</li>
-                        <li>Tortas salgadas</li>
-                        <li>Castanhas</li>
-                        <li>Sucos</li>
-                        <li>Gatorade/Powerade</li>
-                    </ul>
-                </div>
+
+            <div class="listaDiv" id="listaInstrucoes">
+
+            </div>
+            <!-- Div apenas para o card de alerta -->
+            <div class="listaDiv">
                 <div class="instrucao-card alerta-card">
                     <h4>ATENÇÃO! Condicionamento Físico e Psicológico</h4>
                     <p>
@@ -315,7 +285,7 @@
         </div>
 
         <footer id="mainFooter">
-            <div class="footer-content">
+            <div class="footer-content" style="position: relative;">
                 <p>Site desenvolvido por
                     <a href="https://www.linkedin.com/in/j%C3%BAlia-martins-souza-997ba6350/" target="_blank">Júlia Martins Souza</a>
                     e por <a href="https://www.linkedin.com/in/andré-dias-de-paula-3430ba406/" target="_blank">André Dias de Paula</a>
@@ -324,7 +294,6 @@
                     direitos reservados.</h3>
                 <div class="footer-links">
                     <a href="https://www.coltec.ufmg.br" target="_blank">Institucional</a>
-
                 </div>
             </div>
         </footer>
