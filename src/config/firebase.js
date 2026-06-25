@@ -1,9 +1,15 @@
+/**
+ * Código que guarda as configurações do firebase e algumas da página.
+ */
+
+// Versão da página //
+export const PAGE_VERSION = "a2306.3";
+
 
 import { initializeApp } from "firebase/app"; // Para inicializar o app
 
 import { getAuth } from 'firebase/auth'; // Para obter o auth
 import { getDatabase } from 'firebase/database'; // Para obter o Realtime Database
-
 
 // Dados do firebase
 const firebaseConfig = {
@@ -17,7 +23,7 @@ const firebaseConfig = {
 };
 
 
-// Inicializa o Firebase apenas se ainda não foi inicializado
+// Inicializa o Firebase
 //if (!firebase.apps.length) {
 export const App = initializeApp( firebaseConfig );
 //}
@@ -27,4 +33,5 @@ export const Auth = getAuth(App);
 export const Database = getDatabase(App);
 
 export default App;
+
 

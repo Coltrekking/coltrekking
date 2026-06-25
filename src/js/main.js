@@ -7,8 +7,7 @@
  */
 import {VERSION} from "lodash";
 
-// Versão da página
-const PAGE_VERSION = "a2306.23";
+
 
 // Inicializa o Sentry
 // É importante que ele seja o primeiro a inicializar para
@@ -90,10 +89,11 @@ import "./auth"
 import './utils';
 import './tabs'
 import './date'
+import {PAGE_VERSION} from "/src/config/firebase";
 
+// Carrega os elementos de versão da página //
 const _pageVersionElement = document.getElementById("pageVersionText");
 if (_pageVersionElement) _pageVersionElement.innerText = `Versão da página: ${PAGE_VERSION}`;
 
 const _pageVersionOnIndex = document.getElementById("pageVersionOnIndex");
 if (_pageVersionOnIndex) _pageVersionOnIndex.innerText = `Versão: ${PAGE_VERSION}`;
-

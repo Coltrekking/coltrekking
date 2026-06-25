@@ -23,12 +23,19 @@
   </head>
   <body>
     <div id="message">
-      <h2>404</h2>
-      <h1>Página não encontrada</h1>
-      <p>Desculpe pelo transtorno! Site ainda em processo de criação.</p>
-      <p><a href="index.html">Você pode voltar para a área de login!</a></p>
-      <h3>O que fazer?</h3>
-      <p>Entrar em contato com André Dias, 3º ano de DS</p>
+        <h2>404</h2>
+        <h1>Página não encontrada</h1>
+        <p>Desculpe pelo transtorno! Site ainda em processo de criação.</p>
+        <p><a href="index.html">Você pode voltar para a área de login!</a></p>
+        <h3>O que fazer?</h3>
+        <ol>
+            <li style="margin-bottom: 10px;">Certifique-se de que seu navegador não está usando uma versão antiga da página
+                (devido ao <i>cache</i> que alguns navegadores guardam dos sites, você pode estar vendo uma versão antiga da página);</li>
+            <li>Entrar em contato com André Dias, 3º ano de DS.</li>
+        </ol>
+        <p id="pageVersionOn404" style="text-align: center; font-weight: bold;">...</p>
     </div>
+
+    <script type="module" src="/src/js/pages/404.js"></script>
   </body>
 </html>

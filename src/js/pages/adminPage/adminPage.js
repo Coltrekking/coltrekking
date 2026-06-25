@@ -2,7 +2,7 @@
  * Página de administração do coltrekking.
  *
  * @author André Dias
- * @since 2024-06
+ * @since 2026-06
  */
 import {isAdmin, waitForUser} from "/src/js/auth";
 import {openTab} from "/src/js/tabs";

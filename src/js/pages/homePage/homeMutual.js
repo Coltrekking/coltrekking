@@ -112,20 +112,20 @@ async function loadCommon() {
     // Verifica a autenticação do usuário
     checkAuth()
 
-    // Redireciona o usuário
-    if (isAdmin()) {
-        if (!window.location.href.includes("homeAdmin")) { // se não estiver admin na página
-            //abrirAlerta("Você será redirecionado para a página de administrador.").then();
-            //document.getElementById("darkOverlay").style.display = "flex";
-            window.location.href = ADMIN_HOME_PAGE_ADDRESS;
-            return;
-        }
-    } else {
-        if (window.location.href.includes("homeAdmin")) { // se estiver na página admin
+    // Redireciona o usuário se ele tiver na página errada
+    if (window.location.href.includes("admin") || window.location.href.includes("Admin")) {
+        if (!isAdmin()) {
             //document.getElementById("darkOverlay").style.display = "flex"; // essa linha faz o div de overlay escuro aparecer
             //document.body.replaceChildren(); // essa linha apaga todos os elementos do body
             window.location.href = USER_HOME_PAGE_ADDRESS;
             //abrirAlerta("Você não tem permissão de acessar essa página!").then(); // essa linha manda um aviso para o usuário
+            return;
+        }
+    } else {
+        if (isAdmin()) {
+            //abrirAlerta("Você será redirecionado para a página de administrador.").then();
+            //document.getElementById("darkOverlay").style.display = "flex";
+            window.location.href = ADMIN_HOME_PAGE_ADDRESS;
             return;
         }
     }
@@ -134,7 +134,6 @@ async function loadCommon() {
     onValue(EventsDatabaseRef, function (dataSnapshot) {
         fillEventList(dataSnapshot);
     });
-
 
 
     // Tratar o envio do formulário de edição de informações pessoais

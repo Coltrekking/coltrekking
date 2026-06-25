@@ -116,7 +116,7 @@ function loadPage() {
     loadEvents();
 }
 
-if (isAdmin() && window.location.href.includes("homeAdmin")) loadPage();
+if (isAdmin()) loadPage();
 
 
 

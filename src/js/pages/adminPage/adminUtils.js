@@ -2,7 +2,7 @@
  * Funções uteis para a página de administração.
  *
  * @author André Dias
- * @since 2024-06
+ * @since 2026-06
  */
 import {
     getDataFromDatabase,

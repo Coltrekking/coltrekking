@@ -198,7 +198,7 @@ export function isAdmin() {
 export function userSignOut() {
     signOut(Auth).then(function() {
         localStorage.removeItem("isLogged");
-        window.location.href = 'index.html';
+        window.location.href = '/';
     }).catch(function(error) {
         showError("Erro ao sair: ", error);
     });
@@ -218,11 +218,11 @@ async function _onSignIn() {
 
     let hasAdminPower = currentUserHasAdminPower();
     if (hasAdminPower) {
-        if (!window.location.href.includes("homeAdmin"))
-            window.location.href = ADMIN_HOME_PAGE_ADDRESS;
+       if (!window.location.href.includes("homeAdmin"))
+           window.location.href = ADMIN_HOME_PAGE_ADDRESS;
     } else {
-        if (!window.location.href.includes("homePage"))
-            window.location.href = USER_HOME_PAGE_ADDRESS;
+       if (!window.location.href.includes("homePage"))
+           window.location.href = USER_HOME_PAGE_ADDRESS;
     }
 }
 
@@ -265,7 +265,7 @@ export async function deleteAccount() {
         showItem(loading);
         deleteUser(Auth.currentUser).then(function() {
             abrirAlerta("Conta excluída com sucesso!");
-            window.location.href = 'index.html';
+            window.location.href = '/';
         }).catch(function(error) {
             showError("Erro ao excluir conta: ", error);
         }).finally(function() {
@@ -443,9 +443,10 @@ export function checkAuth() {
                     logOutUserWithAlert("Acesso negado. Conta não autorizada. Por favor, use um email institucional (@teiacoltec.org) para se autenticar.");
                 }
             } else {
-                const currentPath = window.location.href;
-                if (!currentPath.includes("index.html") && currentPath !== "/" ) {
-                    window.location.href = "index.html";
+                const currentPath = window.location.pathname;
+
+                if (!currentPath.includes("index") && currentPath !== "/" ) {
+                   window.location.href = "/";
                 }
             }
         }
@@ -487,9 +488,10 @@ function logOutUserWithAlert(message) {
         // Desloga o usuário
         userSignOut();
         // Redireciona o usuário para a página de login
-        const currentPath = window.location.href;
-        if (!currentPath.includes("index.html") && currentPath !== "/" ) {
-            window.location.href = "index.html";
+        const currentPath = window.location.pathname;
+
+        if (!currentPath.includes("index") && currentPath !== "/" ) {
+            window.location.href = "/";
         }
     });
 }
@@ -590,9 +592,11 @@ onAuthStateChanged(Auth, (user) => {
 
         // Se o usuário deslogou, redirecio
         // na para a página de login (se não estiver)
-        const currentPath = window.location.href;
-        if (!currentPath.includes("index.html") && currentPath !== "/" ) {
-            window.location.href = "index.html";
+        const currentPath = window.location.pathname;
+
+
+        if (!currentPath.includes("index") && currentPath !== "/" ) {
+            window.location.href = "/";
         }
     }
 });
@@ -600,11 +604,11 @@ onAuthStateChanged(Auth, (user) => {
 // Tratamento da autenticação **usando o signInWithRedirect**.
 // O onAuthStateChanged() também é chamado normalmente, mas o _onSignIn()
 // não é chamado no signInWithRedirect -- por isso, ele é chamado aqui.
-getRedirectResult(Auth)
+/*getRedirectResult(Auth)
     .then(credential => {
         if (credential)
             _onSignIn().then( );
     })
     .catch(error => {
         showError("Erro no login com Google usando redirect: ", error);
-    });
+    });*/
