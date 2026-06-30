@@ -15,7 +15,7 @@ import {
 } from "./utils";
 import {abrirAlerta, abrirConfirmacao, abrirModal, EntradasModal} from "./modal";
 import {isAdmin} from "./auth";
-import {exportarInscricoesCSV, exportarInscricoesXLSX, listarInscritos, removeEvent, updateEvent} from "./eventAdmin";
+import {listarInscritos, removeEvent, updateEvent} from "./eventAdmin";
 import {remove, set, update} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
 
@@ -100,7 +100,7 @@ function fillEventCard(eventContainer, item, uid, updating = false) {
     seeImagesBtn.style.right = "15px";
     seeImagesBtn.style.zIndex = "3";
 
-    const styleHeight = "max(40px, 2.5em)";
+    //const styleHeight = "max(40px, 2.5em)";
     const seeImagesImg = document.createElement("img");
     seeImagesImg.id = "evento-imagens-img-" + item.key;
     seeImagesImg.src = "assets/icons/loading.svg";//EventImagesIcons.view;
@@ -167,41 +167,19 @@ function fillEventCard(eventContainer, item, uid, updating = false) {
         editBtn.onclick = () => updateEvent(item.key);
 
         const listarBtn = document.createElement('button');
-        listarBtn.textContent = 'Listar Inscritos';
+        listarBtn.textContent = 'Gerenciar Inscritos';
         listarBtn.className = 'alternative eventBtn';
         listarBtn.onclick = () => listarInscritos(item.key);
-
-        const exportarCSV = document.createElement('button');
-        exportarCSV.textContent = 'Baixar Planilha de Inscrições';
-        exportarCSV.className = 'alternative eventBtn';
-        exportarCSV.onclick = () => {
-            // Pergunta ao usuário o formato para exportar
-            abrirModal(
-                "Exportar Inscrições",
-                "Deseja exportar em qual formato?",
-                EntradasModal.SELECAO,
-                {opcoes:
-                        {"xlsx": "Excel/Google Planilhas (.xlsx)", "csv": "CSV (.csv)"}
-                }
-            ).then(resultado => {
-                if (resultado) {
-                    switch (resultado) {
-                        case "csv":
-                            exportarInscricoesCSV(item.key, value.nome);
-                            break;
-                        case "xlsx":
-                            exportarInscricoesXLSX(item.key, value.nome);
-                            break;
-                    }
-                }
-            });
-        }
 
         eventCard.appendChild(removeBtn);
         eventCard.appendChild(editBtn);
         eventCard.appendChild(listarBtn);
-        eventCard.appendChild(exportarCSV);
     }
+
+    // Nova linha para o botão de inscrição
+    eventCard.appendChild(
+        document.createElement('br')
+    );
 
     // Cria o botão de inscrever e desinscrever
     const eventDate = value.data ? new Date(value.data) : null;

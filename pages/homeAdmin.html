@@ -187,13 +187,6 @@
                 <button type="button" class="danger" id="cancelEventForm">Cancelar</button>
             </form>
 
-            <!-- Container para a lista de inscritos -->
-            <div id="inscritosContainer" class="startHidden">
-                <h3>Inscritos</h3>
-                <div id="inscritosList"></div>
-                <button id="fecharInscritos" class="alternative">Fechar</button>
-            </div>
-
         </div>
 
         <div id="photos" class="tab-content">
@@ -226,10 +219,10 @@
         </div>
 
         <!-- Modal que lista os links das fotos de um evento -->
-        <div id="modalOverlayFotosEvento" class="modal-overlay" style="display: none;">
+        <div id="modalOverlayFotosEvento" class="modal-overlay startHidden" style="display: none;">
             <div class="modal-content" style="position: relative; min-height: 20px;">
                 <button id="fecharMenuFotos" title="Fechar" class="icon-button close-image-modal-button">
-                    <img src="/assets/icons/close-icon.svg" alt="Fechar" class="close-modal-icon">
+                    <img src="/assets/icons/close-icon.svg" alt="Ícone de X, para fechar" class="close-modal-icon">
                 </button>
                 <div id="eventPhotoList"> <!-- Fotos do eventos -->
 
@@ -238,6 +231,50 @@
                 <button id="addPhotoModalBtn" class="alternative">
                     Adicionar Imagem
                 </button>
+            </div>
+        </div>
+
+        <!-- Modal que mostra os inscritos e as informações ligadas a eles -->
+        <div id="modalOverlayInscritosEvento" class="modal-overlay" style="display: none;">
+            <div class="modal-content modal-large inscritos-admin-frame">
+                <div>
+                    <button id="fecharMenuInscritos" title="Fechar" class="icon-button close-image-modal-button">
+                        <img src="/assets/icons/close-icon.svg" alt="Ícone de X, para fechar" class="close-modal-icon" style="height: max(25px, 3vw);">
+                    </button>
+
+                    <!-- Título do Evento -->
+                    <h3 id="menuInscritosTituloEvento">Título do Evento</h3>
+
+                    <p id="listaInscritosPontuacaoEvento" class="pontuacao-evento"></p>
+
+                    <button class="alternative" id="menuInscritosExportarInscricoesBtn">Exportar Inscrições</button>
+                    <button class="alternative" id="menuInscritosObterSelecionadosBtn">Obter Selecionados</button>
+
+                    <hr> <!-- Linha para separar o título das informações -->
+
+                    <span class="text big-text">Inscritos do Evento</span>
+
+                    <br>
+
+                    <!-- Obter apenas os inscritos que estão em um estado específico -->
+                    <div>
+                        <label for="inscritoSearchState"><span class="text">Situação:</span></label>
+                        <select class="text small-text" id="inscritoSearchState">
+                            <option value="todos">Todas</option>
+                            <option value="presente">Presente</option>
+                            <option value="ausente">Ausente</option>
+                        </select>
+                    </div>
+
+                    <br>
+
+                    <p id="modalInscritosTotalInscritos" class="total-inscritos"></p>
+
+
+                    <div id="inscritosList">
+
+                    </div>
+                </div>
             </div>
         </div>
 

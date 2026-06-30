@@ -18,14 +18,18 @@ import {
     loadCommonEvents
 } from "./homeMutual";
 import {
-    atualizarEvento,
+    atualizarEvento, atualizarListaDeInscritos,
     cancelarFormEvento,
     criarEvento, editarPontuacaoNecessariaEventoAtual,
     fecharListaInscritos,
-    getPontuacaoNecessariaEventoAtual, isUserEditingEvent
+    getPontuacaoNecessariaEventoAtual, isUserEditingEvent, onExportarInscritosBtnClicked, onObterSelecionadosBtnClicked
 } from "../../eventAdmin";
 
 const editEventNeededPointsBtn = document.getElementById("eventoAlterarPontuacaoNecessaria");
+const modalInscritosFecharBtn = document.getElementById("fecharMenuInscritos");
+const inscritoSearchState = document.getElementById('inscritoSearchState');
+const exportarInscricoesBtn = document.getElementById('menuInscritosExportarInscricoesBtn');
+const obterSelecionadosBtn = document.getElementById('menuInscritosObterSelecionadosBtn');
 
 
 /**
@@ -103,9 +107,20 @@ function loadEvents() {
         });
     }
 
-    //document.getElementById('toggleUserManagerBtn').onclick = () => toggleUserManager();
-
     editEventNeededPointsBtn.onclick = async () => perguntarNovaPontuacaoNecessaria();
+
+    modalInscritosFecharBtn.addEventListener('click', _ => {
+        hideItem(document.getElementById("modalOverlayInscritosEvento"));
+    });
+
+    // Quando o filtro de status de inscrito atualizar
+    inscritoSearchState.addEventListener("change", atualizarListaDeInscritos);
+
+    // Quando o usuário apertar o botão de exportar inscrições
+    exportarInscricoesBtn.addEventListener('click', onExportarInscritosBtnClicked);
+
+    // Quando o usuário apertar o botão de obter selecionados
+    obterSelecionadosBtn.addEventListener('click', onObterSelecionadosBtnClicked);
 }
 
 function loadPage() {

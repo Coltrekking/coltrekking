@@ -24,7 +24,7 @@ import {
 import {enviarErroParaSentry} from "/src/js/main";
 import {Auth} from "/src/config/firebase";
 import * as XLSX from 'xlsx';
-import {abrirAlerta, abrirConfirmacao} from "/src/js/modal"; // Planilha
+import {abrirAlerta, abrirConfirmacao, abrirModal, EntradasModal} from "/src/js/modal";
 
 export function criarEvento() {
     hideItem(eventForm);
@@ -591,6 +591,119 @@ export function exportarInscricoesXLSX(eventId, nomeEvento = 'Evento', dataInici
         });
 }
 
+/**
+ * Exporta um arquivo xlsx com as pessoas selecionadas, obedecendo a quantidade de selecionados.
+ * @param eventId id do evento
+ * @param nomeEvento nome do evento
+ * @param dataInicioEvento
+ * @param qntdSelecionados quantidade de pessoas que deverão ser selecionadas
+ */
+export function exportarSelecionadosXLSX(eventId, nomeEvento = 'Evento', dataInicioEvento = null, qntdSelecionados) {
+    const inscricoesRef = refFromDatabase(InscricoesDatabaseRef, eventId);
+
+    getDataFromDatabase(inscricoesRef)
+        .then(snapshot => {
+            if (!snapshot.exists()) {
+                abrirAlerta(`Nenhuma inscrição encontrada para "${nomeEvento}".`).then( );
+                return;
+            }
+
+            const inscricoes = [];
+            const promises = [];
+
+            snapshot.forEach(childSnap => {
+
+                const uid = childSnap.key;
+                const inscricaoData = childSnap.val();
+
+                if (!uid) {
+                    console.warn("Inscrição sem UID:", inscricaoData);
+                    return;
+                }
+
+                // Se não tiver presente, não considera
+                if (!inscricaoData.presenca) return;
+
+                // Filtra pelo timestamp da inscrição se dataInicioEvento foi informada
+                if (dataInicioEvento && inscricaoData.dataInscricao) {
+                    if (inscricaoData.dataInscricao < new Date(dataInicioEvento).getTime()) {
+                        return; // ignora inscrições antes do início do evento
+                    }
+                }
+
+                const p = getDataFromDatabase(UsersDatabaseRef, uid).then(userSnap => {
+                    const userData = userSnap.val() || {};
+                    inscricoes.push({
+                        nome: userData.nome || '---',
+                        dataInscricao: inscricaoData.dataInscricao
+                    });
+                });
+
+                promises.push(p);
+            });
+
+            return Promise.all(promises).then(() => inscricoes);
+        })
+        .then(inscricoes => {
+            if (!inscricoes || inscricoes.length === 0) {
+                abrirAlerta('Nenhuma inscrição válida encontrada.');
+                return;
+            }
+
+            // Ordena por data de inscrição (mais antiga primeiro)
+            inscricoes.sort((a, b) => (a.dataInscricao || 0) - (b.dataInscricao || 0));
+
+            // Adiciona o atributo "passou" aos primeiros 'qntdSelecionados' inscritos
+            for (let i = 0; i < inscricoes.length; i++) {
+                inscricoes[i].passou = i < qntdSelecionados;
+            }
+
+            /*function formatarData(ts) {
+                if (!ts) return '---';
+                return new Date(ts).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', hour12: false });
+            }*/
+
+            // Prepara a matriz de dados para a planilha
+            const sheetData = [];
+
+            // Adiciona a linha de Cabeçalho
+            sheetData.push(["POSIÇÃO", "NOME", "STATUS"]);
+
+            // Adiciona as linhas de dados
+            inscricoes.forEach((i, index) => {
+                sheetData.push([
+                    index + 1,
+                    i.nome,
+                    i.passou ? "CONVOCADO" : "FILA DE ESPERA",
+                ]);
+            });
+
+            // Converte a matriz de dados em uma planilha
+            const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+
+            // Ajusta automaticamente a largura das colunas
+            worksheet['!cols'] = [
+                {wch: 10},  // #
+                {wch: 30}, // Nome
+                {wch: 15}  // Status
+            ];
+
+            // Cria um arquivo e adiciona a planilha a ele
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Participantes");
+
+            // Gera o arquivo e aciona o download automático
+            const nomeArquivo = `"LISTA DE PARTICIPANTES "${nomeEvento.replace(/\s+/g, '_')}.xlsx`;
+            XLSX.writeFile(workbook, nomeArquivo);
+        })
+        .catch(error => {
+            console.error('Erro ao obter selecionados:', error);
+            enviarErroParaSentry(error);
+            abrirAlerta('Erro ao obter selecionados.').then( );
+        });
+}
+
+
 // Id do evento que está listando os inscritos atualmente.
 // `null` se não estiver listando nada.
 let currentListingSubscribeEvent = null
@@ -608,49 +721,74 @@ let atualizandoListaInscritos = false;
  */
 export function listarInscritos(eventId, onlyUpdate = false) {
     if (atualizandoListaInscritos) return; // evita que a função seja chamada novamente enquanto já está atualizando
-    currentListingSubscribeEvent = eventId;
-    const inscritosContainer = document.getElementById("inscritosContainer");
-    const inscritosList = document.getElementById("inscritosList");
 
-    if (!inscritosContainer || !inscritosList) {
+    const TODOS_SELECT = 'todos'; // Valor do estado que todos os inscritos serão selecionados
+
+    // Obtém os elementos e reseta o que precisa
+    const inscritosModal = document.getElementById("modalOverlayInscritosEvento");
+    const inscritosList = document.getElementById("inscritosList");
+    const inscritoTituloEvento = document.getElementById('menuInscritosTituloEvento');
+    const inscritoSearchState = document.getElementById('inscritoSearchState');
+    const totalElem = document.getElementById("modalInscritosTotalInscritos");
+
+    // Cria o gif de carregamento
+    const inscritosLoadingGif = document.createElement("img");
+    inscritosLoadingGif.src = "assets/icons/loading.svg";
+    inscritosLoadingGif.alt = "Gif de carregando";
+    inscritosLoadingGif.style.height = "max(60px, 3.5em)";
+
+    if (!inscritosModal || !inscritosList) {
         console.error("Container de inscritos não encontrado no HTML!");
         enviarErroParaSentry(new Error("Container de inscritos não encontrado no HTML!"));
         return;
     }
 
+    // Limpa os elementos de dentro
+    inscritosList.innerHTML = "";
+
+    currentListingSubscribeEvent = eventId;
+
+    // Mostra pontuação do evento
+    getDataFromDatabase(EventsDatabaseRef, eventId).then(eventSnap => {
+        const evento = eventSnap.val();
+        if (!evento) return;
+
+        const pontuacaoEvento = calcularPontuacaoDoEvento(evento);
+
+        const pontosElem = document.getElementById("listaInscritosPontuacaoEvento");
+        pontosElem.innerHTML = `<strong>Pontuação do evento:</strong> ${pontuacaoEvento} pontos`;
+        inscritoTituloEvento.innerHTML = evento.nome;
+    });
+
     atualizandoListaInscritos = true;
+
     if (!onlyUpdate) {
-        inscritosContainer.scrollIntoView({ behavior: "smooth", block: "start" });
-        inscritosContainer.classList.remove("startHidden");
-        inscritosList.innerHTML = "<p>Carregando inscritos...</p>";
+        inscritosList.appendChild(inscritosLoadingGif); // Coloca o loading
+        inscritoTituloEvento.innerHTML = "...";
+        inscritosLoadingGif.classList.add("loading-animation");
+        inscritosModal.style.display = 'flex';
+        //inscritosModal.classList.remove("startHidden");
     }
 
     getDataFromDatabase(InscricoesDatabaseRef, eventId)
         .then(snapshot => {
-            inscritosList.innerHTML = "";
 
             if (!snapshot.exists()) {
                 inscritosList.innerHTML = "<p>Nenhum inscrito encontrado neste evento.</p>";
                 return;
             }
 
-            // Mostra pontuação do evento
-            getDataFromDatabase(EventsDatabaseRef, eventId).then(eventSnap => {
-                const evento = eventSnap.val();
-                if (!evento) return;
-
-                const pontuacaoEvento = calcularPontuacaoDoEvento(evento);
-
-                const pontosElem = document.createElement("p");
-                pontosElem.id = "listaInscritosPontuacaoEvento";
-                pontosElem.innerHTML = `<strong>Pontuação do evento:</strong> ${pontuacaoEvento} pontos`;
-                pontosElem.className = "pontuacao-evento";
-                inscritosList.appendChild(pontosElem);
-            });
+            // Obtém o status
+            const state = inscritoSearchState?.value.trim() || TODOS_SELECT;
 
             // Lista inscritos
             const inscricoes = [];
             snapshot.forEach(childSnap => {
+                const presenca = childSnap.val().presenca || false;
+
+                if (presenca && state === 'ausente') return;
+                if (!presenca && state === 'presente') return;
+
                 inscricoes.push({
                     uid: childSnap.key,
                     dataInscricao: childSnap.val().dataInscricao || 0,
@@ -660,10 +798,11 @@ export function listarInscritos(eventId, onlyUpdate = false) {
 
             inscricoes.sort((a, b) => a.dataInscricao - b.dataInscricao);
 
-            const totalElem = document.createElement("p");
-            totalElem.textContent = `Total de inscritos: ${inscricoes.length}`;
-            totalElem.className = "total-inscritos";
-            inscritosList.appendChild(totalElem);
+
+            if (state !== TODOS_SELECT) // Se estiver filtrando pelo estado, adiciona o estado no texto
+                totalElem.textContent = `Total de inscritos (${state}s): ${inscricoes.length}`;
+            else // Caso não esteja filtrando, deixa da forma normal
+                totalElem.textContent = `Total de inscritos: ${inscricoes.length}`;
 
             const promises = inscricoes.map((inscricao, index) => {
                 return getDataFromDatabase(UsersDatabaseRef, inscricao.uid).then(userSnap => {
@@ -727,7 +866,20 @@ export function listarInscritos(eventId, onlyUpdate = false) {
         }).finally(() => {
             // Quando tudo acabar, volta a permitir atualizações da lista
             atualizandoListaInscritos = false;
+            // Retira o loading
+            if (inscritosList.contains(inscritosLoadingGif))
+                inscritosList.removeChild(inscritosLoadingGif);
         });
+}
+
+/**
+ * Atualiza a lista de inscritos com o evento atualmente selecionado.
+ * Se não houver evento atualmente selecionado, não faz nada.
+ */
+export function atualizarListaDeInscritos() {
+    // Se for nulo, retorna
+    if (currentListingSubscribeEvent === null) return;
+    listarInscritos(currentListingSubscribeEvent, true);
 }
 
 /**
@@ -758,4 +910,63 @@ export function getPontuacaoNecessariaEventoAtual() {
  */
 export function isUserEditingEvent() {
     return currentEditingEvent !== null;
+}
+
+/**
+ * Quando o botão de exportar inscritos for clicado, essa função é chamada.
+ */
+export async function onExportarInscritosBtnClicked() {
+    // Se não estiver vendo os inscritos de nenhum inscrito, retorna
+    if (currentListingSubscribeEvent === null) return;
+
+    // Obtém o nome do evento
+    const evento = await getDataFromDatabase(EventsDatabaseRef, currentListingSubscribeEvent);
+    const nome = evento.val().nome;
+
+    // Pergunta em que formato deseja exportar
+    const resultado = await abrirModal(
+        "Exportar Inscrições",
+        "Deseja exportar em qual formato?",
+        EntradasModal.SELECAO,
+        {opcoes:
+                {"xlsx": "Excel/Google Planilhas (.xlsx)", "csv": "CSV (.csv)"}
+        }
+    );
+
+    if (resultado) {
+        switch (resultado) {
+            case "csv":
+                exportarInscricoesCSV(currentListingSubscribeEvent, nome);
+                break;
+            case "xlsx":
+                exportarInscricoesXLSX(currentListingSubscribeEvent, nome);
+                break;
+        }
+    }
+}
+
+/**
+ * Quando o botão de obter sekecionados for clicado, essa função é chamada.
+ */
+export async function onObterSelecionadosBtnClicked() {
+    // Se não estiver vendo os inscritos de nenhum inscrito, retorna
+    if (currentListingSubscribeEvent === null) return;
+
+    // Obtém o nome do evento
+    const evento = await getDataFromDatabase(EventsDatabaseRef, currentListingSubscribeEvent);
+    const nome = evento.val().nome;
+
+    const qntd = await abrirModal(
+        "Obter selecionados",
+        "Quantos deverão ser selecionados?",
+        EntradasModal.NUMERO,
+        {
+            minNumber: 0
+        }
+    );
+
+    // Se a pessoa cancelar, retorna
+    if (qntd === null) return;
+
+    exportarSelecionadosXLSX(currentListingSubscribeEvent, nome, null, qntd);
 }

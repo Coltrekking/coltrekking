@@ -832,7 +832,7 @@ textarea {
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.6);
-    z-index: 9999; /* Garante que fique por cima de tudo no site */
+    z-index: 9999; /* garante que fique por cima de tudo no site */
 
     display: flex;
     justify-content: center;
@@ -854,6 +854,9 @@ textarea {
 
     max-height: 85vh;
     overflow-y: auto; /* Para aparecer a barra de scroll caso haja overflow */
+}
+.modal-content.modal-large {
+    max-width: 90vw;
 }
 
 .modal-content h3 {
@@ -888,6 +891,11 @@ textarea {
 .modal-botoes > button:active {
     transition: transform 0.1s ease-in-out;
     transform: scale(0.98);
+}
+
+.inscritos-admin-frame {
+    position: relative;
+    height: 90vh;
 }
 
 .close-image-modal-button {
