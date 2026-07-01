@@ -1,8 +1,8 @@
 import {Auth, Database} from "../config/firebase";
-import {child, ref, get, set, update} from "firebase/database";
+import {child, ref, get} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
-import {getUserRole, isAdmin} from "/src/js/auth";
-import {abrirAlerta, abrirModal, EntradasModal} from "/src/js/modal";
+import {getUserRole} from "/src/js/auth";
+import {abrirAlerta} from "/src/js/modal";
 
 // Referências dos elementos da página
 export let loading = document.getElementById('loading');
@@ -49,6 +49,16 @@ export function showItem(item) {
         let _loading = document.getElementById('loading'); // Para ter certeza que o loading
         if (_loading && item === _loading) item.style.display = 'flex';
         else item.style.display = 'block';
+    }
+}
+
+/**
+ * Mostra o elemento usando display flex.
+ * @param item elemento que será aplicado o display flex.
+ */
+export function showItemAsFlex(item) {
+    if (item && item.style) {
+        item.style.display = 'flex';
     }
 }
 

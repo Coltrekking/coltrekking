@@ -133,6 +133,22 @@
             </div>
         </div>
 
+        <!-- Modal que mostra que conseguiu se inscrever com sucesso e a posição -->
+        <div id="modalOverlayInscricaoEvento" class="modal-overlay startHidden" style="display: none;">
+            <div class="modal-content" style="position: relative; min-height: 20px;">
+                <button id="fecharMenuInscricao" title="Fechar" class="icon-button close-image-modal-button">
+                    <img src="/assets/icons/close-icon.svg" alt="Ícone de X, para fechar" class="close-modal-icon">
+                </button>
+                <span class="text big-text">Inscrição realizada com sucesso!</span>
+                <br> <br>
+                <p class="text">Sua posição:
+                    <br>
+                    <img id="modalOverlayInscricaoLoading" src="/assets/icons/loading.svg" alt="Carregando" class="loading-animation" style="height: max(60px, 3.5em);">
+                    <span id="modalOverlayInscricaoPosicao" class="text huge-text" style="color: orange;"></span>
+                </p>
+            </div>
+        </div>
+
         <div id="lista-blocks" class="tab-content">
             <h2>Lista de Bloqueios</h2>
             <div id="regrasBloqueio" class="center">

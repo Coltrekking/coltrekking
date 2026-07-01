@@ -15,7 +15,7 @@ import {
 } from "../../utils";
 import {abrirAlerta, abrirAviso} from "../../modal.js";
 import {openTab} from "../../tabs";
-import {fillEventList} from "../../event";
+import {fillEventList, modalInscricaoEvento} from "../../event";
 import {onValue, update} from "firebase/database";
 import {onAuthStateChanged} from "firebase/auth";
 import {enviarErroParaSentry} from "/src/js/main";
@@ -95,6 +95,10 @@ export function loadCommonEvents() {
 
     document.getElementById("fecharMenuFotos").onclick = _ => {
         hideItem(document.getElementById("modalOverlayFotosEvento"));
+    }
+
+    document.getElementById("fecharMenuInscricao").onclick = _ => {
+        hideItem(modalInscricaoEvento);
     }
 }
 

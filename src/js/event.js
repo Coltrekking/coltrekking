@@ -11,13 +11,15 @@ import {
     loading,
     PhotosDatabaseRef,
     refFromDatabase,
-    refFromUser, showItem, showLoading
+    refFromUser, showItem, showItemAsFlex, showLoading
 } from "./utils";
 import {abrirAlerta, abrirConfirmacao, abrirModal, EntradasModal} from "./modal";
 import {isAdmin} from "./auth";
 import {listarInscritos, removeEvent, updateEvent} from "./eventAdmin";
 import {remove, set, update} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
+
+export const modalInscricaoEvento = document.getElementById("modalOverlayInscricaoEvento");
 
 // Ícones para as ações relacionadas às imagens dos eventos
 // (o ícone que aperta para abrir a tela de imagens)
@@ -167,7 +169,7 @@ function fillEventCard(eventContainer, item, uid, updating = false) {
         editBtn.onclick = () => updateEvent(item.key);
 
         const listarBtn = document.createElement('button');
-        listarBtn.textContent = 'Gerenciar Inscritos';
+        listarBtn.textContent = 'Gerenciar Inscrições';
         listarBtn.className = 'alternative eventBtn';
         listarBtn.onclick = () => listarInscritos(item.key);
 
@@ -543,16 +545,17 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn) {
                     return { evento, userData };
                 });
         })
-        .then(() => {
+        .then(async () => {
             // Registra inscrição
             const dataInscricao = Date.now();
-            return set(refFromDatabase(InscricoesDatabaseRef, `${eventId}/${uid}`), {
+            await set(refFromDatabase(InscricoesDatabaseRef, `${eventId}/${uid}`), {
                 dataInscricao: dataInscricao,
                 presenca: false
             });
         })
-        .then(() => {
-            abrirAlerta('Inscrição realizada com sucesso!');
+        .then(async () => {
+            await onSuccessfulSubscription(eventId);
+            //abrirAlerta('Inscrição realizada com sucesso!');
             subscribeBtn.style.display = 'none';
             unsubscribeBtn.style.display = 'inline-block';
         })
@@ -912,3 +915,56 @@ async function removeLink(eventKey, url) {
             });
     });
 }
+
+/**
+ * Quando o usuário consegue se inscrever com sucesso, essa função é chamada
+ * @param eventId id do evento que o usuário local acabou de se inscrever
+ * @return {Promise<void>}
+ */
+async function onSuccessfulSubscription(eventId) {
+    const loadingElement = document.getElementById('modalOverlayInscricaoLoading');
+    loadingElement.style.display = ""; // faz aparecer o loading
+
+    const positionElement = document.getElementById('modalOverlayInscricaoPosicao');
+    hideItem(positionElement); // esconde a posição até obter ela
+
+    showItemAsFlex(modalInscricaoEvento); // mostra o modal o mais rápido possível (para o usuário ver que a inscrição deu certo)
+
+    let indice = -1; // posição que o usuário está. -1 se não encontrou
+
+    const uid = Auth.currentUser.uid;
+
+    // Obtém as inscrições do evento do id dado
+    const inscricoesSnap = await getDataFromDatabase(InscricoesDatabaseRef, `${eventId}`);
+
+    // Verifica a posição apenas se a snapshot existe
+    if (inscricoesSnap.exists()) {
+        const inscricoes = [];
+
+        // Obtém as inscrições e ordena elas
+        inscricoesSnap.forEach(childSnap => {
+            inscricoes.push({
+                uid: childSnap.key,
+                dataInscricao: childSnap.val().dataInscricao || 0
+            });
+        });
+
+        inscricoes.sort((a, b) => a.dataInscricao - b.dataInscricao);
+
+        // Obtém a posição
+        indice = inscricoes.findIndex((v) => {
+            return v.uid === uid; // retorna o índice da inscrição com o uid do usuário local
+        });
+    }
+
+    if (indice === -1) { // se não conseguiu achar
+        positionElement.textContent = "Não foi possível obter a sua posição.";
+    } else {
+        positionElement.textContent = (indice + 1) + "ª"; // +1, pois o indice é 0-indexed
+    }
+
+    // Retira o loading e mostra os elementos
+    hideItem(loadingElement);
+    showItem(positionElement);
+}
+

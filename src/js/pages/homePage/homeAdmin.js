@@ -110,7 +110,7 @@ function loadEvents() {
     editEventNeededPointsBtn.onclick = async () => perguntarNovaPontuacaoNecessaria();
 
     modalInscritosFecharBtn.addEventListener('click', _ => {
-        hideItem(document.getElementById("modalOverlayInscritosEvento"));
+        hideItem(document.getElementById("modalOverlayGerenciarInscritosEvento"));
     });
 
     // Quando o filtro de status de inscrito atualizar

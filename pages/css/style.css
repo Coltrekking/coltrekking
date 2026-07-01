@@ -253,6 +253,10 @@ p {
     margin: 0;
 }
 
+.huge-text {
+    font-size: max(20px, 2vw);
+}
+
 .big-text {
     font-size: max(15px, 1.5vw);
 }

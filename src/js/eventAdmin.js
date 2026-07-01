@@ -23,7 +23,7 @@ import {
 } from "/src/js/event";
 import {enviarErroParaSentry} from "/src/js/main";
 import {Auth} from "/src/config/firebase";
-import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx-js-style';
 import {abrirAlerta, abrirConfirmacao, abrirModal, EntradasModal} from "/src/js/modal";
 
 export function criarEvento() {
@@ -599,6 +599,10 @@ export function exportarInscricoesXLSX(eventId, nomeEvento = 'Evento', dataInici
  * @param qntdSelecionados quantidade de pessoas que deverão ser selecionadas
  */
 export function exportarSelecionadosXLSX(eventId, nomeEvento = 'Evento', dataInicioEvento = null, qntdSelecionados) {
+    // Palavras que não devem começar com letra maiúscula.
+    // Obs.: palavras com 1 letra já estão incluídas
+    const excecoesCapitalizar = ["da", "das", "de", "do", "dos"]
+
     const inscricoesRef = refFromDatabase(InscricoesDatabaseRef, eventId);
 
     getDataFromDatabase(inscricoesRef)
@@ -671,9 +675,28 @@ export function exportarSelecionadosXLSX(eventId, nomeEvento = 'Evento', dataIni
 
             // Adiciona as linhas de dados
             inscricoes.forEach((i, index) => {
+                let nome = i.nome.trim();
+
+                // Obtém a última palavra do nome e, se o nome termina em "coltec",
+                // retira essa palavra "coltec"
+                if (nome.split(" ").at(-1).toLowerCase() === "coltec")
+                    nome = nome.slice(0, -7); // retira o "coltec"
+
+                // Faz as palavras começarem com letra maiúscula (com exceções,
+                // como 'da', 'o', etc)
+                nome = nome.split(' ').map((palavra) => {
+                    const palavraMinusculo = palavra.toLowerCase();
+
+                    // Se a palavra é uma exceção (ou tem apenas uma letra), retorna
+                    if (excecoesCapitalizar.includes(palavraMinusculo) || palavraMinusculo.length === 1)
+                        return palavraMinusculo;
+
+                    return palavra.charAt(0).toUpperCase() + palavra.slice(1);
+                }).join(' '); // o `join()` une as palavras
+
                 sheetData.push([
                     index + 1,
-                    i.nome,
+                    nome,
                     i.passou ? "CONVOCADO" : "FILA DE ESPERA",
                 ]);
             });
@@ -681,10 +704,63 @@ export function exportarSelecionadosXLSX(eventId, nomeEvento = 'Evento', dataIni
             // Converte a matriz de dados em uma planilha
             const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
 
+            // Estilização //
+
+            // Estilo do cabeçalho
+            const headerStyle = {
+                font: { bold: true, color: { rgb: "FFFFFF" } },
+                fill: { fgColor: { rgb: "1F497D" } },
+                alignment: { horizontal: "center", vertical: "center" }
+            };
+
+            // Aplica o estilo na primeira linha (A1, B1, C1)
+            worksheet["A1"].s = headerStyle;
+            worksheet["B1"].s = headerStyle;
+            worksheet["C1"].s = headerStyle;
+
+            // Estilo para as outras linhas (dados)
+            const borderStyle = {
+                top: { style: "thin", color: { auto: 1 } },
+                bottom: { style: "thin", color: { auto: 1 } },
+                left: { style: "thin", color: { auto: 1 } },
+                right: { style: "thin", color: { auto: 1 } }
+            };
+
+            // Percorre as linhas de dados, estilizando elas
+            inscricoes.forEach((i, index) => {
+                const rowIndex = index + 2; // (+ 2) porque o index começa em 0 e a linha 1 é o cabeçalho
+
+                // Cor dinâmica para o Status (Coluna C)
+                const fillStyle = {
+                    fgColor: {
+                        rgb: i.passou ? "D1F1CF" : "EEEEEE" // Verde se passou, cinza claro se não
+                    }
+                } ; // Verde se passou, branco se fila
+
+                // Estilos padrão das colunas A e B com borda
+                worksheet[`A${rowIndex}`].s = {
+                    alignment: { horizontal: "center" },
+                    border: borderStyle,
+                    fill: fillStyle
+                };
+                worksheet[`B${rowIndex}`].s = {
+                    border: borderStyle,
+                    fill: fillStyle
+                };
+                worksheet[`C${rowIndex}`].s = {
+                    font: { bold: true },
+                    alignment: { horizontal: "center" },
+                    border: borderStyle,
+                    fill: fillStyle
+                };
+            });
+
+            // Fim da estilização //
+
             // Ajusta automaticamente a largura das colunas
             worksheet['!cols'] = [
                 {wch: 10},  // #
-                {wch: 30}, // Nome
+                {wch: 50}, // Nome
                 {wch: 15}  // Status
             ];
 
@@ -693,7 +769,7 @@ export function exportarSelecionadosXLSX(eventId, nomeEvento = 'Evento', dataIni
             XLSX.utils.book_append_sheet(workbook, worksheet, "Participantes");
 
             // Gera o arquivo e aciona o download automático
-            const nomeArquivo = `"LISTA DE PARTICIPANTES "${nomeEvento.replace(/\s+/g, '_')}.xlsx`;
+            const nomeArquivo = `LISTA DE PARTICIPANTES ${nomeEvento.replace(/\s+/g, '_')}.xlsx`;
             XLSX.writeFile(workbook, nomeArquivo);
         })
         .catch(error => {
@@ -725,7 +801,7 @@ export function listarInscritos(eventId, onlyUpdate = false) {
     const TODOS_SELECT = 'todos'; // Valor do estado que todos os inscritos serão selecionados
 
     // Obtém os elementos e reseta o que precisa
-    const inscritosModal = document.getElementById("modalOverlayInscritosEvento");
+    const inscritosModal = document.getElementById("modalOverlayGerenciarInscritosEvento");
     const inscritosList = document.getElementById("inscritosList");
     const inscritoTituloEvento = document.getElementById('menuInscritosTituloEvento');
     const inscritoSearchState = document.getElementById('inscritoSearchState');
@@ -957,8 +1033,8 @@ export async function onObterSelecionadosBtnClicked() {
     const nome = evento.val().nome;
 
     const qntd = await abrirModal(
-        "Obter selecionados",
-        "Quantos deverão ser selecionados?",
+        "Selecionar Participantes",
+        "Quantas pessoas deverão ser selecionadas?",
         EntradasModal.NUMERO,
         {
             minNumber: 0
