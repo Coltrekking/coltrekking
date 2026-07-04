@@ -15,11 +15,30 @@
 </head>
 
 <body>
+    <div id="barraAviso">
+        <!-- Conteúdo do aviso -->
+        <div class="conteudo-aviso flex-center">
+            <img src="/assets/icons/error-icon.svg" alt="Ícone do status do aviso" class="status-icon">
+            <div class="flex-center">
+                <p class="google-font">Mensagem aleatória grande o suficiente para ser um caso absurdamente extremo do uso dessa ferramenta no site.</p>
+            </div>
+        </div>
+
+        <!-- Barra para ver outros avisos -->
+        <!-- sempre que essa div aparecer, use `margin-bottom-aviso` na classe do conteúdo-aviso -->
+        <div class="w100 barra-selecionar-aviso" style="display: none">
+            <img src="/assets/icons/previous-icon.svg" alt="Seta para esquerda (anterior)">
+            <span class="google-font font-bold">13</span>
+            <img src="/assets/icons/next-icon.svg" alt="Seta para direita (próximo)">
+        </div>
+    </div>
+
     <div id="darkOverlay" class="modal-overlay" style="display: none;"></div>
     <div class="modal-overlay" id="loading" style="display: none;">
         <img src="/assets/icons/loading.svg" alt="Carregando..." class="loading-icon">
     </div>
     <div id="homePage" class="center">
+
         <header>
             <img src="/assets/images/coltrekkingHorizontal.png" id="imgHP" alt="Logo Coltrekking">
             <hr>
@@ -43,7 +62,8 @@
                 </button>
             </div>
 
-            <p id="userPoints">Pontuação: </p>
+            <span class="text medium-text" id="userPoints">Pontuação: </span>
+            <br>
 
             <button id="signOutBtn" class="alternative">
                 <img src="/assets/icons/log-out-icon.svg" class="" style="height: 1.5em; margin-bottom: -0.5vw;" alt="Ícone de sair">
@@ -114,7 +134,10 @@
                 <div id="eventContainer"></div>
             </div>
 
-            <button class="alternative" id="createEvent">Criar Evento</button>
+            <button class="alternative" id="createEvent">
+                <img src="/assets/icons/add-icon.svg" class="" style="height: 1.5em; margin-bottom: -0.5vw;" alt="Ícone de adição">
+                Criar Evento
+            </button>
 
             <form id="eventForm" class="startHidden">
                 <label>Nome do Evento:</label><br>
@@ -253,9 +276,9 @@
         <!-- Modal que mostra os inscritos e as informações ligadas a eles -->
         <div id="modalOverlayGerenciarInscritosEvento" class="modal-overlay" style="display: none;">
             <div class="modal-content modal-large inscritos-admin-frame">
-                <div style="position: relative;">
+                <div>
                     <button id="fecharMenuInscritos" title="Fechar" class="icon-button close-image-modal-button">
-                        <img src="/assets/icons/close-icon.svg" alt="Ícone de X, para fechar" class="close-modal-icon" style="height: max(25px, 3vw);">
+                        <img src="/assets/icons/close-icon.svg" alt="Ícone de X, para fechar" class="close-modal-icon">
                     </button>
 
                     <!-- Título do Evento -->
@@ -344,8 +367,8 @@
                     <a href="https://www.linkedin.com/in/j%C3%BAlia-martins-souza-997ba6350/" target="_blank">Júlia Martins Souza</a>
                     e por <a href="https://www.linkedin.com/in/andré-dias-de-paula-3430ba406/" target="_blank">André Dias de Paula</a>
                     para o Projeto de Ensino Coltrekking do Colégio Técnico da UFMG</p>
-                <h3><img src="/assets/images/logoColtec.png" id="imgColtec" alt="Logo Coltec"> &copy; 2026 Coltrekking. Todos os
-                    direitos reservados.</h3>
+                <h4><img src="/assets/images/logoColtec.png" id="imgColtec" alt="Logo Coltec"> &copy; 2026 Coltrekking. Todos os
+                    direitos reservados.</h4>
                 <div class="footer-links">
                     <a href="https://www.coltec.ufmg.br" target="_blank">Institucional</a>
                 </div>

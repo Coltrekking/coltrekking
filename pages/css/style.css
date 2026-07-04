@@ -3,6 +3,8 @@ body {
     display: flex;
     height: 96vh;
     background-color: #e5d7bd;
+    flex-direction: column;
+    margin: 0;
 }
 
 #app {
@@ -25,7 +27,7 @@ body {
 
 #homePage {
     width: 80%;
-    margin: auto;
+    margin: 3px auto auto;
     box-shadow: 4px 4px 20px #888;
     padding: 20px;
     border-radius: 20px;
@@ -124,8 +126,13 @@ h4 {
     font-family: 'Anton', sans-serif;
     color: #15140e;
     margin: 4px;
-    font-size: 2vw;
+    font-size: 1vw;
 }
+
+.event-card h4 {
+    font-size: 1.3vw;
+}
+
 
 hr {
     border: 0;
@@ -461,7 +468,7 @@ p {
 
 /* Tab Bar Styles */
 .tab-bar {
-    height: 20%;
+    /*height: 20%;*/
     background-color: #15140e;
     border-radius: 10px;
     overflow: hidden;
@@ -861,6 +868,12 @@ textarea {
 }
 .modal-content.modal-large {
     max-width: 90vw;
+    max-height: 92vh; /* Evita colar totalmente nas bordas da tela */
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    position: relative; /* Para posicionar o X */
+    padding-top: 55px; /* Garante que o título e o X tenham um espaço reservado (no topo) */
 }
 
 .modal-content h3 {
@@ -917,9 +930,228 @@ textarea {
     width: auto;
 }
 
-@media (max-width: 500px) { /* Se a tela tiver 500px ou menos de largura*/
-    /* Deixa o botão de configurações no topo da tela */
-    .icon-button > img.config-icon {
+#inscritosList {
+    padding-right: 8px;
+}
+
+#fecharMenuInscritos {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+    z-index: 10;
+    transition: color 0.2s, transform 0.2s;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#fecharMenuInscritos:hover {
+    color: #d9534f;
+    transform: scale(1.1);
+}
+
+h1, h2, h3, h4, .event-card h3, .event-card h2 {
+    white-space: normal !important; /* Permite que o texto quebre linha */
+    word-wrap: break-word !important; /* Força a quebra de palavras gigantes se necessário */
+    overflow-wrap: break-word !important;
+}
+
+.google-font {
+    font-family: 'Google Sans', sans-serif;
+}
+
+.font-bold {
+    font-weight: bold;
+}
+
+/* Avisos */
+#barraAviso {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    position: relative;
+
+    width: 100%;
+    height: auto;
+
+    flex-shrink: 0; /* Para a barra não ser amassada */
+
+    z-index: 10000;
+
+    padding: 5px 0;
+
+    background-color: #fadfbb;
+
+    white-space: normal !important; /* Permite que o texto quebre linha */
+    word-wrap: break-word !important; /* Força a quebra de palavras gigantes se necessário */
+    overflow-wrap: break-word !important;
+}
+
+.status-icon {
+    height: max(20px, 4vh);
+    width: auto;
+    padding-right: 5px;
+}
+
+.margin-bottom-aviso {
+    margin-bottom: 10px;
+}
+
+.conteudo-aviso p {
+    width: auto;
+
+    font-size: max(15px, 1.8vh);
+    font-weight: bold;
+}
+
+.barra-selecionar-aviso {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 3px; /* Espaço entre as setas e o número */
+
+    position: absolute;
+    bottom: 0;
+    right: 0;
+
+    height: max(15px, 3vh);
+
+    color: #000;
+
+    font-size: max(12px, 1.75vh);
+}
+
+.barra-selecionar-aviso img {
+    height: 80%;
+    width: auto;
+}
+
+/* Se a tela tiver 500px ou menos de largura, aplica os estilos abaixo */
+@media (max-width: 500px) {
+    html, body {
+        overflow-x: hidden !important;
+        width: 100vw;
+    }
+
+    #app,
+    .event-card,
+    #imgLogin {
+        min-width: unset !important;
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    #homePage,
+    #adminPage {
+        width: 95% !important;
+        max-width: 95vw !important;
+        padding: 15px 10px !important;
+        box-sizing: border-box;
+    }
+
+    #imgHP {
+        width: 100% !important;
+        max-width: 320px;
+        height: auto !important;
+        display: block;
+        margin: 0 auto;
+        object-fit: contain;
+    }
+
+    .event-buttons {
+        flex-direction: column !important;
+        gap: 12px !important;
+        width: 100%;
+    }
+
+    .event-buttons button,
+    .event-buttons select,
+    .login-button {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 14px 16px !important; /* Aumenta a área de clique */
+        font-size: 1.2rem !important; /* Deixa o texto interno do botão legível */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 48px;
+    }
+
+    .login-button > span {
+        font-size: 1.6rem;
+    }
+
+    .footer-content {
+        flex-direction: column !important;
+        gap: 15px !important;
+        text-align: center !important;
+    }
+
+    .footer-links {
+        justify-content: center !important;
+        margin-top: 10px !important;
+    }
+
+    h2 {
+        font-size: 6.4vw;
+    }
+
+    label {
+        font-size: 20px;
+    }
+
+    select {
+        font-size: 13px;
+    }
+
+    .tab-content p {
+        font-size: 12px;
+    }
+
+    /* Eventos */
+
+    .event-title {
+        font-size: 26px !important; /* Tamanho um pouco mais amigável para telas pequenas */
+        width: 100% !important;
+        max-width: 100% !important; /* Libera o título para ocupar o tamanho normal */
+        box-sizing: border-box !important;
+        text-align: center !important; /* Centraliza o texto perfeitamente */
+        padding: 0 45px !important; /* Cria uma "zona de segurança" nas laterais para o texto nunca encostar ou ficar por baixo do botão de fotos */
+        margin: 0 auto 10px auto !important; /* Garante que a própria caixa fique no meio */
+        align-self: center !important; /* Força o alinhamento central no Flexbox */
+    }
+
+    .event-card p {
+        font-size: 12px;
+    }
+
+    .event-card h4 {
+        font-size: 3.4vw;
+    }
+
+    /* Instruções Gerais */
+
+    .instrucao-card h4 {
+        font-size: 7vw !important;
+    }
+
+    .instrucao-card li {
+        font-size: 3.2vw;
+    }
+
+    /* Configurações */
+
+    .icon-button > img.config-icon { /* Deixa o botão de configurações no topo da tela */
         position: absolute;
         top: 2px;
         right: 0;
@@ -927,5 +1159,71 @@ textarea {
 
     #userInfo {
         position: relative; /* Para poder posicionar o botão de configurações no canto */
+    }
+
+    /* Gerenciar Inscrições */
+
+    .modal-content.modal-large {
+        padding-top: 70px; /* Aumenta o recuo do topo no celular para o X não cobrir o título */
+    }
+
+    #fecharMenuInscritos {
+        font-size: 2.6rem;
+        top: 8px;
+        right: 8px;
+        padding: 15px; /* (facilita o toque) */
+        color: #222;
+    }
+
+    #fecharMenuInscritos img {
+        height: 35px;
+        width: 35px;
+    }
+
+    /* Avisos */
+
+    .barra-selecionar-aviso {
+        height: 30px;
+        gap: 7px;
+    }
+
+    .margin-bottom-aviso {
+        margin-bottom: 30px;
+    }
+
+    .barra-selecionar-aviso {
+        font-size: 18px;
+    }
+
+    /* Footer */
+
+    #mainFooter .footer-content p {
+        margin: 5px 0;
+        color: #15140e;
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 3.2vw;
+    }
+
+    #mainFooter .footer-content h3 {
+        margin: 10px 100px;
+        color: #15140e;
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 3.5vw;
+    }
+
+    #mainFooter .footer-links a {
+        color: #6c4b18;
+        margin: 0 10px;
+        text-decoration: none;
+        transition: color 0.2s;
+        font-size: 3.3vw;
+        font-family: 'Anton', sans-serif;
+    }
+
+    button:not(.icon-button) {
+        min-width: 160px;
+        min-height: 30px;
+
+        font-size: 15px;
     }
 }
