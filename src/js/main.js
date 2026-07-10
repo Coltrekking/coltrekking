@@ -5,9 +5,6 @@
  *  entra no site.
  *  NOTE: esse é o primeiro código a ser iniciado no site.
  */
-import {VERSION} from "lodash";
-
-
 
 // Inicializa o Sentry
 // É importante que ele seja o primeiro a inicializar para
@@ -89,7 +86,9 @@ import "./auth"
 import './utils';
 import './tabs'
 import './date'
+import "./pages/common/barraAviso";
 import {PAGE_VERSION} from "/src/config/firebase";
+
 
 // Carrega os elementos de versão da página //
 const _pageVersionElement = document.getElementById("pageVersionText");

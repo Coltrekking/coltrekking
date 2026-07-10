@@ -26,6 +26,12 @@ if (!document.getElementById("modalOverlay")) {
                     <input type="text" id="modalTextElement" style="display: none">
                 </div>
                 
+                <!-- Caso haja necessidade para outro input de texto -->
+                <div class="modal-botoes" style="flex-direction: column; align-items: center; gap: 5px;">
+                    <p id="modalTextElement2Label" style="margin: 0;"></p>
+                    <input type="text" id="modalTextElement2" style="display: none">
+                </div>
+                
                 <p id="modalInvalidValueMessage" class="soft-warn startHidden" style="color: orange;">Insira algo válido!</p> <!-- esse texto não é o final! -->
     
                 <div class="modal-botoes">
@@ -54,7 +60,9 @@ const Modal = {
 
     SelectElement: document.getElementById('modalSelectElement'),
     NumberElement: document.getElementById("modalNumberElement"),
-    TextElement: document.getElementById("modalTextElement")
+    TextElement: document.getElementById("modalTextElement"),
+    TextElement2: document.getElementById("modalTextElement2"),
+    TextElement2Label: document.getElementById("modalTextElement2Label")
 }
 
 // As entradas(como Sim/Não) que o modal aceita.
@@ -63,7 +71,8 @@ export const EntradasModal = Object.freeze({
     OK: 'ok',
     SELECAO: 'selecao',
     NUMERO: 'numero',
-    TEXTO: 'texto'
+    TEXTO: 'texto',
+    TEXTO2: 'texto2'
     // Lembre-se: se adicionar mais tipos de entrada aqui,
     // adicione o tratamento deles na função `abrirModal`
     // (como fazer a limpeza deles toda vez que um modal é
@@ -86,6 +95,7 @@ let modalEstaAberto = false;
  * - `EntradasModal.NUMERO`: O modal terá um campo de entrada numérica. O botão "Ok" retorna o número inserido (como número, não string), e "Cancelar" retorna null.
  *   É possível delimitar o número mínimo e máximo aceito usando as opções `minNumber` e `maxNumber`, respectivamente.
  * - `EntradasModal.TEXTO`: O modal terá uma pequena caixa de texto. O botão "OK" retorna o texto escrito e "Cancelar" retorna null
+ * - `EntradasModal.TEXTO2`: O modal terá duas pequenas caixas de texto. O botão "OK" retorna os textos escritos em um array e "Cancelar" retorna null
  *
  * Opções gerais:
  * - BtnOkTexto: texto do botão "Ok"
@@ -131,7 +141,9 @@ export function abrirModal(titulo, mensagem, tipoDeEntrada, opcoes = {}) {
         maxNumber: "",   // número máximo
 
         // Entrada de Texto
-        textPlaceholder: "" // o texto que aparece por padrão
+        textPlaceholder: "", // o texto que aparece por padrão no texto 1 (a caixa normal)
+        text2Placeholder: "", // o texto que aparece por padrão no texto 2
+        text2Label: "" // a label para o texto 2
     };
 
     // Une as opções dadas com as padrões
@@ -151,6 +163,8 @@ export function abrirModal(titulo, mensagem, tipoDeEntrada, opcoes = {}) {
         hideItem(Modal.SelectElement);
         hideItem(Modal.NumberElement)
         hideItem(Modal.TextElement);
+        hideItem(Modal.TextElement2Label);
+        hideItem(Modal.TextElement2);
         hideItem(Modal.BtnCancelar);
         hideItem(Modal.BtnOk);
 
@@ -160,6 +174,8 @@ export function abrirModal(titulo, mensagem, tipoDeEntrada, opcoes = {}) {
         Modal.SelectElement.innerHTML = "";
         Modal.NumberElement.value = "";
         Modal.TextElement.value = "";
+        Modal.TextElement2Label.innerText = "";
+        Modal.TextElement2.value = "";
 
         // Coloca o OK e Cancelar como padrão (vão aparecer quase todas as vezes)
         showItem(Modal.BtnOk);
@@ -201,7 +217,17 @@ export function abrirModal(titulo, mensagem, tipoDeEntrada, opcoes = {}) {
                 showItem(Modal.TextElement);
                 Modal.TextElement.value = opcoes.textPlaceholder;
                 break;
+
+            case EntradasModal.TEXTO2:
+                showItem(Modal.TextElement);
+                showItem(Modal.TextElement2);
+                showItem(Modal.TextElement2Label);
+                Modal.TextElement.value = opcoes.textPlaceholder;
+                Modal.TextElement2.value = opcoes.text2Placeholder;
+                Modal.TextElement2Label.innerText = opcoes.text2Label;
+                break;
         }
+
 
         showItem(Modal);
 
@@ -235,6 +261,10 @@ export function abrirModal(titulo, mensagem, tipoDeEntrada, opcoes = {}) {
 
                 case EntradasModal.TEXTO:
                     _resolver(Modal.TextElement.value);
+                    break;
+
+                case EntradasModal.TEXTO2:
+                    _resolver([Modal.TextElement.value, Modal.TextElement2.value]);
                     break;
 
                 default: // Resolve a Promise como verdadeira

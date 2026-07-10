@@ -6,16 +6,15 @@
  */
 import {isAdmin, waitForUser} from "/src/js/auth";
 import {openTab} from "/src/js/tabs";
-import {GeralDatabaseRef, getDataFromDatabase, hideItem, loading, showItem} from "/src/js/utils";
+import {hideItem, loading, showItem} from "/src/js/utils";
 import {
     loadUsersOnUserPage,
     roleUserSelect,
     searchInput,
     stateUserSelect
 } from "/src/js/pages/adminPage/adminUtils";
-import {enviarErroParaSentry} from "/src/js/main";
-import {createInstrucoesGeraisCard, loadInstrucoesGerais} from "/src/js/pages/common/instrucoesGerais";
-import {ADMIN_HOME_PAGE_ADDRESS, USER_HOME_PAGE_ADDRESS} from "/src/js/pages/pages";
+import {loadInstrucoesGerais} from "/src/js/pages/common/instrucoesGerais";
+import {USER_HOME_PAGE_ADDRESS} from "/src/js/pages/pages";
 
 // Elementos //
 export const instrucoesGeraisCardsAreaAdmin = document.getElementById("instrucoesGeraisCardsAreaAdmin");

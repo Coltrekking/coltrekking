@@ -971,6 +971,11 @@ h1, h2, h3, h4, .event-card h3, .event-card h2 {
     font-weight: bold;
 }
 
+/* Força o elemento a estar invisível */
+.forceHidden {
+    display: none !important;
+}
+
 /* Avisos */
 #barraAviso {
     display: flex;
@@ -994,16 +999,14 @@ h1, h2, h3, h4, .event-card h3, .event-card h2 {
     white-space: normal !important; /* Permite que o texto quebre linha */
     word-wrap: break-word !important; /* Força a quebra de palavras gigantes se necessário */
     overflow-wrap: break-word !important;
+
+    transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1); /* Transiciona de forma suave (quando a barra for subir/descer) */
 }
 
 .status-icon {
     height: max(20px, 4vh);
     width: auto;
     padding-right: 5px;
-}
-
-.margin-bottom-aviso {
-    margin-bottom: 10px;
 }
 
 .conteudo-aviso p {
@@ -1013,28 +1016,6 @@ h1, h2, h3, h4, .event-card h3, .event-card h2 {
     font-weight: bold;
 }
 
-.barra-selecionar-aviso {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 3px; /* Espaço entre as setas e o número */
-
-    position: absolute;
-    bottom: 0;
-    right: 0;
-
-    height: max(15px, 3vh);
-
-    color: #000;
-
-    font-size: max(12px, 1.75vh);
-}
-
-.barra-selecionar-aviso img {
-    height: 80%;
-    width: auto;
-}
 
 /* Se a tela tiver 500px ou menos de largura, aplica os estilos abaixo */
 @media (max-width: 500px) {

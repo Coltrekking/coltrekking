@@ -170,14 +170,38 @@ export function createInstrucoesGeraisCard(instrucoesGeraisArea, cardName, cardD
 /**
  * Cria um elemento da lista de instruções gerais
  * @param ulList {Element} lista que a instrução será posta
- * @param text {String} texto da instrução
+ * @param textoData {String | {texto, observacao}} texto da instrução
  * @param cardName {String} nome do cartão
  * @private
  */
-function _createRowOnInstrucoesGerais(ulList, text, cardName) {
+function _createRowOnInstrucoesGerais(ulList, textoData, cardName) {
+    let texto, observacao = null;
+
+    // Obtém as informações dependendo do tipo do textoData
+    // (dependendo de quando a instrução foi criada, ela pode ser
+    // apenas uma string, não tendo a observação)
+    if (typeof textoData === 'string') {
+        texto = textoData;
+    } else {
+        texto = textoData.texto;
+        observacao = textoData.observacao;
+    }
+
     // Cria o li e põe o texto
     const li = document.createElement("li");
-    li.innerText = text;
+    const liTexto = document.createElement('li');
+    liTexto.innerText = texto;
+    liTexto.style.display = 'inline'; // para não pular os próximos elementos para a próxima linha (à toa)
+
+    // Cria o elemento da observação
+    let span = document.createElement('span');
+    span.className = 'text small-text';
+    span.style.display = 'flex';
+    span.style.width = "100%";
+    if (observacao)
+        span.innerText = observacao;
+
+    li.appendChild(liTexto);
 
     // Cria os botões de editar e remover (se for admin)
     if (isAdmin() && CARREGAR_EDICAO) {
@@ -199,7 +223,7 @@ function _createRowOnInstrucoesGerais(ulList, text, cardName) {
 
         // Evento para o botão de editar
         editBtn.addEventListener('click', _ => {
-            _onInstrucaoCardUpdateInstrucao(li.innerText, li, cardName);
+            _onInstrucaoCardUpdateInstrucao(liTexto.innerText, liTexto, cardName, span.innerText, span);
         });
 
         const removeBtn = document.createElement("button");
@@ -214,7 +238,7 @@ function _createRowOnInstrucoesGerais(ulList, text, cardName) {
         removeBtn.appendChild(removeImg);
 
         removeBtn.addEventListener('click', _ => {
-            _onInstrucaoCardRemoveInstrucao(cardName, ulList, text, li);
+            _onInstrucaoCardRemoveInstrucao(cardName, ulList, texto, li);
         });
 
         btnsDiv.appendChild(editBtn);
@@ -223,6 +247,8 @@ function _createRowOnInstrucoesGerais(ulList, text, cardName) {
         //li.appendChild(editBtn);
         //li.appendChild(removeBtn);
     }
+
+    li.appendChild(span);
 
     ulList.appendChild(li);
 }
@@ -237,10 +263,12 @@ function _createRowOnInstrucoesGerais(ulList, text, cardName) {
 function _onInstrucaoCardAddItemClicked(cardName, ulList) {
     if (!isAdmin()) return; // Se não for admin, não deixa
 
-    abrirModal("Adicionar Item", "", EntradasModal.TEXTO)
-        .then(async texto => {
-            if (!texto) return;
+    abrirModal("Adicionar Item", "", EntradasModal.TEXTO2, {text2Label: "Observação:"})
+        .then(async textos => {
+            if (!textos) return;
             showLoading();
+            const texto1 = textos[0];
+            const observacao = textos[1];
 
             // Obtém os itens que já tem
             const cardSnapshot = await getDataFromDatabase(GeralDatabaseRef, `instrucoes-gerais/${cardName}`);
@@ -254,20 +282,22 @@ function _onInstrucaoCardAddItemClicked(cardName, ulList) {
             if (!cardData.itens) cardData.itens = []; // Se a lista não existir, cria ela
 
             // Se já tem esse texto, avisa o usuário e não salva
-            if (cardData.itens.includes(texto)) {
-                await abrirAlerta(`A instrução "${texto}" já existe!`);
+            if (cardData.itens.includes(texto1)) {
+                await abrirAlerta(`A instrução "${texto1}" já existe!`);
                 hideLoading();
                 return;
             }
 
+            const textoData = {texto: texto1, observacao: observacao};
+
             // Adiciona o texto à lista de itens
-            cardData.itens.push(texto);
+            cardData.itens.push({texto: texto1, observacao: observacao});
 
             // Coloca a nova lista no banco de dados
             await set(refFromDatabase(GeralDatabaseRef, `instrucoes-gerais/${cardName}`), cardData);
 
             // Cria o elemento na tela
-            _createRowOnInstrucoesGerais(ulList, texto, cardName);
+            _createRowOnInstrucoesGerais(ulList, textoData, cardName);
 
             hideLoading();
         })
@@ -282,15 +312,22 @@ function _onInstrucaoCardAddItemClicked(cardName, ulList) {
  * @param textoAntigo o texto antes de atualizar
  * @param instrucaoEl o elemento da instrução (li)
  * @param cardName o nome do cartão
+ * @param observacaoAntiga o texto da observação
+ * @param observacaoEl o elemento do texto da observação
  * @private
  */
-function _onInstrucaoCardUpdateInstrucao(textoAntigo, instrucaoEl, cardName) {
+function _onInstrucaoCardUpdateInstrucao(textoAntigo, instrucaoEl, cardName, observacaoAntiga = null, observacaoEl = null) {
     if (!isAdmin()) return; // Se não for admin, não deixa
 
-    abrirModal("Alterar Item", "", EntradasModal.TEXTO, {textPlaceholder: textoAntigo})
-        .then(async texto => {
-            if (!texto) return;
-            if (texto === textoAntigo) return; // Se os textos forem iguais, não troca
+    abrirModal("Alterar Item", "", EntradasModal.TEXTO2,
+        {textPlaceholder: textoAntigo, text2Placeholder: observacaoAntiga, text2Label: "Observação:"})
+        .then(async textos => {
+            if (!textos) return;
+
+            const texto = textos[0];
+            const observacao = textos[1];
+
+            if (texto === textoAntigo && (observacaoAntiga === observacao && observacaoAntiga !== null) ) return; // Se os textos forem iguais, não troca
             showLoading();
 
             // Obtém os itens que já tem
@@ -300,18 +337,22 @@ function _onInstrucaoCardUpdateInstrucao(textoAntigo, instrucaoEl, cardName) {
                 return;
 
             const cardData = cardSnapshot.val();
+
             // Se a lista não existir, não é possível "editar" (impossível editar algo que não existe)
             if (!cardData.itens)
                 return;
+
             // Se já houver a instrução (nova), retorna
-            if (cardData.itens.includes(texto)) {
-                hideLoading();
-                await abrirAlerta("Essa instrução já existe!");
-                return;
+            if (getIndexOfInstrucao(cardData.itens, texto) !== -1) {
+                if (observacaoAntiga === observacao) { // se nem a observação mudou
+                    hideLoading();
+                    await abrirAlerta("Essa instrução já existe!");
+                    return;
+                }
             }
 
             // Obtém o índice
-            let index = cardData.itens.indexOf(textoAntigo);
+            let index = getIndexOfInstrucao(cardData.itens, textoAntigo);
 
             // Se não conseguiu achar, retorna
             if (index === -1) {
@@ -321,13 +362,19 @@ function _onInstrucaoCardUpdateInstrucao(textoAntigo, instrucaoEl, cardName) {
             }
 
             // Adiciona o texto à lista de itens
-            cardData.itens[index] = texto;
+            cardData.itens[index] = {texto: texto, observacao: observacao};
 
             // Coloca a nova lista no banco de dados
             await set(refFromDatabase(GeralDatabaseRef, `instrucoes-gerais/${cardName}`), cardData);
 
             // Atualiza o elemento na tela
-            instrucaoEl.firstChild.nodeValue = texto;
+            instrucaoEl.innerText = texto;
+            observacaoEl.innerText = observacao;
+
+            if (observacao !== null && observacaoEl)
+                observacaoEl.style.display = '';
+            else if (observacao === null && observacaoEl)
+                observacaoEl.style.display = 'none';
         })
         .finally(_ => {
             hideLoading();
@@ -372,7 +419,7 @@ function _onInstrucaoCardRemoveInstrucao(cardName, ulList, texto, instrucaoEl) {
             const cardData = cardSnapshot.val();
             if (!cardData.itens) return; // Se a lista não existir, é impossível apagar algo
 
-            const index = cardData.itens.indexOf(texto);
+            const index = getIndexOfInstrucao(cardData.itens, texto);
 
             // Se o índice for -1, não encontrou. Logo, não tem o que apagar
             if (index === -1)
@@ -394,4 +441,23 @@ function _onInstrucaoCardRemoveInstrucao(cardName, ulList, texto, instrucaoEl) {
         .finally(_ => {
             hideLoading();
         });
+}
+
+/**
+ * Retorna o índice do item cuja instrução é o texto dado
+ * @param itens lista das instruções
+ * @param texto texto que se deseja encontrar
+ * @return {number} o índice obtido; se não for encontrado, retorna -1.
+ */
+function getIndexOfInstrucao(itens, texto) {
+    let index = -1;
+    itens.forEach((data, i) => {
+        // Se for uma string, verifica diretamente
+        if (typeof data === 'string' && data === texto)
+            index = i;
+        // Se for o set, verifica o atributo do texto
+        else if (data.texto === texto)
+            index = i;
+    });
+    return index;
 }

@@ -118,8 +118,6 @@ export function loadUsersOnUserPage(shouldShowLoading = true) {
         });
 }
 
-
-
 /**
  * Cria uma linha para a seção de usuários.
  * Função criada apenas para deixar o código mais limpo.
