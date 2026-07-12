@@ -372,7 +372,7 @@ function _onInstrucaoCardUpdateInstrucao(textoAntigo, instrucaoEl, cardName, obs
             observacaoEl.innerText = observacao;
 
             if (observacao !== null && observacaoEl)
-                observacaoEl.style.display = '';
+                observacaoEl.style.display = 'flex';
             else if (observacao === null && observacaoEl)
                 observacaoEl.style.display = 'none';
         })

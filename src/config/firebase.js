@@ -3,7 +3,7 @@
  */
 
 // Versão da página //
-export const PAGE_VERSION = "a1507c1";
+export const PAGE_VERSION = "a1207";
 
 
 import { initializeApp } from "firebase/app"; // Para inicializar o app
