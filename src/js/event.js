@@ -623,7 +623,7 @@ async function unsubscribeFromEvent(eventId, unsubscribeBtn, subscribeBtn) {
     showItem(loading);
 
     // Retira o usuário do evento
-    unsubscribeUserFromEvent(eventId, uid).then(() => {
+    return unsubscribeUserFromEvent(eventId, uid).then(() => {
         abrirAlerta('Inscrição removida com sucesso!');
         unsubscribeBtn.style.display = 'none';
         subscribeBtn.style.display = 'inline-block';
