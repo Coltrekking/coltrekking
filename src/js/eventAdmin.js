@@ -851,6 +851,7 @@ export function listarInscritos(eventId, onlyUpdate = false) {
 
             if (!snapshot.exists()) {
                 inscritosList.innerHTML = "<p>Nenhum inscrito encontrado neste evento.</p>";
+                totalElem.textContent = "Total de inscritos: 0";
                 return;
             }
 

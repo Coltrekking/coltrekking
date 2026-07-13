@@ -16,7 +16,7 @@ import {
 import {abrirAlerta, abrirConfirmacao, abrirModal, EntradasModal} from "./modal";
 import {isAdmin} from "./auth";
 import {listarInscritos, removeEvent, updateEvent} from "./eventAdmin";
-import {remove, set, update} from "firebase/database";
+import {remove, set, update, serverTimestamp, runTransaction} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
 
 export const modalInscricaoEvento = document.getElementById("modalOverlayInscricaoEvento");
@@ -501,7 +501,7 @@ export async function atualizarPontuacaoUsuario(uid, eventId, adicionar) {
 
 
 // funcção para inscrever em evento
-function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn) {
+function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, alreadyRetrying = false) {
     const user = Auth.currentUser;
     if (!user) {
         abrirAlerta('Você precisa estar logado para se inscrever.').then( );
@@ -546,24 +546,62 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn) {
                 });
         })
         .then(async () => {
-            // Registra inscrição
-            const dataInscricao = Date.now();
-            await set(refFromDatabase(InscricoesDatabaseRef, `${eventId}/${uid}`), {
-                dataInscricao: dataInscricao,
-                presenca: false
+            // Registra inscrição (usando transações) //
+
+            // Referência para um contador específico deste evento
+            const contadorRef = refFromDatabase(`contadoresEventos/${eventId}`);
+
+            // Executa a transação para pegar a posição (quantas pessoas já se inscreveram)
+            const transactionResult = await runTransaction(contadorRef, (contadorAtual) => {
+                // Se o contador ainda não existir no banco (primeiro inscrito), começa no 0
+                if (contadorAtual === null) {
+                    return 1;
+                }
+                // Caso contrário, incrementa 1
+                return contadorAtual + 1;
             });
+
+            // Se a transação deu certo, adiciona a inscrição
+            if (transactionResult.committed) {
+                // Obtém a posição que o usuário ficou (apenas para mostrar ao usuário local!)
+                const posicaoGarantida = transactionResult.snapshot.val();
+
+                // Salva a inscrição
+                await set(refFromDatabase(InscricoesDatabaseRef, `${eventId}/${uid}`), {
+                    dataInscricao: serverTimestamp(), // Mantém o timestamp do servidor por segurança extra
+                    presenca: false
+                });
+
+                // Mostra na tela a posição
+                onSuccessfulSubscription(posicaoGarantida).then( );
+            } else {
+                throw new Error("Falha ao gerar posição na fila.");
+            }
+
+            // Código antigo
+            /*const dataInscricao = Date.now();
+            await set(refFromDatabase(InscricoesDatabaseRef, `${eventId}/${uid}`), {
+                dataInscricao: serverTimestamp(),
+                presenca: false
+            });*/
         })
         .then(async () => {
-            await onSuccessfulSubscription(eventId);
             //abrirAlerta('Inscrição realizada com sucesso!');
             subscribeBtn.style.display = 'none';
             unsubscribeBtn.style.display = 'inline-block';
         })
         .catch(error => {
             if (!["Dados pessoais incompletos", "Usuário bloqueado", "Inscrição antes do horário", "Pontuação insuficiente"].includes(error.message)) {
-                console.error('Erro ao inscrever:', error);
-                enviarErroParaSentry(error);
-                abrirAlerta('Erro ao realizar inscrição. Tente novamente.');
+                // Tenta se inscrever novamente se não conseguiu de primeira
+                if (!alreadyRetrying) {
+                    enviarErroParaSentry(error);
+                    subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, true);
+                // Se já tentou se inscrever duas vezes, apenas envia o erro
+                } else {
+                    console.error('Erro ao inscrever:', error);
+                    enviarErroParaSentry(error);
+                    abrirAlerta('Erro ao realizar inscrição. Tente novamente.').then();
+                }
             }
         });
 }
@@ -605,18 +643,42 @@ export async function unsubscribeUserFromEvent(eventId, uid) {
     // Retira a pontuação desse evento do usuário
     await atualizarPontuacaoUsuario(uid, eventId, false);
 
-    // Remove a inscrição do usuário
-    return remove(inscricaoRef)
-        .then(async () => {
-            // Verifica os eventos que o usuário está inscrito para checar
-            // se, em algum deles, ele não tem mais ponto suficiente para participar.
-            await checkSubscribedEventsRequiringMinimumPoints(uid);
-        })
-        .catch(error => {
-            console.error(`Erro ao remover inscrição do usuário ${user.val().nome}:`, error);
-            enviarErroParaSentry(error);
-            abrirAlerta('Erro ao cancelar inscrição. Tente novamente.');
+    try {
+        // Remove a inscrição do usuário
+        remove(inscricaoRef)
+            .then(async () => {
+                // Verifica os eventos que o usuário está inscrito para checar
+                // se, em algum deles, ele não tem mais ponto suficiente para participar.
+                await checkSubscribedEventsRequiringMinimumPoints(uid);
+            })
+            .catch(error => {
+                console.error(`Erro ao remover inscrição do usuário ${user.val().nome}:`, error);
+                enviarErroParaSentry(error);
+                abrirAlerta('Erro ao cancelar inscrição. Tente novamente.');
+            });
+
+        // Referência para um contador específico deste evento
+        const contadorRef = refFromDatabase(`contadoresEventos/${eventId}`);
+
+        // Executa a transação para retirar a posição
+        const transactionResult = await runTransaction(contadorRef, (contadorAtual) => {
+            // Se o contador ainda não existir no banco (primeiro inscrito), começa no 0
+            if (contadorAtual === null || contadorAtual <= 0) {
+                return 0;
+            }
+            // Caso contrário, incrementa 1
+            return contadorAtual - 1;
         });
+
+        // Se a transação não deu certo, adiciona a inscrição
+        if (!transactionResult.committed) {
+            console.log("Não foi possível decrementar o contador de inscrições.");
+        }
+    } catch (error) {
+        enviarErroParaSentry(error);
+        abrirAlerta('Erro ao cancelar inscrição. Tente novamente.').then( );
+        throw error; // Lança o erro para cima
+    }
 }
 
 /**
@@ -915,13 +977,12 @@ async function removeLink(eventKey, url) {
             });
     });
 }
-
 /**
  * Quando o usuário consegue se inscrever com sucesso, essa função é chamada
- * @param eventId id do evento que o usuário local acabou de se inscrever
+ * @param posicao a posição que o usuário ficou
  * @return {Promise<void>}
  */
-async function onSuccessfulSubscription(eventId) {
+async function onSuccessfulSubscription(posicao) {
     const loadingElement = document.getElementById('modalOverlayInscricaoLoading');
     loadingElement.style.display = ""; // faz aparecer o loading
 
@@ -930,41 +991,9 @@ async function onSuccessfulSubscription(eventId) {
 
     showItemAsFlex(modalInscricaoEvento); // mostra o modal o mais rápido possível (para o usuário ver que a inscrição deu certo)
 
-    let indice = -1; // posição que o usuário está. -1 se não encontrou
-
-    const uid = Auth.currentUser.uid;
-
-    // Obtém as inscrições do evento do id dado
-    const inscricoesSnap = await getDataFromDatabase(InscricoesDatabaseRef, `${eventId}`);
-
-    // Verifica a posição apenas se a snapshot existe
-    if (inscricoesSnap.exists()) {
-        const inscricoes = [];
-
-        // Obtém as inscrições e ordena elas
-        inscricoesSnap.forEach(childSnap => {
-            inscricoes.push({
-                uid: childSnap.key,
-                dataInscricao: childSnap.val().dataInscricao || 0
-            });
-        });
-
-        inscricoes.sort((a, b) => a.dataInscricao - b.dataInscricao);
-
-        // Obtém a posição
-        indice = inscricoes.findIndex((v) => {
-            return v.uid === uid; // retorna o índice da inscrição com o uid do usuário local
-        });
-    }
-
-    if (indice === -1) { // se não conseguiu achar
-        positionElement.textContent = "Não foi possível obter a sua posição.";
-    } else {
-        positionElement.textContent = (indice + 1) + "ª"; // +1, pois o indice é 0-indexed
-    }
+    positionElement.textContent = posicao + "ª";
 
     // Retira o loading e mostra os elementos
     hideItem(loadingElement);
     showItem(positionElement);
 }
-

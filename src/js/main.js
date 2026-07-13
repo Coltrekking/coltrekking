@@ -41,7 +41,7 @@ if ( !Sentry.isInitialized() && !window.location.href.includes("localhost")) {
  */
 export function identificarUserParaSentry(userUid, email, data) {
     Sentry.setUser({
-        email: email, // não tem o email por padrão na data do usuário
+        email: email, // não tem o email por padrão nas informações do usuário. Por isso, coloquei aqui manualmente
         uid: userUid,
         data: data
     });
