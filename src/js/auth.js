@@ -9,11 +9,10 @@ import {
     showItem,
     showAuth,
     showError,
-    refFromDatabase,
     getDataFromDatabase, UsersDatabaseRef, refFromUser, getDataFromUser
 } from "./utils"
 import {abrirAlerta, abrirConfirmacao} from "./modal.js";
-import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, deleteUser, reload } from "firebase/auth";
+import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, deleteUser } from "firebase/auth";
 import {child, set, update} from "firebase/database";
 import {enviarErroParaSentry, identificarUserParaSentry} from "/src/js/main";
 import {ADMIN_HOME_PAGE_ADDRESS, USER_HOME_PAGE_ADDRESS} from "/src/js/pages/pages";
@@ -178,7 +177,7 @@ export async function waitForUser(tries = 100) {
 
 /**
  * Obtém o cargo do usuário logado. Se o cargo ainda não tiver sido carregado, retorna o cargo "indefinido".
- * @return {Roles} cargo do usuário logado.
+ * @return {Roles | String} cargo do usuário logado.
  */
 export function getUserRole() {
     return currentUserRole;
@@ -240,19 +239,25 @@ export function signInWithGoogle() {
     signInWithPopup(Auth, provider)
         .then(async _result => {
             await _onSignIn();
+            hideItem(loading);
         })
         .catch(error => {
+            const errosParaLoginComRedirect = [
+                'auth/popup-blocked',
+                //'auth/cancelled-popup-request',
+                'auth/web-storage-unsupported'
+            ]
+            console.log(error.code);
             // Se der erro de popup, usa o signInWithRedirect
-            if (error.code === 'auth/popup-blocked') {
+            if (errosParaLoginComRedirect.includes(error.code)) {
                 signInWithRedirect(Auth, provider).catch(error => {
+                    hideItem(loading);
                     showError("Erro ao redirecionar e logar com o Google (isso não deveria acontecer, pois é logado no signInWithRedirect). Mensagem de erro: ", error);
                 });
             } else {
+                hideItem(loading);
                 showError("Erro ao logar com o Google: ", error);
             }
-        })
-        .finally(() => {
-            hideItem(loading);
         });
 }
 
@@ -273,129 +278,6 @@ export async function deleteAccount() {
         });
     }
 }
-
-// Função que alterna a exibição da div de gerenciamento
-export function toggleUserManager() {
-    const div = document.getElementById("userManager");
-    const btn = document.querySelector("button[onclick='toggleUserManager()']"); // botão
-    const user = Auth.currentUser;
-
-    if (!user) {
-        abrirAlerta("Você precisa estar logado para gerenciar usuários.").then( );
-        return;
-    }
-
-    // Recarrega info do usuário para garantir dados atualizados
-    reload(user).then(() => {
-        const uid = user.uid;
-
-        // Verifica role do usuário atual
-        getDataFromDatabase(refFromUser(uid), '/role')
-            .then(_snap => {
-                if (!currentUserHasAdminPower()) {
-                    abrirAlerta("Você não tem permissão para gerenciar usuários.").then( );
-                    return;
-                }
-
-                // Alterna a visibilidade da div
-                if (div.style.display === "none" || div.style.display === "") {
-                    div.style.display = "block";
-                    if (btn) btn.textContent = "Fechar"; // muda o texto
-                    loadUsers(); // carrega a lista de usuários
-                } else {
-                    div.style.display = "none";
-                    if (btn) btn.textContent = "Gerenciar Usuários"; // volta ao original
-                }
-            }
-        )
-            .catch(err => {
-                console.error("Erro ao verificar role:", err);
-                enviarErroParaSentry(err);
-
-            }
-        );
-    });
-}
-
-// Função que carrega todos os usuários do BD
-export function loadUsers() {
-    const userList = document.getElementById("userList");
-    userList.innerHTML = "<p>Carregando usuários...</p>";
-
-    const searchTerm =
-        document.getElementById("userSearch")?.value.trim().toLowerCase() || "";
-
-    getDataFromDatabase(refFromDatabase("users"))
-        .then(snapshot => {
-            userList.innerHTML = "";
-
-            const users = [];
-
-            snapshot.forEach(childSnap => {
-                const user = childSnap.val();
-                const uid = childSnap.key;
-
-                // Filtra pelo início do nome
-                if (searchTerm && !user.nome?.toLowerCase().startsWith(searchTerm)) {
-                    return;
-                }
-
-                users.push({ ...user, uid });
-            });
-
-            // 🔤 ORDENAÇÃO ALFABÉTICA PELO NOME
-            users.sort((a, b) => {
-                return (a.nome || "").localeCompare(b.nome || "");
-            });
-
-            // Renderiza os usuários
-            users.forEach(user => {
-                const userCard = document.createElement("div");
-                userCard.className = "user-card";
-
-                const row = document.createElement("div");
-                row.className = "user-row";
-
-                const nameElem = document.createElement("span");
-                nameElem.textContent = user.nome || "---";
-                row.appendChild(nameElem);
-
-                let actionBtn;
-                actionBtn = document.createElement("button");
-                // Se o usuário tiver cargo SUPER, o cargo dele não pode ser alterado.
-                /*if (getRolePower(user.role) !== getRolePower(Roles.SUPER)) {
-                    if (getRolePower(user.role) < getRolePower(Roles.ADMIN)) {
-                        actionBtn.textContent = "Promover a Admin";
-                        actionBtn.className = "primary";
-                        actionBtn.onclick = () => promoteToAdmin(user.uid);
-                    } else {
-                        actionBtn.textContent = "Remover Admin";
-                        actionBtn.className = "danger";
-                        actionBtn.onclick = () => demoteFromAdmin(user.uid);
-                    }
-                } else {
-                    actionBtn.textContent = "Sem Permissão";
-                    actionBtn.className = "unable";
-                    actionBtn.onclick = () => abrirAviso("Este usuário tem o cargo máximo e não pode ser promovido ou rebaixado.");
-                }*/
-
-                row.appendChild(actionBtn);
-                userCard.appendChild(row);
-                userList.appendChild(userCard);
-            });
-
-            // Caso não encontre nenhum usuário
-            if (users.length === 0) {
-                userList.innerHTML = "<p>Nenhum usuário encontrado.</p>";
-            }
-        })
-        .catch(err => {
-            console.error("Erro ao carregar usuários:", err);
-            enviarErroParaSentry(err);
-        });
-}
-
-
 
 /**
  * Retorna o poder hierárquico de um cargo. Se o cargo não existir, retorna -1.
@@ -604,11 +486,11 @@ onAuthStateChanged(Auth, (user) => {
 // Tratamento da autenticação **usando o signInWithRedirect**.
 // O onAuthStateChanged() também é chamado normalmente, mas o _onSignIn()
 // não é chamado no signInWithRedirect -- por isso, ele é chamado aqui.
-/*getRedirectResult(Auth)
+getRedirectResult(Auth)
     .then(credential => {
         if (credential)
             _onSignIn().then( );
     })
     .catch(error => {
         showError("Erro no login com Google usando redirect: ", error);
-    });*/
+    });

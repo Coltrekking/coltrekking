@@ -1,5 +1,5 @@
 import {Auth, Database} from "../config/firebase";
-import {child, ref, get} from "firebase/database";
+import {child, ref, get, onValue} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
 import {getUserRole} from "/src/js/auth";
 import {abrirAlerta} from "/src/js/modal";
@@ -27,8 +27,8 @@ export let editPersonalInfoInitial = { cpf: "", turma: "", curso: "" };
 export let eventForm = document.getElementById('eventForm');
 export let submitEventForm = document.getElementById('submitEventForm');
 export let editEventForm = document.getElementById('editEventForm');
-export let eventContainer = document.getElementById('eventContainer');
-export let eventCount = document.getElementById('eventCount');
+//export let eventContainer = document.getElementById('eventContainer');
+//export let eventCount = document.getElementById('eventCount');
 
 export const EventsDatabaseRef = refFromDatabase("event/");
 export const InscricoesDatabaseRef = refFromDatabase("inscricoes/");
@@ -329,4 +329,24 @@ export function showError(prefix, error) {
         abrirAlerta('Erro desconhecido: ' + error).then( );
         enviarErroParaSentry(error);
     }
+}
+
+// Variável para guardar a diferença de tempo
+let serverTimeOffset = 0;
+
+// Ouve a diferença de tempo calculada pelo Firebase
+const offsetRef = ref(Database, ".info/serverTimeOffset");
+onValue(offsetRef, (snap) => {
+    serverTimeOffset = snap.val() || 0;
+});
+
+/**
+ * Obtém o horário aproximado do servidor, sem o horário do dispositivo afetar.
+ * O horário obtido pode conter um erro de até um segundo (como o próprio
+ * site diz).
+ * @return {Number} horário real, em milissegundos.
+ */
+export function getRealTime() {
+    // Relógio do usuário + a diferença exata para o servidor
+    return Date.now() + serverTimeOffset;
 }

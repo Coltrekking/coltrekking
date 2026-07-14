@@ -11,7 +11,8 @@ import {
     loading,
     PhotosDatabaseRef,
     refFromDatabase,
-    refFromUser, showItem, showItemAsFlex, showLoading
+    refFromUser, showItem, showItemAsFlex, showLoading,
+    getRealTime
 } from "./utils";
 import {abrirAlerta, abrirConfirmacao, abrirModal, EntradasModal} from "./modal";
 import {isAdmin} from "./auth";
@@ -59,7 +60,7 @@ function checkForDifficult(userUid, pontuacaoNecessaria, eventDate, eventCard) {
     getAttributeFromUser(userUid, "pontos").then(pontuacaoUsuario => {
         // Se não tiver pontos suficientes, mostra um aviso.
         if (pontuacaoUsuario < pontuacaoNecessaria) {
-            if (eventDate && Date.now() > eventDate.getTime()) return; // se o evento já passou, não mostra aviso
+            if (eventDate && getRealTime() > eventDate.getTime()) return; // se o evento já passou, não mostra aviso
 
             // Cria elemento de aviso em vez de usar innerHTML +=
             const avisoElem = document.createElement('p');
@@ -359,7 +360,7 @@ function createSubscribeButton(evento, key, userUid, eventDate) {
     function checkSubscriptionTime() {
         if (!eventStart) return;
 
-        const now = Date.now();
+        const now = getRealTime();
 
         // se ainda não chegou a hora de inscrição
         if (now < eventStart.getTime()) {
@@ -395,7 +396,7 @@ function createSubscribeButton(evento, key, userUid, eventDate) {
 
                 // checa se a data do evento já passou
                 const eventDate = evento.data ? new Date(evento.data) : null;
-                if (eventDate && Date.now() > eventDate.getTime()) {
+                if (eventDate && getRealTime() > eventDate.getTime()) {
                     setSubscribeButtonState(unsubscribeBtn, SubscribeButtonStates.EVENTO_REALIZADO);
                 }
             }
@@ -406,7 +407,7 @@ function createSubscribeButton(evento, key, userUid, eventDate) {
         const eventStart = new Date(evento.dataInscricao);
 
         //camada extra de segurança
-        if (Date.now() < eventStart.getTime()) {
+        if (getRealTime() < eventStart.getTime()) {
             abrirAlerta("⚠️ Inscrições ainda não começaram para este evento.").then( );
             return;
         }
@@ -510,6 +511,32 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, alreadyRetrying
 
     const uid = user.uid;
 
+    // Obtém a posição do usuário na fila.
+    // Isso é *obrigatório* para a fila ficar organizada e a posição
+    // que vai aparecer ao usuário local não ser falsa
+    async function _getPosicao(tentativa= 0) {
+        // Referência para um contador específico deste evento
+        const contadorRef = refFromDatabase(`contadoresEventos/${eventId}`);
+
+        // Executa a transação para pegar a posição (quantas pessoas já se inscreveram)
+        const transactionResult = await runTransaction(contadorRef, (contadorAtual) => {
+            // Se o contador ainda não existir no banco (primeiro inscrito), começa no 0
+            if (contadorAtual === null) {
+                return 1;
+            }
+            // Caso contrário, incrementa 1
+            return contadorAtual + 1;
+        });
+
+        // Verifica se deu sucesso
+        if (transactionResult.committed) {
+            return transactionResult.snapshot.val();
+        } else {
+            // Se não deu sucesso, tenta obter a posição novamente
+            return _getPosicao(tentativa + 1);
+        }
+    }
+
     // Busca dados do usuário
     return getDataFromUser(uid)
         .then(snapshot => {
@@ -548,23 +575,10 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, alreadyRetrying
         .then(async () => {
             // Registra inscrição (usando transações) //
 
-            // Referência para um contador específico deste evento
-            const contadorRef = refFromDatabase(`contadoresEventos/${eventId}`);
-
-            // Executa a transação para pegar a posição (quantas pessoas já se inscreveram)
-            const transactionResult = await runTransaction(contadorRef, (contadorAtual) => {
-                // Se o contador ainda não existir no banco (primeiro inscrito), começa no 0
-                if (contadorAtual === null) {
-                    return 1;
-                }
-                // Caso contrário, incrementa 1
-                return contadorAtual + 1;
-            });
+            const posicaoGarantida = await _getPosicao();
 
             // Se a transação deu certo, adiciona a inscrição
-            if (transactionResult.committed) {
-                // Obtém a posição que o usuário ficou (apenas para mostrar ao usuário local!)
-                const posicaoGarantida = transactionResult.snapshot.val();
+            if (posicaoGarantida >= 0) {
 
                 // Salva a inscrição
                 await set(refFromDatabase(InscricoesDatabaseRef, `${eventId}/${uid}`), {
@@ -579,7 +593,7 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, alreadyRetrying
             }
 
             // Código antigo
-            /*const dataInscricao = Date.now();
+            /*const dataInscricao = getRealTime();
             await set(refFromDatabase(InscricoesDatabaseRef, `${eventId}/${uid}`), {
                 dataInscricao: serverTimestamp(),
                 presenca: false
@@ -930,7 +944,7 @@ function addLink(eventKey, url) {
     if (!isAdmin()) return;
 
     if (!eventKey || !url) {
-        abrirAlerta('Selecione o evento e informe o link.');
+        abrirAlerta('Selecione o evento e informe o link.').then( );
         return;
     }
 
