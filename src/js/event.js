@@ -12,7 +12,7 @@ import {
     PhotosDatabaseRef,
     refFromDatabase,
     refFromUser, showItem, showItemAsFlex, showLoading,
-    getRealTime
+    getRealTime, hideLoading
 } from "./utils";
 import {abrirAlerta, abrirConfirmacao, abrirModal, EntradasModal} from "./modal";
 import {isAdmin} from "./auth";
@@ -500,9 +500,17 @@ export async function atualizarPontuacaoUsuario(uid, eventId, adicionar) {
     }
 }
 
+// Tempo mínimo, em milissegundos, entre tentativas de inscrições (para evitar
+// que um usuário fique clicando muitas vezes no botão e dê conflito)
+const minimumTimeBetweenSubscriptionAttempts = 1500;
 
+let lastSubscriptionTime = -1;
 // funcção para inscrever em evento
 function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, alreadyRetrying = false) {
+    // Verifica se já deu o tempo mínimo desde a última tentativa
+    if ( lastSubscriptionTime >= 0 && (getRealTime() - lastSubscriptionTime) < minimumTimeBetweenSubscriptionAttempts )
+        return;
+
     const user = Auth.currentUser;
     if (!user) {
         abrirAlerta('Você precisa estar logado para se inscrever.').then( );
@@ -536,6 +544,11 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, alreadyRetrying
             return _getPosicao(tentativa + 1);
         }
     }
+
+    // Atualiza o tempo da última tentativa de inscrição
+    lastSubscriptionTime = getRealTime();
+
+    //showLoading();
 
     // Busca dados do usuário
     return getDataFromUser(uid)
@@ -587,6 +600,7 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, alreadyRetrying
                 });
 
                 // Mostra na tela a posição
+                hideLoading();
                 onSuccessfulSubscription(posicaoGarantida).then( );
             } else {
                 throw new Error("Falha ao gerar posição na fila.");
@@ -605,6 +619,7 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, alreadyRetrying
             unsubscribeBtn.style.display = 'inline-block';
         })
         .catch(error => {
+            hideLoading();
             if (!["Dados pessoais incompletos", "Usuário bloqueado", "Inscrição antes do horário", "Pontuação insuficiente"].includes(error.message)) {
                 // Tenta se inscrever novamente se não conseguiu de primeira
                 if (!alreadyRetrying) {
@@ -654,8 +669,14 @@ export async function unsubscribeUserFromEvent(eventId, uid) {
     // Se não encontrou a inscrição, retorna
     if (!inscricaoRef) return;
 
+    const inscricaoSnap = await getDataFromDatabase(inscricaoRef);
+
+    if (!inscricaoSnap.exists()) return;
+
     // Retira a pontuação desse evento do usuário
-    await atualizarPontuacaoUsuario(uid, eventId, false);
+    if (inscricaoSnap.val().presenca === true) {
+        await atualizarPontuacaoUsuario(uid, eventId, false);
+    }
 
     try {
         // Remove a inscrição do usuário

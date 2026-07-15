@@ -316,7 +316,8 @@ export function showError(prefix, error) {
     if (error.code) {
         switch (error.code) {
             case 'auth/popup-closed-by-user':
-                //abrirAlerta(prefix + ' ' + 'Pop-up fechado pelo usuário antes da operação ser concluída!');
+            case 'auth/cancelled-popup-request':
+                //abrirAlerta(prefix + ' ' + 'Pop-up fechado pelo usuário a antes da operação ser concluída!');
                 break;
             case 'auth/user-cancelled':
                 //abrirAlerta('Você cancelou sua autenticação!');

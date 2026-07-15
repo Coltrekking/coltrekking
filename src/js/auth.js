@@ -244,10 +244,9 @@ export function signInWithGoogle() {
         .catch(error => {
             const errosParaLoginComRedirect = [
                 'auth/popup-blocked',
-                //'auth/cancelled-popup-request',
+                //'auth/cancelled-popup-request', (esse é enviado em algumas vezes que a pessoa fecha o popup manualmente)
                 'auth/web-storage-unsupported'
             ]
-            console.log(error.code);
             // Se der erro de popup, usa o signInWithRedirect
             if (errosParaLoginComRedirect.includes(error.code)) {
                 signInWithRedirect(Auth, provider).catch(error => {
