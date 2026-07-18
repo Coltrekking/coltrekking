@@ -389,13 +389,22 @@ export function updateEvent(key) {
     });
 }
 
+/**
+ * Ordena a lista de inscrições dada. Cada inscrição precisa ter o atributo
+ * "dataInscricao" ou "posicao"(se não tiver "posicao", vai usar a "dataInscricao").
+ * @param {Array} inscricoes lista das inscrições
+ */
+function ordenarListaInscricoes(inscricoes) {
+    inscricoes.sort((a, b) => (a.dataInscricao || 0) - (b.dataInscricao || 0));
+}
+
 // botão para listar inscrições de um evento e exportar CSV
 export function exportarInscricoesCSV(eventId, nomeEvento = 'Evento', dataInicioEvento = null) {
     const inscricoesRef = refFromDatabase(InscricoesDatabaseRef, eventId);
     getDataFromDatabase(inscricoesRef)
         .then(snapshot => {
             if (!snapshot.exists()) {
-                abrirAlerta(`Nenhuma inscrição encontrada para "${nomeEvento}".`);
+                abrirAlerta(`Nenhuma inscrição encontrada para "${nomeEvento}".`).then( );
                 return;
             }
 
@@ -438,12 +447,12 @@ export function exportarInscricoesCSV(eventId, nomeEvento = 'Evento', dataInicio
         })
         .then(inscricoes => {
             if (!inscricoes || inscricoes.length === 0) {
-                abrirAlerta('Nenhuma inscrição válida encontrada.');
+                abrirAlerta('Nenhuma inscrição válida encontrada.').then( );
                 return;
             }
 
-            // Ordena por data de inscrição (mais antiga primeiro)
-            inscricoes.sort((a, b) => (a.dataInscricao || 0) - (b.dataInscricao || 0));
+            // Ordena a lista de inscrições
+            ordenarListaInscricoes(inscricoes);
 
             function formatarData(ts) {
                 if (!ts) return '---';
@@ -478,7 +487,7 @@ export function exportarInscricoesCSV(eventId, nomeEvento = 'Evento', dataInicio
         .catch(error => {
             console.error('Erro ao buscar inscrições:', error);
             enviarErroParaSentry(error);
-            abrirAlerta('Erro ao buscar inscrições.');
+            abrirAlerta('Erro ao buscar inscrições.').then();
         });
 }
 
@@ -488,7 +497,7 @@ export function exportarInscricoesXLSX(eventId, nomeEvento = 'Evento', dataInici
     getDataFromDatabase(inscricoesRef)
         .then(snapshot => {
             if (!snapshot.exists()) {
-                abrirAlerta(`Nenhuma inscrição encontrada para "${nomeEvento}".`);
+                abrirAlerta(`Nenhuma inscrição encontrada para "${nomeEvento}".`).then( );
                 return;
             }
 
@@ -531,12 +540,12 @@ export function exportarInscricoesXLSX(eventId, nomeEvento = 'Evento', dataInici
         })
         .then(inscricoes => {
             if (!inscricoes || inscricoes.length === 0) {
-                abrirAlerta('Nenhuma inscrição válida encontrada.');
+                abrirAlerta('Nenhuma inscrição válida encontrada.').then( );
                 return;
             }
 
-            // Ordena por data de inscrição (mais antiga primeiro)
-            inscricoes.sort((a, b) => (a.dataInscricao || 0) - (b.dataInscricao || 0));
+            // Ordena a lista de inscrições
+            ordenarListaInscricoes(inscricoes);
 
             function formatarData(ts) {
                 if (!ts) return '---';
@@ -650,12 +659,12 @@ export function exportarSelecionadosXLSX(eventId, nomeEvento = 'Evento', dataIni
         })
         .then(inscricoes => {
             if (!inscricoes || inscricoes.length === 0) {
-                abrirAlerta('Nenhuma inscrição válida encontrada.');
+                abrirAlerta('Nenhuma inscrição válida encontrada.').then( );
                 return;
             }
 
-            // Ordena por data de inscrição (mais antiga primeiro)
-            inscricoes.sort((a, b) => (a.dataInscricao || 0) - (b.dataInscricao || 0));
+            // Ordena as inscrições
+            ordenarListaInscricoes(inscricoes);
 
             // Adiciona o atributo "passou" aos primeiros 'qntdSelecionados' inscritos
             for (let i = 0; i < inscricoes.length; i++) {

@@ -523,6 +523,7 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, alreadyRetrying
     // Isso é *obrigatório* para a fila ficar organizada e a posição
     // que vai aparecer ao usuário local não ser falsa
     async function _getPosicao(tentativa= 0) {
+        if (tentativa > 5) return -1; // Se passar de 5 tentativas, retorna que não conseguiu obter a posição
         // Referência para um contador específico deste evento
         const contadorRef = refFromDatabase(`contadoresEventos/${eventId}`);
 
@@ -588,6 +589,7 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, alreadyRetrying
         .then(async () => {
             // Registra inscrição (usando transações) //
 
+            // Obtém a posição do usuário na lista
             const posicaoGarantida = await _getPosicao();
 
             // Se a transação deu certo, adiciona a inscrição
@@ -601,7 +603,7 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, alreadyRetrying
 
                 // Mostra na tela a posição
                 hideLoading();
-                onSuccessfulSubscription(posicaoGarantida).then( );
+                onSuccessfulSubscription(posicaoGarantida);
             } else {
                 throw new Error("Falha ao gerar posição na fila.");
             }
@@ -624,7 +626,7 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, alreadyRetrying
                 // Tenta se inscrever novamente se não conseguiu de primeira
                 if (!alreadyRetrying) {
                     enviarErroParaSentry(error);
-                    subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, true);
+                    subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, true).then( );
                 // Se já tentou se inscrever duas vezes, apenas envia o erro
                 } else {
                     console.error('Erro ao inscrever:', error);
@@ -695,19 +697,30 @@ export async function unsubscribeUserFromEvent(eventId, uid) {
         // Referência para um contador específico deste evento
         const contadorRef = refFromDatabase(`contadoresEventos/${eventId}`);
 
-        // Executa a transação para retirar a posição
-        const transactionResult = await runTransaction(contadorRef, (contadorAtual) => {
-            // Se o contador ainda não existir no banco (primeiro inscrito), começa no 0
-            if (contadorAtual === null || contadorAtual <= 0) {
-                return 0;
-            }
-            // Caso contrário, incrementa 1
-            return contadorAtual - 1;
-        });
+        async function _decrementarPosicao(tentativa = 0) {
+            if (tentativa > 5) return false;
+            // Executa a transação para retirar a posição
+            const transactionResult = await runTransaction(contadorRef, (contadorAtual) => {
+                // Se o contador ainda não existir no banco (primeiro inscrito), começa no 0
+                if (contadorAtual === null || contadorAtual <= 0) {
+                    return 0;
+                }
+                // Caso contrário, incrementa 1
+                return contadorAtual - 1;
+            });
+
+            if (!transactionResult.committed)
+                return _decrementarPosicao(tentativa + 1);
+            else
+                return true;
+        }
+
+        let conseguiuDecrementar = await _decrementarPosicao();
 
         // Se a transação não deu certo, adiciona a inscrição
-        if (!transactionResult.committed) {
+        if (!conseguiuDecrementar) {
             console.log("Não foi possível decrementar o contador de inscrições.");
+            enviarErroParaSentry(Error("Não foi possível decrementar o contador de inscrições."));
         }
     } catch (error) {
         enviarErroParaSentry(error);
@@ -1015,9 +1028,8 @@ async function removeLink(eventKey, url) {
 /**
  * Quando o usuário consegue se inscrever com sucesso, essa função é chamada
  * @param posicao a posição que o usuário ficou
- * @return {Promise<void>}
  */
-async function onSuccessfulSubscription(posicao) {
+function onSuccessfulSubscription(posicao) {
     const loadingElement = document.getElementById('modalOverlayInscricaoLoading');
     loadingElement.style.display = ""; // faz aparecer o loading
 
