@@ -17,7 +17,7 @@ import {
 import {abrirAlerta, abrirConfirmacao, abrirModal, EntradasModal} from "./modal";
 import {isAdmin} from "./auth";
 import {listarInscritos, removeEvent, updateEvent} from "./eventAdmin";
-import {remove, set, update, serverTimestamp, runTransaction} from "firebase/database";
+import {remove, set, update, serverTimestamp} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
 
 export const modalInscricaoEvento = document.getElementById("modalOverlayInscricaoEvento");
@@ -519,37 +519,10 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, alreadyRetrying
 
     const uid = user.uid;
 
-    // Obtém a posição do usuário na fila.
-    // Isso é *obrigatório* para a fila ficar organizada e a posição
-    // que vai aparecer ao usuário local não ser falsa
-    async function _getPosicao(tentativa= 0) {
-        if (tentativa > 5) return -1; // Se passar de 5 tentativas, retorna que não conseguiu obter a posição
-        // Referência para um contador específico deste evento
-        const contadorRef = refFromDatabase(`contadoresEventos/${eventId}`);
-
-        // Executa a transação para pegar a posição (quantas pessoas já se inscreveram)
-        const transactionResult = await runTransaction(contadorRef, (contadorAtual) => {
-            // Se o contador ainda não existir no banco (primeiro inscrito), começa no 0
-            if (contadorAtual === null) {
-                return 1;
-            }
-            // Caso contrário, incrementa 1
-            return contadorAtual + 1;
-        });
-
-        // Verifica se deu sucesso
-        if (transactionResult.committed) {
-            return transactionResult.snapshot.val();
-        } else {
-            // Se não deu sucesso, tenta obter a posição novamente
-            return _getPosicao(tentativa + 1);
-        }
-    }
-
     // Atualiza o tempo da última tentativa de inscrição
     lastSubscriptionTime = getRealTime();
 
-    //showLoading();
+    showLoading();
 
     // Busca dados do usuário
     return getDataFromUser(uid)
@@ -588,32 +561,14 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, alreadyRetrying
         })
         .then(async () => {
             // Registra inscrição (usando transações) //
-
-            // Obtém a posição do usuário na lista
-            const posicaoGarantida = await _getPosicao();
-
-            // Se a transação deu certo, adiciona a inscrição
-            if (posicaoGarantida >= 0) {
-
-                // Salva a inscrição
-                await set(refFromDatabase(InscricoesDatabaseRef, `${eventId}/${uid}`), {
-                    dataInscricao: serverTimestamp(), // Mantém o timestamp do servidor por segurança extra
-                    presenca: false
-                });
-
-                // Mostra na tela a posição
-                hideLoading();
-                onSuccessfulSubscription(posicaoGarantida).then( );
-            } else {
-                throw new Error("Falha ao gerar posição na fila.");
-            }
-
-            // Código antigo
-            /*const dataInscricao = getRealTime();
             await set(refFromDatabase(InscricoesDatabaseRef, `${eventId}/${uid}`), {
                 dataInscricao: serverTimestamp(),
                 presenca: false
-            });*/
+            });
+            // Se chegou até aqui, deu tudo certo na inscrição chama a função de sucesso.
+            // NOTA: não é usado "await" aqui pq não tem motivos de esperar (essa função tem efeito puramente visual).
+            onSuccessfulSubscription(eventId).then( );
+            hideLoading(); // Some o loading que foi colocado logo antes de
         })
         .then(async () => {
             //abrirAlerta('Inscrição realizada com sucesso!');
@@ -693,35 +648,6 @@ export async function unsubscribeUserFromEvent(eventId, uid) {
                 enviarErroParaSentry(error);
                 abrirAlerta('Erro ao cancelar inscrição. Tente novamente.');
             });
-
-        // Referência para um contador específico deste evento
-        const contadorRef = refFromDatabase(`contadoresEventos/${eventId}`);
-
-        async function _decrementarPosicao(tentativa = 0) {
-            if (tentativa > 5) return false;
-            // Executa a transação para retirar a posição
-            const transactionResult = await runTransaction(contadorRef, (contadorAtual) => {
-                // Se o contador ainda não existir no banco (primeiro inscrito), começa no 0
-                if (contadorAtual === null || contadorAtual <= 0) {
-                    return 0;
-                }
-                // Caso contrário, incrementa 1
-                return contadorAtual - 1;
-            });
-
-            if (!transactionResult.committed)
-                return _decrementarPosicao(tentativa + 1);
-            else
-                return true;
-        }
-
-        let conseguiuDecrementar = await _decrementarPosicao();
-
-        // Se a transação não deu certo, adiciona a inscrição
-        if (!conseguiuDecrementar) {
-            console.log("Não foi possível decrementar o contador de inscrições.");
-            enviarErroParaSentry(Error("Não foi possível decrementar o contador de inscrições."));
-        }
     } catch (error) {
         enviarErroParaSentry(error);
         abrirAlerta('Erro ao cancelar inscrição. Tente novamente.').then( );
@@ -1026,7 +952,8 @@ async function removeLink(eventKey, url) {
     });
 }
 
-// Tempo para esperar para obter a posição quando o usuário se inscreve em um evento
+// Tempo, em milissegundos, para esperar para obter a
+// colocação quando o usuário se inscreve em um evento.
 const delayForGettingPosition = 700;
 /**
  * Quando o usuário consegue se inscrever com sucesso, essa função é chamada
@@ -1044,7 +971,7 @@ async function onSuccessfulSubscription(eventId) {
 
     let indice = -1; // posição que o usuário está. -1 se não encontrou
 
-    const uid = Auth.currentUser.uid;
+    const uid = Auth.currentUser.uid; // uid do usuário
 
     // Espera um tempo para obter a posição (para evitar overload no servidor)
     await delay(delayForGettingPosition);
@@ -1077,27 +1004,6 @@ async function onSuccessfulSubscription(eventId) {
     } else {
         positionElement.textContent = (indice + 1) + "ª"; // +1, pois o indice é 0-indexed
     }
-
-    // Retira o loading e mostra os elementos
-    hideItem(loadingElement);
-    showItem(positionElement);
-}
-
-/**
- * Quando o usuário consegue se inscrever com sucesso e a posição do usuário
- * já é obtida, essa função é chamada
- * @param posicao a posição que o usuário ficou
- */
-function _onSuccessfulSubscriptionWithPosition(posicao) {
-    const loadingElement = document.getElementById('modalOverlayInscricaoLoading');
-    loadingElement.style.display = ""; // faz aparecer o loading
-
-    const positionElement = document.getElementById('modalOverlayInscricaoPosicao');
-    hideItem(positionElement); // esconde a posição até obter ela
-
-    showItemAsFlex(modalInscricaoEvento); // mostra o modal o mais rápido possível (para o usuário ver que a inscrição deu certo)
-
-    positionElement.textContent = posicao + "ª";
 
     // Retira o loading e mostra os elementos
     hideItem(loadingElement);
