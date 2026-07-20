@@ -284,7 +284,8 @@ function fillEventContainer(dataSnapshot) {
  */
 function fillEventListAsAdmin(dataSnapshot) {
     // Preenche o container de eventos
-    fillEventContainer(dataSnapshot)
+    // TODO: quando terminar de fazer o card de eventos, retira isso
+    //fillEventContainer(dataSnapshot);
 }
 
 

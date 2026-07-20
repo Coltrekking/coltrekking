@@ -23,5 +23,8 @@ hosting/.firebase/*.cache
 # Log files
 *.log
 
+# Cache
+*.cache
+
 # Sentry Config File
 .env.sentry-build-plugin

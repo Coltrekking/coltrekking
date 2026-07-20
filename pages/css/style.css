@@ -592,10 +592,10 @@ textarea {
     margin-top: 10px;
 }
 
-#eventContainer .event-card:hover {
+/*#eventContainer .event-card:hover {
     box-shadow: 4px 4px 20px #888;
     background-color: #edcb94;
-}
+}*/
 
 /* botões de eventos */
 #submitEventForm {
