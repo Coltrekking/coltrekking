@@ -133,6 +133,7 @@ function fillEventCard(eventContainer, item, uid, updating = false) {
         seeImagesImg.classList.remove("loading-animation"); // Retira a animação de carregamento
     });
 
+    // TODO: atualizar o cartão aqui
     // Coloca as informações do evento
     eventCard.insertAdjacentHTML('beforeend', `
                     <h3 class="event-title">${value.nome}</h3>

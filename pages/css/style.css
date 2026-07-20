@@ -129,9 +129,7 @@ h4 {
     font-size: 1vw;
 }
 
-.event-card h4 {
-    font-size: 1.3vw;
-}
+
 
 
 hr {
@@ -581,7 +579,62 @@ textarea {
     background-color: #e5d7bd;
 }
 
-#eventContainer .event-card {
+.event-card {
+    position: relative;
+
+    width: 100%;
+    min-height: 300px;
+    height: 50vh;
+
+    /* Fundo com imagem */
+    background-image: url("../../public/assets/images/card-evento-imagem-temporaria.jpg"); /* Também funciona se tirar o ../../public, mas fica xingando */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+
+    border-radius: 30px;
+    border: 7px solid #f3a338;
+
+    overflow: hidden; /* Esconde o que tá fora da imagem*/
+}
+
+.event-card-blur {
+    position: absolute;
+    inset: 0; /* Ocupa todo o espaço da foto */
+    pointer-events: none; /* Garante que o blur não atrapalhe cliques */
+
+    /* Aplica o desfoque de 8px no fundo */
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px); /* Suporte para Safari */
+
+    /* Cria o gradiente: começa invisível (no-blur) e termina visível (com blur) */
+    mask-image: linear-gradient(to bottom, transparent 25%, black 60%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 25%, black 60%);
+    z-index: 1; /* Fica no meio */
+
+}
+
+.event-card-content {
+    position: absolute;
+    bottom: 0;
+
+    margin-left: 2px;
+
+    z-index: 2;
+}
+
+.event-title {
+    text-align: left;
+
+    width: 100%;
+    font-size: 4vw;
+}
+
+.event-card h4 {
+    font-size: 1.3vw;
+}
+
+/*#eventContainer .event-card {
     border: 1px solid #ccc;
     padding: 15px;
     margin-bottom: 15px;
@@ -592,7 +645,7 @@ textarea {
     margin-top: 10px;
 }
 
-/*#eventContainer .event-card:hover {
+#eventContainer .event-card:hover {
     box-shadow: 4px 4px 20px #888;
     background-color: #edcb94;
 }*/
@@ -826,12 +879,7 @@ textarea {
 
 
 
-.event-title {
-    text-align: center;
 
-    width: 80%;
-    margin-left: 10%; /* para ficar centralizado */
-}
 
 /* == Modal == */
 
