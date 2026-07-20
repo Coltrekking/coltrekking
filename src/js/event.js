@@ -12,7 +12,7 @@ import {
     PhotosDatabaseRef,
     refFromDatabase,
     refFromUser, showItem, showItemAsFlex, showLoading,
-    getRealTime, hideLoading
+    getRealTime, hideLoading, delay
 } from "./utils";
 import {abrirAlerta, abrirConfirmacao, abrirModal, EntradasModal} from "./modal";
 import {isAdmin} from "./auth";
@@ -603,7 +603,7 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, alreadyRetrying
 
                 // Mostra na tela a posição
                 hideLoading();
-                onSuccessfulSubscription(posicaoGarantida);
+                onSuccessfulSubscription(posicaoGarantida).then( );
             } else {
                 throw new Error("Falha ao gerar posição na fila.");
             }
@@ -1025,11 +1025,70 @@ async function removeLink(eventKey, url) {
             });
     });
 }
+
+// Tempo para esperar para obter a posição quando o usuário se inscreve em um evento
+const delayForGettingPosition = 700;
 /**
  * Quando o usuário consegue se inscrever com sucesso, essa função é chamada
+ * @param eventId id do evento que o usuário local acabou de se inscrever
+ * @return {Promise<void>}
+ */
+async function onSuccessfulSubscription(eventId) {
+    const loadingElement = document.getElementById('modalOverlayInscricaoLoading');
+    loadingElement.style.display = ""; // faz aparecer o loading
+
+    const positionElement = document.getElementById('modalOverlayInscricaoPosicao');
+    hideItem(positionElement); // esconde a posição até obter ela
+
+    showItemAsFlex(modalInscricaoEvento); // mostra o modal o mais rápido possível (para o usuário ver que a inscrição deu certo)
+
+    let indice = -1; // posição que o usuário está. -1 se não encontrou
+
+    const uid = Auth.currentUser.uid;
+
+    // Espera um tempo para obter a posição (para evitar overload no servidor)
+    await delay(delayForGettingPosition);
+
+    // Obtém as inscrições do evento do id dado
+    const inscricoesSnap = await getDataFromDatabase(InscricoesDatabaseRef, `${eventId}`);
+
+    // Verifica a posição apenas se a snapshot existe
+    if (inscricoesSnap.exists()) {
+        const inscricoes = [];
+
+        // Obtém as inscrições e ordena elas
+        inscricoesSnap.forEach(childSnap => {
+            inscricoes.push({
+                uid: childSnap.key,
+                dataInscricao: childSnap.val().dataInscricao || 0
+            });
+        });
+
+        inscricoes.sort((a, b) => a.dataInscricao - b.dataInscricao);
+
+        // Obtém a posição
+        indice = inscricoes.findIndex((v) => {
+            return v.uid === uid; // retorna o índice da inscrição com o uid do usuário local
+        });
+    }
+
+    if (indice === -1) { // se não conseguiu achar
+        positionElement.textContent = "Não foi possível obter a sua posição.";
+    } else {
+        positionElement.textContent = (indice + 1) + "ª"; // +1, pois o indice é 0-indexed
+    }
+
+    // Retira o loading e mostra os elementos
+    hideItem(loadingElement);
+    showItem(positionElement);
+}
+
+/**
+ * Quando o usuário consegue se inscrever com sucesso e a posição do usuário
+ * já é obtida, essa função é chamada
  * @param posicao a posição que o usuário ficou
  */
-function onSuccessfulSubscription(posicao) {
+function _onSuccessfulSubscriptionWithPosition(posicao) {
     const loadingElement = document.getElementById('modalOverlayInscricaoLoading');
     loadingElement.style.display = ""; // faz aparecer o loading
 

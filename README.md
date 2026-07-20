@@ -121,15 +121,14 @@ Minha história com o Coltrekking começou logo no primeiro ano de colégio. O q
 ---
 ### Sobre o 2º desenvolvedor
 
-Eae! Meu nome é André, também chamado de Dedé _(principalmente)_ por causa do meu tamanho =D
+Eae! Meu nome é André, mas muitos me chamam de Dedé _principalmente_ por causa do meu <span style="font-size: 9px;">tamanho</span> =D
 
 Sou formado em Desenvolvimento de Sistemas pelo Colégio Técnico da UFMG e este projeto foi
 o meu estágio!
 
-Sempre fui bem elétrico, principalmente quando se trata de correr! Quando vi o Coltrekking, 
-senti um grande incentivo de fazer trilhas e me aventurar pela natureza. Para me incentivar mais,
-optei por manter o projeto do site e, assim, conseguir me convencer de uma vez por todas _(e minha
-família)_ para eu ir às trilhas!
+Quando vi o Coltrekking, achei muito maneiro e, como eu sempre gostei de andar e correr (sempre fui muito elétrico),
+pensei que seria uma boa eu ir a uma trilha para ver como é (e eu gostei muito)! Desde a minha primeira trilha,
+tentei ao máximo não perder nenhuma outra!
 
 ---
 

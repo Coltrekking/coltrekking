@@ -36,6 +36,9 @@ export const PhotosDatabaseRef = refFromDatabase("photos/");
 export const UsersDatabaseRef = refFromDatabase("users/");
 export const GeralDatabaseRef = refFromDatabase("geral/");
 
+// Função estática para gerar um delay
+export const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 // Remove elementos da aba
 export function hideItem(item) {
     if (item && item.style) {
