@@ -11,6 +11,7 @@ local/
 
 # Módulos
 node_modules/
+package-lock.json
 
 # Cache
 hosting/.firebase/*.cache
