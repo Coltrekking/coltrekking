@@ -586,16 +586,22 @@ textarea {
 }
 
 .event-card {
-    background-color: #15140E;
     position: relative;
 
     width: 100%;
     min-height: 300px;
-    height: 80vh;
+    height: 40vh;
 
+    /* Fundo com imagem */
+    background-image: url("../../public/assets/images/card-evento-imagem-temporaria.jpg"); /* Também funciona se tirar o ../../public, mas fica xingando */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
     border-radius: 40px;
 
     box-shadow: 0 4px 10px 10px #9b8d7577;
+
+    border: 4px solid #15140E;
 
     overflow: hidden; /* Esconde o que tá fora da imagem */
 
@@ -604,19 +610,6 @@ textarea {
     text-shadow: 0 1px 3px rgba(0,0,0,0.7);
 
     transition: all ease-in 0.5s;
-}
-
-#eventphoto {
-    width: 100%;
-    min-height: 300px;
-    height: 50vh;
-    /* Fundo com imagem */
-    background-image: url("../../public/assets/images/card-evento-imagem-temporaria.jpg"); /* Também funciona se tirar o ../../public, mas fica xingando */
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
-    border-radius: 40px;
-
 }
 
 .event-card .text {
@@ -705,8 +698,8 @@ textarea {
     -webkit-backdrop-filter: blur(3px); /* Suporte para Safari */
 
     /* Cria o gradiente: começa invisível (no-blur) e termina visível (com blur) */
-    mask-image: linear-gradient(to bottom, transparent 35%, black 70%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 35%, black 70%);
+    mask-image: linear-gradient(to bottom, transparent 25%, black 60%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 25%, black 60%);
 
     z-index: 1; /* Fica no meio */
 }
