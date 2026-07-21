@@ -579,27 +579,44 @@ textarea {
     background-color: #e5d7bd;
 }
 
+#eventContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
 .event-card {
+    background-color: #15140E;
     position: relative;
 
     width: 100%;
     min-height: 300px;
-    height: 50vh;
-
-    /* Fundo com imagem */
-    background-image: url("../../public/assets/images/card-evento-imagem-temporaria.jpg"); /* Também funciona se tirar o ../../public, mas fica xingando */
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
+    height: 80vh;
 
     border-radius: 40px;
-    border: 7px solid #f6f4f0;
+
+    box-shadow: 0 4px 10px 10px #9b8d7577;
 
     overflow: hidden; /* Esconde o que tá fora da imagem */
 
     /* Sombra no texto */
     font-family: 'Google Sans', sans-serif;
     text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+
+    transition: all ease-in 0.5s;
+}
+
+#eventphoto {
+    width: 100%;
+    min-height: 300px;
+    height: 50vh;
+    /* Fundo com imagem */
+    background-image: url("../../public/assets/images/card-evento-imagem-temporaria.jpg"); /* Também funciona se tirar o ../../public, mas fica xingando */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    border-radius: 40px;
+
 }
 
 .event-card .text {
@@ -655,17 +672,24 @@ textarea {
     font-family: 'Google Sans', sans-serif;
     font-size: max(13px, 1.3vw);
     font-weight: bold;
+
+    background-color: #f29c2c22;
+    outline: 2px solid #f3c79d;
+    border-radius: 100px;
+
+    transition: all ease-in 0.03s;
+    box-sizing: border-box;
 }
 
 .event-btn:hover {
-    background-color: #ed9728;
+    outline: 3px solid #f29c2c;
     opacity: 1;
 }
 
 .event-buttons {
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
 
     width: 100%;
@@ -683,8 +707,8 @@ textarea {
     /* Cria o gradiente: começa invisível (no-blur) e termina visível (com blur) */
     mask-image: linear-gradient(to bottom, transparent 35%, black 70%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 35%, black 70%);
-    z-index: 1; /* Fica no meio */
 
+    z-index: 1; /* Fica no meio */
 }
 
 .event-card-content {
@@ -1213,9 +1237,11 @@ h1, h2, h3, h4, .event-card h3, .event-card h2 {
         display: flex;
         flex-direction: column;
         justify-content: flex-end;
+        padding-bottom: 5px;
     }
 
     .event-title {
+        min-width: 80%;
         width: 90% !important;
         box-sizing: border-box !important;
         text-align: left !important; /* Centraliza o texto perfeitamente */
