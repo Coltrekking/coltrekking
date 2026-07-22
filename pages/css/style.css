@@ -733,6 +733,76 @@ textarea {
     color: antiquewhite;
 }
 
+
+.event-modal-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 5; /* garante que fique por cima do site principal */
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.event-modal-content {
+    width: 80%;
+    min-width: 400px;
+    max-width: 80vw;
+
+    height: auto;
+    min-height: 300px;
+    max-height: 85vh;
+
+    border-radius: 8px;
+    background-color: #e5d7bd;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+
+    text-align: center;
+    overflow-y: auto; /* Para aparecer a barra de scroll caso haja overflow */
+}
+
+.event-modal-image {
+    width: auto;
+    height: 200px;
+
+    background-image: url("../../public/assets/images/card-evento-imagem-temporaria.jpg");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+
+    mask-image: linear-gradient(to bottom, black 40%, transparent 90%);
+}
+
+.event-modal-data {
+    padding-left: 10px;
+}
+
+.event-modal-title {
+    text-align: left;
+
+    width: 95%;
+    font-size: max(25px, 2.9vw);
+
+    font-family: 'Google Sans', sans-serif;
+    color: black;
+}
+
+.event-modal-description {
+    text-align: left;
+
+    width: 90%;
+    font-size: max(10px, 1.4vw);
+
+    font-family: 'Google Sans', sans-serif;
+    color: #333333;
+}
+
+
+
 /* botões de eventos */
 #submitEventForm {
     margin: 1vw auto;
@@ -890,7 +960,7 @@ textarea {
 
 .alerta-card {
     border-left: 5px solid #f44336;
-}  
+}
 
 .alerta-card h4 {
     color: #f44336 !important;
