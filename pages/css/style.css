@@ -666,16 +666,17 @@ textarea {
     font-size: max(13px, 1.3vw);
     font-weight: bold;
 
-    background-color: #f29c2c22;
+    background-color: #f29c2c99;
     outline: 2px solid #f3c79d;
     border-radius: 100px;
 
-    transition: all ease-in 0.03s;
+    transition: all ease-in 0.04s;
     box-sizing: border-box;
 }
 
 .event-btn:hover {
-    outline: 3px solid #f29c2c;
+    outline-width: 3px;
+    background-color: #f29c2c;
     opacity: 1;
 }
 
@@ -698,8 +699,8 @@ textarea {
     -webkit-backdrop-filter: blur(3px); /* Suporte para Safari */
 
     /* Cria o gradiente: começa invisível (no-blur) e termina visível (com blur) */
-    mask-image: linear-gradient(to bottom, transparent 25%, black 60%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 25%, black 60%);
+    mask-image: linear-gradient(to bottom, transparent 20%, black 65%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 20%, black 65%);
 
     z-index: 1; /* Fica no meio */
 }
