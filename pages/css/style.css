@@ -779,6 +779,7 @@ textarea {
 
 .event-modal-data {
     padding-left: 10px;
+    font-family: 'Google Sans', sans-serif;
 }
 
 .event-modal-title {
@@ -799,6 +800,37 @@ textarea {
 
     font-family: 'Google Sans', sans-serif;
     color: #333333;
+}
+
+.event-modal-data .text {
+    font-family: 'Google Sans', sans-serif;
+    font-weight: bold;
+
+    color: black;
+}
+
+.event-modal-text-icon {
+    display: flex;
+    align-items: center;
+    gap: 0.4vw;
+    margin-top: 5px;
+}
+
+.event-modal-line {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+
+    gap: min(3vw, 30px);
+
+    width: 100%;
+    height: max(4vh, 20px);
+
+    text-align: left;
+}
+
+.invert-color {
+    filter: invert();
 }
 
 
