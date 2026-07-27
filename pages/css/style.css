@@ -805,7 +805,7 @@ textarea {
     text-align: left;
 
     width: 95%;
-    font-size: max(22px, 2.6vw);
+    font-size: max(30px, 2.6vw);
 
     font-family: 'Google Sans', sans-serif;
     color: black;
@@ -816,7 +816,7 @@ textarea {
 
     width: 90%;
     padding: 0 10px;
-    font-size: max(12px, 1.2vw);
+    font-size: max(18px, 1.2vw);
 
     font-family: 'Google Sans', sans-serif;
     color: #333333;
@@ -840,7 +840,11 @@ textarea {
 
     border-left: 5px solid #444;
     border-radius: 5px;
-    min-width: 200px;
+    min-width: 180px;
+}
+
+.min-width-240 {
+    min-width: 240px;
 }
 
 .event-modal-line {
@@ -873,7 +877,7 @@ textarea {
 .event-modal-info-value {
     margin-left: 8px;
     color: #444;
-    font-size: max(11px, 1.1vw);
+    font-size: max(10px, 1vw);
 }
 
 .event-modal-data hr {
