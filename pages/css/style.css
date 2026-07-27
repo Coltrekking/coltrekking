@@ -785,14 +785,20 @@ textarea {
 .event-modal-data {
     display: flex;
     flex-direction: column;
-    padding: 0 10px;
-    font-family: 'Google Sans', sans-serif;
+
     width: 90%;
     height: auto;
+
+    padding: 0 10px;
+    margin-top: 10px;
+
+    gap: 4px;
+
+    font-family: 'Google Sans', sans-serif;
 }
 
-.event-modal-left, .event-modal-right {
-    flex: 1;
+.event-modal-data p {
+    font-size: max(20px, 1.5vw);
 }
 
 .event-modal-title {
