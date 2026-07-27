@@ -609,7 +609,7 @@ textarea {
     font-family: 'Google Sans', sans-serif;
     text-shadow: 0 1px 3px rgba(0,0,0,0.7);
 
-    transition: all ease-in 0.5s;
+    /*transition: all ease-in 0.5s;*/
 }
 
 .event-card .text {
@@ -782,6 +782,14 @@ textarea {
     display: block;
 }
 
+.event-modal-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
 .event-modal-data {
     display: flex;
     flex-direction: column;
@@ -882,6 +890,7 @@ textarea {
 
 .event-modal-data hr {
     height: 2px;
+    width: 100%;
 }
 
 .invert-color {
