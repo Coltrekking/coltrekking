@@ -777,9 +777,22 @@ textarea {
     mask-image: linear-gradient(to bottom, black 40%, transparent 90%);
 }
 
+.event-modal-icon {
+    height: max(15px, 1.5vw);
+    display: block;
+}
+
 .event-modal-data {
+    display: flex;
+    flex-direction: row;
     padding: 0 10px;
     font-family: 'Google Sans', sans-serif;
+    width: 90%;
+    height: auto;
+}
+
+.event-modal-left, .event-modal-right {
+    flex: 1;
 }
 
 .event-modal-title {
@@ -796,6 +809,7 @@ textarea {
     text-align: left;
 
     width: 90%;
+    padding: 0 10px;
     font-size: max(10px, 1.4vw);
 
     font-family: 'Google Sans', sans-serif;
@@ -811,24 +825,49 @@ textarea {
 
 .event-modal-text-icon {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
     gap: 0.4vw;
+
     margin-top: 5px;
+    margin-bottom: 10px;
+    padding-left: 10px;
+
+    border-left: 5px solid #444;
+    border-radius: 5px;
 }
 
 .event-modal-line {
     display: flex;
-    justify-content: sp; /* space-between */
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start; /* space-between */
     align-items: center;
 
-    gap: min(3vw, 30px);
+    gap: min(2.2vh, 20px);
 
     width: 100%;
-    height: max(4vh, 20px);
+    height: auto;
 
     text-align: left;
 
     /*padding-right: 4%;*/
+}
+
+.event-modal-info-title {
+    display: flex;
+    flex-direction: row;
+    gap: 3px;
+
+    width: 100%;
+
+    font-size: max(12px, 1.2vw);
+}
+
+.event-modal-info-value {
+    margin-left: 8px;
+    color: #444;
+    font-size: max(11px, 1.1vw);
 }
 
 .event-modal-data hr {
