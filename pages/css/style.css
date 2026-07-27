@@ -901,7 +901,12 @@ textarea {
 
     position: absolute;
     top: 5px;
-    right: 5px;
+    right: 0.5vw;
+}
+
+.event-modal-top-button {
+    width: 40px !important;
+    height: auto !important;
 }
 
 
