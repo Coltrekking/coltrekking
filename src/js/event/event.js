@@ -1,6 +1,6 @@
 // função para preencher a lista de eventos
-import {Auth} from "../config/firebase";
-import {formattedDate} from "./date"
+import {Auth} from "../../config/firebase";
+import {formattedDate} from "../date"
 import {
     EventsDatabaseRef,
     getAttributeFromUser,
@@ -13,9 +13,9 @@ import {
     refFromDatabase,
     refFromUser, showItem, showItemAsFlex, showLoading,
     getRealTime, hideLoading, delay
-} from "./utils";
-import {abrirAlerta, abrirConfirmacao, abrirModal, EntradasModal} from "./modal";
-import {isAdmin} from "./auth";
+} from "../utils";
+import {abrirAlerta, abrirConfirmacao, abrirModal, EntradasModal} from "../modal";
+import {isAdmin} from "../auth";
 import {listarInscritos, removeEvent, updateEvent} from "./eventAdmin";
 import {remove, set, update, serverTimestamp} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";

@@ -15,7 +15,7 @@ import {
 } from "../../utils";
 import {abrirAlerta, abrirAviso} from "../../modal.js";
 import {openTab} from "../../tabs";
-import {fillEventList, modalInscricaoEvento} from "../../event";
+import {fillEventList, modalInscricaoEvento} from "../../event/event";
 import {onValue, update} from "firebase/database";
 import {onAuthStateChanged} from "firebase/auth";
 import {enviarErroParaSentry} from "/src/js/main";

@@ -4,7 +4,7 @@
  */
 import './homeMutual'
 import {isAdmin} from "../../auth";
-import "../../event"
+import "../../event/event"
 import {loadCommonEvents} from "./homeMutual";
 
 /**

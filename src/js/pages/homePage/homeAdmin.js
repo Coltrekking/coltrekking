@@ -23,7 +23,7 @@ import {
     criarEvento, editarPontuacaoNecessariaEventoAtual,
     fecharListaInscritos,
     getPontuacaoNecessariaEventoAtual, isUserEditingEvent, onExportarInscritosBtnClicked, onObterSelecionadosBtnClicked
-} from "../../eventAdmin";
+} from "../../event/eventAdmin";
 
 const editEventNeededPointsBtn = document.getElementById("eventoAlterarPontuacaoNecessaria");
 const modalInscritosFecharBtn = document.getElementById("fecharMenuInscritos");

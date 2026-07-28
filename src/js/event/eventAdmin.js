@@ -12,15 +12,15 @@ import {
     showItem,
     submitEventForm,
     UsersDatabaseRef
-} from "./utils"
-import {validarOrdemDatas} from "./date";
+} from "../utils"
+import {validarOrdemDatas} from "../date";
 import {get, push, remove, set, update} from 'firebase/database'
 import {
     atualizarPontuacaoUsuario,
     calcularPontuacaoDoEvento, checkSubscribedEventsRequiringMinimumPoints,
     getPontuacaoMinimaParaEvento,
     unsubscribeUserFromEvent
-} from "/src/js/event";
+} from "/src/js/event/event";
 import {enviarErroParaSentry} from "/src/js/main";
 import {Auth} from "/src/config/firebase";
 import * as XLSX from 'xlsx-js-style';

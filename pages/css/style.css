@@ -793,6 +793,31 @@ textarea {
     gap: 10px;
 }
 
+.event-modal-btn {
+    min-width: 150px !important;
+    min-height: max(30px, 2.5vw);
+
+    cursor: pointer;
+    display: inline-block;
+
+    font-family: 'Google Sans', sans-serif;
+    font-size: max(13px, 1.3vw);
+    font-weight: bold;
+
+    background-color: #f29c2cDD;
+    outline: 2px solid #f3c79d;
+    border-radius: 100px;
+
+    transition: all ease-in 0.1s;
+    box-sizing: border-box;
+}
+
+.event-modal-btn:hover {
+    outline-width: 3px;
+    outline-color: #ec9626;
+    opacity: 1;
+}
+
 .event-modal-data {
     display: flex;
     flex-direction: column;
