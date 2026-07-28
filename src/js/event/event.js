@@ -19,6 +19,7 @@ import {isAdmin} from "../auth";
 import {listarInscritos, removeEvent, updateEvent} from "./eventAdmin";
 import {remove, set, update, serverTimestamp} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
+import {createEventCard} from "./eventUI";
 
 export const modalInscricaoEvento = document.getElementById("modalOverlayInscricaoEvento");
 
@@ -274,7 +275,8 @@ function fillEventContainer(dataSnapshot) {
 
     // Preenche os cards dos eventos
     eventosArray.forEach(item => {
-        fillEventCard(eventContainer, item, uid);
+        //fillEventCard(eventContainer, item, uid);
+        createEventCard(item.value, eventContainer);
     });
 }
 
@@ -286,7 +288,7 @@ function fillEventContainer(dataSnapshot) {
 function fillEventListAsAdmin(dataSnapshot) {
     // Preenche o container de eventos
     // TODO: quando terminar de fazer o card de eventos, retira isso
-    //fillEventContainer(dataSnapshot);
+    fillEventContainer(dataSnapshot);
 }
 
 
