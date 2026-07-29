@@ -1,103 +1,17 @@
 /**
- * Código que lida com a interface dos eventos (dos cards dos eventos)
+ * Código que lida com a interface visual dos eventos (dos cards dos eventos)
  * @since 2026-07
  */
 import {formattedDate} from "../date";
 
-const EventModalEl = document.getElementById("eventModal"); // TODO: colocar id
-const EventListEl = document.getElementById("listEvents");
-
-// Id do Evento atualmente selecionado
-let currentSelectedEvent = null;
-
-// Retorna o id dp elemento com o nome e o id dado
-const getDynamicElementId = (name, id) => `event-${name}-${id}`;
-
-/**
- * Retorna uma string com o elemento do cartão do evento dado.
- * @param {String} id id do evento
- * @param {Object} eventData dados do evento
- * @return {string} elemento do cartão do evento
- */
-function getFormattedEventCard(id, eventData) {
-    return `
-    <div class="event-card-blur"></div>
-
-    <div class="event-card-content">
-        <h3 class="event-title">${eventData.nome || '---' }</h3>
-        <div class="event-info">
-            <div class="text event-info-text-icon">
-                <img src="/assets/icons/calendar-icon.svg" class="event-info-icon" alt="Ícone de calendário">
-                <span>${eventData.data ? formattedDate(eventData.data) : '---'}</span>
-            </div>
-            <div class="text event-info-text-icon">
-                <img src="/assets/icons/mountain-icon.svg" class="event-info-icon" alt="Ícone de montanha">
-                <span>${eventData.dificuldade || '---'}</span>
-            </div>
-            <div class="text event-info-text-icon">
-                <img src="/assets/icons/trail-icon.svg" class="event-info-icon" alt="Ícone de uma pessoa fazendo uma caminhada">
-                <span>${(eventData.distancia || '---') + ' km'}</span>
-            </div>
-        </div>
-        <div class="event-buttons">
-            <button id="${getDynamicElementId('inscrever-btn', id)}" class="primary event-btn">Inscrever-se</button>
-            <button id="${getDynamicElementId('cancelar-inscricao-btn', id)}" class="danger event-btn" style="display: none;">Cancelar inscrição</button>
-            <button id="${getDynamicElementId('detalhes-btn', id)}" class="primary event-btn">Ver Detalhes</button>
-        </div>
-    </div>
-    `
-}
-
-/**
- * Preenche o modal de evento com os dados do evento selecionado
- * @param {Object} eventSnapshot dados do evento
- */
-export function fillEventModal(eventSnapshot) {
-    const eventData = eventSnapshot.value;
-
-}
-
-/**
- * Cria um card de evento na lista dos eventos com o evento dado
- * @param {Object} eventSnapshot dados do evento
- * @param {Object} listaEventos
- */
-export function createEventCard(eventSnapshot, listaEventos) {
-    const eventId = eventSnapshot.id;
-    const eventData = eventSnapshot.value;
-
-    // Obtém o elemento (por string)
-    const elementoString = getFormattedEventCard(eventId, eventData);
-
-    // Cria o elemento (transforma de string para um elemento em si)
-    const elemento = document.createElement('div');
-    elemento.classList.add('event-card');
-    elemento.insertAdjacentHTML('beforeend', elementoString);
-
-    // Adiciona o elemento na lista
-    // NOTA: é importante fazer isso antes de tentar obter os botões!
-    listaEventos.appendChild(elemento);
-
-    // Trata os eventos
-    const inscreverBtn = document.getElementById(getDynamicElementId('inscrever-btn', eventId));
-    const detalhesBtn = document.getElementById(getDynamicElementId('detalhes-btn', eventId));
-
-    inscreverBtn.addEventListener('click', () => {
-
-    });
-    detalhesBtn.addEventListener('click', () => {
-       fillEventModal(eventSnapshot);
-
-    });
-}
-
 // Adiciona o modal no site (se não houver)
+// Para evitar bugs, essa é a primeira coisa a ser feita
 if (!document.getElementById("event-modal")) {
     const modalHTML = `
         <div id="event-modal" class="event-modal-background" style="display: none">
             <div class="event-modal-content">
                 <!-- Imagem do Evento -->
-                <div class="event-modal-image"></div>
+                <div class="event-modal-image" id="event-modal-image"></div>
 
                 <!-- Botões do topo -->
                 <div class="top-buttons">
@@ -106,8 +20,8 @@ if (!document.getElementById("event-modal")) {
                     </button>
                 </div>
 
-                <h3 class="event-modal-title">Travessia: Diagonal Total (DT) &gt; Lapinha da Serra</h3>
-                <p class="event-modal-description">tem 8 cachoeiras</p>
+                <h3 class="event-modal-title" id="event-modal-title">Titulo</h3>
+                <p class="event-modal-description" id="event-modal-description">Descrição</p>
 
                 <div class="event-modal-data">
                     <!-- 1 -->
@@ -203,3 +117,128 @@ if (!document.getElementById("event-modal")) {
     // Injeta o modal
     document.body.insertAdjacentHTML('beforeend', modalHTML);
 }
+
+// Elementos do event modal
+const EventModalEl = document.getElementById("event-modal");
+const EventModalImgEl = document.getElementById("event-modal-image");
+const EventModalTitleEl = document.getElementById("event-modal-title");
+const EventModalDescriptionEl = document.getElementById("event-modal-description");
+const EventModalInscricaoEl = document.getElementById("event-modal-inscricao");
+const EventModalEventoEl = document.getElementById("event-modal-evento");
+const EventModalPontoEncontroEl = document.getElementById("event-modal-ponto-encontro");
+const EventModalPrelecaoEl = document.getElementById("event-modal-prelecao");
+const EventModalDificuldadeEl = document.getElementById("event-modal-dificuldade");
+const EventModalDistanciaEl = document.getElementById("event-modal-distancia");
+const EventModalSubidaEl = document.getElementById("event-modal-subida");
+const EventModalDescidaEl = document.getElementById("event-modal-descida");
+const EventModalTrajetoEl = document.getElementById("event-modal-trajeto");
+const EventModalInscreverBtnEl = document.getElementById("event-modal-inscrever-btn");
+const EventModalCancelarInscricaoBtnEl = document.getElementById("event-modal-cancelar-inscricao-btn");
+
+// Id do Evento atualmente selecionado
+let currentSelectedEvent = null;
+
+// Retorna o id dp elemento com o nome e o id dado
+const getDynamicElementId = (name, id) => `event-${name}-${id}`;
+
+/**
+ * Retorna uma string com o elemento do cartão do evento dado.
+ * @param {String} id id do evento
+ * @param {Object} eventData dados do evento
+ * @return {string} elemento do cartão do evento
+ */
+function getFormattedEventCard(id, eventData) {
+    return `
+    <div class="event-card-blur"></div>
+
+    <div class="event-card-content">
+        <h3 class="event-title">${eventData.nome || '---' }</h3>
+        <div class="event-info">
+            <div class="text event-info-text-icon">
+                <img src="/assets/icons/calendar-icon.svg" class="event-info-icon" alt="Ícone de calendário">
+                <span>${eventData.data ? formattedDate(eventData.data) : '---'}</span>
+            </div>
+            <div class="text event-info-text-icon">
+                <img src="/assets/icons/mountain-icon.svg" class="event-info-icon" alt="Ícone de montanha">
+                <span>${eventData.dificuldade || '---'}</span>
+            </div>
+            <div class="text event-info-text-icon">
+                <img src="/assets/icons/trail-icon.svg" class="event-info-icon" alt="Ícone de uma pessoa fazendo uma caminhada">
+                <span>${(eventData.distancia || '---') + ' km'}</span>
+            </div>
+        </div>
+        <div class="event-buttons">
+            <button id="${getDynamicElementId('inscrever-btn', id)}" class="primary event-btn">Inscrever-se</button>
+            <button id="${getDynamicElementId('cancelar-inscricao-btn', id)}" class="danger event-btn" style="display: none;">Cancelar inscrição</button>
+            <button id="${getDynamicElementId('detalhes-btn', id)}" class="primary event-btn">Ver Detalhes</button>
+        </div>
+    </div>
+    `
+}
+
+/**
+ * Preenche o modal de evento com os dados do evento selecionado
+ * @param {String} eventId id do evento
+ * @param {Object} eventData dados do evento
+ */
+export function fillEventModal(eventId, eventData) {
+    currentSelectedEvent = eventId;
+
+    console.log("TODO: adicionar imagem"); // TODO: adicionar imagem
+    EventModalImgEl.style.backgroundImage = `url(${eventData.imagem || '/assets/images/default-event-image.jpg'})`;
+
+    EventModalTitleEl.innerText = eventData.nome || '---';
+    EventModalDescriptionEl.innerText = eventData.descricao || '---';
+    EventModalInscricaoEl.innerText = eventData.dataInscricao ? formattedDate(eventData.dataInscricao) : '---';
+    EventModalEventoEl.innerText = eventData.data ? formattedDate(eventData.data) : '---';
+    EventModalPontoEncontroEl.innerText = eventData.localEncontro || '---';
+    EventModalPrelecaoEl.innerText = eventData.dataPrelecao && eventData.localPrelecao
+        ? `${formattedDate(eventData.dataPrelecao)}, ${eventData.localPrelecao}`
+        : '---';
+    EventModalDificuldadeEl.innerText = eventData.dificuldade || '---';
+    EventModalDistanciaEl.innerText = eventData.distancia ? `${eventData.distancia}km` : '---';
+    EventModalSubidaEl.innerText = eventData.subida ? `${eventData.subida}m` : '---';
+    EventModalDescidaEl.innerText = eventData.descida ? `${eventData.descida}m` : '---';
+    EventModalTrajetoEl.innerText = eventData.trajeto || '---';
+
+    // TODO: se já tiver inscrito, coloca botão de desinscrever etc
+}
+
+/**
+ * Cria um card de evento na lista dos eventos com o evento dado
+ * @param {Object} eventSnapshot dados do evento
+ * @param {Object} listaEventos elemento da lista de eventos
+ */
+export function createEventCard(eventSnapshot, listaEventos) {
+    const eventId = eventSnapshot.key;
+    const eventData = eventSnapshot.value;
+
+    // Obtém o elemento (por string)
+    const elementoString = getFormattedEventCard(eventId, eventData);
+
+    // Cria o elemento (transforma de string para um elemento em si)
+    const elemento = document.createElement('div');
+    elemento.classList.add('event-card');
+    elemento.insertAdjacentHTML('beforeend', elementoString);
+
+    // Adiciona o elemento na lista
+    // NOTA: é importante fazer isso antes de tentar obter os botões!
+    listaEventos.appendChild(elemento);
+
+    // Trata os eventos
+    const inscreverBtn = document.getElementById(getDynamicElementId('inscrever-btn', eventId));
+    const detalhesBtn = document.getElementById(getDynamicElementId('detalhes-btn', eventId));
+
+    inscreverBtn.addEventListener('click', () => {
+
+    });
+    detalhesBtn.addEventListener('click', () => {
+        fillEventModal(eventId, eventData);
+        EventModalEl.style.display = 'flex';
+    });
+}
+
+// Evento de fechar o modal
+document.getElementById("fecharMenuEvento").addEventListener("click", () => {
+    EventModalEl.style.display = "none";
+});

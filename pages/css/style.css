@@ -598,7 +598,7 @@ textarea {
     height: 40vh;
 
     /* Fundo com imagem */
-    background-image: url("../../public/assets/images/card-evento-imagem-temporaria.jpg"); /* Também funciona se tirar o ../../public, mas fica xingando */
+    background-image: url("../../public/assets/images/default-event-image.jpg"); /* Também funciona se tirar o ../../public, mas fica xingando */
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
@@ -787,7 +787,7 @@ textarea {
     min-height: 200px;
     height: 30vh;
 
-    background-image: url("../../public/assets/images/card-evento-imagem-temporaria.jpg");
+    background-image: url("../../public/assets/images/default-event-image.jpg");
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
