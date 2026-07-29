@@ -226,7 +226,8 @@ function updateEventCard(eventId) {
         newEventCard.id = eventId;*/
 
         // Preenche o novo card com as informações atualizadas
-        fillEventCard(eventContainer, {key: eventId, value: data}, localStorage.getItem('uid'), true);
+        //fillEventCard(eventContainer, {key: eventId, value: data}, localStorage.getItem('uid'), true);
+        createEventCard({ key: snapshot.key, value: data }, eventContainer);
     }).catch(err => {
         enviarErroParaSentry(err);
     });
@@ -863,18 +864,6 @@ async function showEventPhotos(eventName, eventId) {
     hideItem(loading);
     // Deixa o conteúdo visível agora que terminou de carregar as fotos
     document.getElementById("modalOverlayFotosEvento").style.display = "flex";
-}
-
-/**
- * Retorna os links das fotos do evento dado.
- * @param eventId id do evento que se deseja obter os links das fotos
- * @return {Promise<Array>} uma promessa que resolve para um array de links das fotos do evento dado.
- */
-function getEventPhotos(eventId) {
-    return getDataFromDatabase(PhotosDatabaseRef, eventId).then(snapshot => {
-        // Obtém os links
-        return snapshot.val() || [];
-    });
 }
 
 /**

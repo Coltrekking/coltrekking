@@ -953,6 +953,32 @@ textarea {
     height: auto !important;
 }
 
+.event-modal-photos-corner {
+    position: absolute;
+    top: max(174px, 27vh); /* Para se adaptar ao tamanho da imagem */
+    right: 0;
+
+    margin-right: 15px;
+}
+
+.event-modal-photos-corner span {
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.event-modal-photos-corner img {
+    min-height: max(15px, 1.5vw);
+    width: auto;
+}
+
+#fotosMenuEventoBtn {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+
+    gap: 4px;
+}
+
 
 .invert-color {
     filter: invert();
@@ -1333,6 +1359,10 @@ h1, h2, h3, h4, .event-card h3, .event-card h2 {
     text-align: left;
 }
 
+.white-color {
+    color: white;
+}
+
 /* Força o elemento a estar invisível */
 .forceHidden {
     display: none !important;
@@ -1512,6 +1542,12 @@ h1, h2, h3, h4, .event-card h3, .event-card h2 {
         font-family: 'Google Sans', sans-serif;
         font-size: max(13px, 1.3vw);
         font-weight: bold;
+    }
+
+    .event-modal-btn {
+        min-width: 190px !important;
+        min-height: max(45px, 4vw) !important;
+        font-size: max(20px, 2vw) !important;
     }
 
     /* Instruções Gerais */
