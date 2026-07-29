@@ -276,7 +276,7 @@ function fillEventContainer(dataSnapshot) {
     // Preenche os cards dos eventos
     eventosArray.forEach(item => {
         //fillEventCard(eventContainer, item, uid);
-        createEventCard(item.value, eventContainer);
+        createEventCard(item, eventContainer);
     });
 }
 

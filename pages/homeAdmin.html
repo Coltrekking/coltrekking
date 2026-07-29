@@ -115,32 +115,6 @@
                 <p id="eventCount">Carregando eventos...</p>
                 <div id="eventContainer">
 
-                    <div class="event-card">
-                        <div class="event-card-blur"></div>
-
-                        <div class="event-card-content">
-                            <h3 class="event-title">Travessia: Diagonal Total (DT) &gt; Lapinha da Serra</h3>
-                            <div class="event-info">
-                                <div class="text event-info-text-icon">
-                                    <img src="/assets/icons/calendar-icon.svg" class="event-info-icon" alt="Ícone de calendário">
-                                    <span>01/08/2026 07:30</span>
-                                </div>
-                                <div class="text event-info-text-icon">
-                                    <img src="/assets/icons/mountain-icon.svg" class="event-info-icon" alt="Ícone de montanha">
-                                    <span>Fácil pacas ++</span>
-                                </div>
-                                <div class="text event-info-text-icon">
-                                    <img src="/assets/icons/trail-icon.svg" class="event-info-icon" alt="Ícone de uma pessoa fazendo uma caminhada">
-                                    <span>18km</span>
-                                </div>
-                            </div>
-                            <div class="event-buttons">
-                                <button class="primary event-btn">Inscrever-se</button>
-                                <button class="primary event-btn">Ver Detalhes</button>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
             </div>
 
@@ -223,7 +197,7 @@
         </div>
 
         <!-- Modal para mostrar as informações de um evento -->
-        <div class="event-modal-background" style="display: none">
+        <div id="event-modal" class="event-modal-background" style="display: none">
             <div class="event-modal-content">
                 <!-- Imagem do Evento -->
                 <div class="event-modal-image"></div>
@@ -248,28 +222,28 @@
                                     <img src="/assets/icons/pen-icon.svg" class="event-modal-icon" alt="Ícone de calendário">
                                     <span>Inscrição</span>
                                 </span>
-                                <span class="event-modal-info-value">13/07/2026 20:00</span>
+                                <span id="event-modal-inscricao" class="event-modal-info-value">13/07/2026 20:00</span>
                             </div>
                             <div class="text event-modal-text-icon" title="Data do Evento">
                                 <span class="event-modal-info-title">
                                     <img src="/assets/icons/calendar-icon.svg" class="event-modal-icon invert-color" alt="Ícone de calendário">
                                     <span>Evento</span>
                                 </span>
-                                <span class="event-modal-info-value">01/08/2026 07:30</span>
+                                <span id="event-modal-evento" class="event-modal-info-value" >01/08/2026 07:30</span>
                             </div>
                             <div class="text event-modal-text-icon" title="Ponto de Encontro">
                                 <span class="event-modal-info-title">
                                     <img src="/assets/icons/location-pin-icon.svg" class="event-modal-icon" alt="Ícone de localização">
                                     <span>Ponto de Encontro</span>
                                 </span>
-                                <span class="event-modal-info-value">Escola de Belas Artes</span>
+                                <span id="event-modal-ponto-encontro" class="event-modal-info-value">Escola de Belas Artes</span>
                             </div>
                             <div class="text event-modal-text-icon" title="Data e local da Preleção">
                                 <span class="event-modal-info-title">
                                     <img src="/assets/icons/presentation-icon.svg" class="event-modal-icon" alt="Ícone de calendário">
                                     <span>Preleção</span>
                                 </span>
-                                <span class="event-modal-info-value">15/07/2026 12:00, Auditório</span>
+                                <span id="event-modal-prelecao" class="event-modal-info-value">15/07/2026 12:00, Auditório</span>
                             </div>
                         </div>
                     </div>
@@ -283,35 +257,38 @@
                                     <img src="/assets/icons/mountain-icon.svg" class="event-modal-icon invert-color" alt="Ícone de montanha">
                                     <span>Dificuldade</span>
                                 </span>
-                                <span class="event-modal-info-value">Fácil pacas ++</span>
+                                <span class="event-modal-info-value" id="event-modal-dificuldade">Fácil pacas ++</span>
                             </div>
                             <div class="text event-modal-text-icon" title="Distância">
                                 <span class="event-modal-info-title">
                                     <img src="/assets/icons/trail-icon.svg" class="event-modal-icon invert-color" alt="Ícone de uma pessoa fazendo uma caminhada">
                                     <span>Distância</span>
                                 </span>
-                                <span class="event-modal-info-value">18km</span>
+                                <span class="event-modal-info-value" id="event-modal-distancia">18km</span>
                             </div>
-                            <div class="text event-modal-text-icon" title="Subida">
+                            <div class="text event-modal-text-icon">
                                 <span class="event-modal-info-title">
-                                    <img src="/assets/icons/up-arrow-icon.svg" class="event-modal-icon" alt="Seta para cima">
-                                    <span>Subida</span>
+                                    <img src="/assets/icons/ruler-icon.svg" class="event-modal-icon" alt="Régua">
+                                    <span>Altimetria</span>
                                 </span>
-                                <span class="event-modal-info-value">400m</span>
-                            </div>
-                            <div class="text event-modal-text-icon" title="Descida">
-                                <span class="event-modal-info-title">
-                                    <img src="/assets/icons/down-arrow-icon.svg" class="event-modal-icon" alt="Seta para baixo">
-                                    <span>Descida</span>
-                                </span>
-                                <span class="event-modal-info-value">300m</span>
+                                <div class="event-modal-info-value event-modal-info-altimetria">
+                                    <div class="flex-row" title="Subida">
+                                        <img src="/assets/icons/up-arrow-icon.svg" class="event-modal-icon" alt="Seta para cima">
+                                        <span id="event-modal-subida">400m</span>
+                                    </div>
+
+                                    <div class="flex-row" title="Descida">
+                                        <img src="/assets/icons/down-arrow-icon.svg" class="event-modal-icon" alt="Seta para baixo">
+                                        <span id="event-modal-descida">400m</span>
+                                    </div>
+                                </div>
                             </div>
                             <div class="text event-modal-text-icon" title="Trajeto">
                                 <span class="event-modal-info-title">
                                     <img src="/assets/icons/path-with-two-points-icon.svg" class="event-modal-icon" alt="Rota com dois pontos marcados nas pontas">
                                     <span>Trajeto</span>
                                 </span>
-                                <span class="event-modal-info-value">Circuito</span>
+                                <span class="event-modal-info-value" id="event-modal-trajeto">Circuito</span>
                             </div>
                         </div>
 
@@ -320,8 +297,8 @@
 
 
                 <div class="event-modal-buttons">
-                    <button class="primary event-modal-btn" style="cursor: pointer; display: inline-block;">Inscrever-se</button>
-                    <button class="danger event-modal-btn" style="display: none;">Cancelar inscrição</button>
+                    <button id="event-modal-inscrever-btn" class="primary event-modal-btn" style="cursor: pointer; display: inline-block;">Inscrever-se</button>
+                    <button id="event-modal-cancelar-inscricao-btn" class="danger event-modal-btn" style="display: none;">Cancelar inscrição</button>
                 </div>
                 <!--
                     Informações para colocar:
