@@ -3,8 +3,11 @@
  * @since 2026-07
  */
 import {formattedDate} from "../date";
-import {getDataFromDatabase, PhotosDatabaseRef} from "../utils";
+import {getDataFromDatabase, getRealTime, InscricoesDatabaseRef, PhotosDatabaseRef} from "../utils";
 import {isAdmin} from "../auth";
+import {Auth} from "../../config/firebase";
+import {abrirAlerta} from "../modal";
+import {enviarErroParaSentry} from "../main";
 
 // Elementos do event modal
 // (São definidos mais tarde, depois que há certeza que os elementos estão no site)
@@ -37,12 +40,104 @@ const EventImagesIcons = {
     "no_image": "/assets/icons/no-image-icon.svg"
 }
 
-
 // Id do Evento atualmente selecionado
 let currentSelectedEvent = null;
 
+// Funções de inscrever/desinscrever.
+// São definidas mais tarde pelo event.js
+let subscribeToEvent;
+let unsubscribeFromEvent;
+
 // Retorna o id do elemento com o nome e o id dado
 const getEventElementId = (name, id) => `event-${name}-${id}`;
+
+/**
+ * Define as funções de inscrever/desinscrever locais (do eventUI.js)
+ * como as funções dadas.
+ * @param subscribe função de inscrever
+ * @param unsubscribe função de desinscrever
+ */
+export function setSubscribeAndUnsubscribeFunctions(subscribe, unsubscribe) {
+    subscribeToEvent = subscribe;
+    unsubscribeFromEvent = unsubscribe;
+}
+
+// Estados do botão de inscrição/desinscrição
+const SubscribeButtonStates = Object.freeze({  // O `Object.freeze()` certifica que não é possível atualizar
+    INSCREVER: 'Inscrever',
+    DESINSCREVER: 'Desinscrever',
+    EVENTO_REALIZADO: 'eventoRealizado',
+    NAO_HABILITADO: 'naoHabilitado'
+    // Lembre-se: se adicionar um novo estado, atualize a função setSubscribeButtonState() para refletir o estado visual do botão
+});
+/**
+ * Define o estado do botão de inscrição/desinscrição a partir do estado dado.
+ * @param button o elemento do botão a ser modificado
+ * @param state estado do botão, dado pelos estados do SubscribeButtonStates
+ */
+function setSubscribeButtonState(button, state) {
+    if (!button)
+        throw new Error("Botão dado para definir o estado é inválido!")
+    switch (state) {
+        case SubscribeButtonStates.INSCREVER: {
+            button.textContent = 'Inscrever-se';
+            button.className = 'primary event-btn';
+            //button.style.backgroundColor = '#ccc';
+            button.style.backgroundColor = '';
+            button.style.outline = '';
+            button.style.cursor = 'pointer';
+            button.disabled = false;
+            break;
+        }
+        case SubscribeButtonStates.DESINSCREVER: {
+            button.textContent = 'Cancelar inscrição';
+            button.className = 'danger event-btn';
+            button.style.backgroundColor = '';
+            button.style.outline = '';
+            button.style.display = 'none';
+            break;
+        }
+        case SubscribeButtonStates.EVENTO_REALIZADO: {
+            // button.style.backgroundColor = '#008000';
+            button.className = 'past-event event-btn';
+            button.textContent = 'Evento realizado';
+            button.style.backgroundColor = '';
+            button.style.outline = '';
+            button.disabled = true;
+            button.style.cursor = 'not-allowed';
+            break;
+        }
+
+        case SubscribeButtonStates.NAO_HABILITADO: {
+            button.style.backgroundColor = '#ccc';
+            button.style.outline = '2px solid #ccc';
+            button.disabled = true;
+            button.style.cursor = 'not-allowed';
+            break;
+        }
+    }
+}
+
+/**
+ * Dependendo do estado, deixa os botões visíveis ou não (apenas um
+ * estará visível por vez)
+ * @param state se está inscrito
+ * @param subscribeBtn botão de inscrever
+ * @param unsubscribeBtn botão de desinscrever
+ */
+export function setSubscribeButtons(state, subscribeBtn, unsubscribeBtn) {
+    if (!subscribeBtn || !unsubscribeBtn) {
+        enviarErroParaSentry(new Error("Botão de inscrever ou desinscrever não existe."));
+        return;
+    }
+    if (state) {
+        subscribeBtn.style.display = 'none';
+        unsubscribeBtn.style.display = 'inline-block';
+    } else {
+        subscribeBtn.style.display = 'inline-block';
+        unsubscribeBtn.style.display = 'none';
+    }
+}
 
 /**
  * Retorna uma string com o elemento do cartão do evento dado.
@@ -77,6 +172,86 @@ function getFormattedEventCard(id, eventData) {
         </div>
     </div>
     `
+}
+
+/**
+ * Lida com as atualizações de inscrição/desinscrição de um evento.
+ * @param eventData o evento em que se quer colocar o botão
+ * @param key o uid do evento
+ * @param buttons os botões de inscrever/desinscrever (em um mapa)
+ */
+function setupSubscribeObserver(key, eventData, buttons) {
+    const eventDate = eventData.data ? new Date(eventData.data) : null;
+
+    const subscribeBtn = buttons.subscribe;
+    setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.INSCREVER);
+    subscribeBtn.disabled = true; // começa desativado
+    subscribeBtn.style.cursor = 'not-allowed';
+
+    const unsubscribeBtn = buttons.unsubscribe;
+    setSubscribeButtonState(unsubscribeBtn, SubscribeButtonStates.DESINSCREVER);
+
+    // verifica se já é hora de inscrição e se ainda não passou a data do evento
+    function checkSubscriptionTime() {
+        // pega a hora do evento
+        const eventStart = eventData.dataInscricao ? new Date(eventData.dataInscricao) : null;
+
+        if (!eventStart) return;
+
+        const now = getRealTime();
+
+        // se ainda não chegou a hora de inscrição
+        if (now < eventStart.getTime()) {
+            setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.NAO_HABILITADO);
+            return;
+        }
+
+        // se a data do evento já passou
+        if (eventDate && now > eventDate.getTime()) {
+            setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.EVENTO_REALIZADO);
+            clearInterval(subscriptionTimer);
+            return;
+        }
+
+        // se está no período válido de inscrição
+        setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.INSCREVER);
+    }
+
+    // chama a função a cada segundo até habilitar
+    const subscriptionTimer = setInterval(checkSubscriptionTime, 100);
+    checkSubscriptionTime(); // checa imediatamente
+
+    // verifica se o usuário já está inscrito
+    getDataFromDatabase(InscricoesDatabaseRef, key + '/' + Auth.currentUser.uid)
+        .then(snapshot => {
+            if (snapshot.exists()) {
+                subscribeBtn.style.display = 'none';
+                unsubscribeBtn.style.display = 'inline-block';
+
+                // checa se a data do evento já passou
+                const eventDate = eventData.data ? new Date(eventData.data) : null;
+                if (eventDate && getRealTime() > eventDate.getTime()) {
+                    setSubscribeButtonState(unsubscribeBtn, SubscribeButtonStates.EVENTO_REALIZADO);
+                }
+            }
+        });
+
+    // chama subscribe passando ambos os botões
+    subscribeBtn.onclick = () => {
+        const eventStart = new Date(eventData.dataInscricao);
+
+        //camada extra de segurança
+        if (getRealTime() < eventStart.getTime()) {
+            abrirAlerta("⚠️ Inscrições ainda não começaram para este evento.").then( );
+            return;
+        }
+
+        subscribeToEvent(key, buttons.subscribe, buttons.unsubscribe);
+    };
+
+    unsubscribeBtn.onclick = () => {
+        unsubscribeFromEvent(key, buttons.subscribe, buttons.unsubscribe);
+    };
 }
 
 /**
@@ -132,7 +307,19 @@ export function fillEventModal(eventId, eventData) {
         EventModalFotosBtn.style.display = 'flex';
     });
 
-    // TODO: se já tiver inscrito, coloca botão de desinscrever etc
+    // Se já tiver realizado
+    const now = getRealTime();
+    const eventDate = eventData.data ? new Date(eventData.data) : null;
+    if (eventDate && now > eventDate.getTime()) {
+        setSubscribeButtonState(EventModalInscreverBtnEl, SubscribeButtonStates.EVENTO_REALIZADO);
+        setSubscribeButtons(false, EventModalInscreverBtnEl, EventModalCancelarInscricaoBtnEl);
+    } else {
+        // verifica se o usuário já está inscrito
+        getDataFromDatabase(InscricoesDatabaseRef, eventId + '/' + Auth.currentUser.uid)
+            .then(snapshot => {
+                setSubscribeButtons(snapshot.exists(), EventModalInscreverBtnEl, EventModalCancelarInscricaoBtnEl);
+            });
+    }
 }
 
 /**
@@ -157,6 +344,10 @@ export function createEventCard(eventSnapshot, listaEventos) {
 
         // Adiciona o elemento na lista de eventos
         // NOTA: é importante fazer isso antes de tentar obter os botões!
+        // NOTA 2: isso faz o evento ser colocado na tela antes de haver coisas dentro.
+        //         Por mais que isso não seja recomendado (se sentir necessidade, pode
+        //         colocar depois do "insertAdjacentHTML" abaixo), é por um mínimo
+        //         tempo que a div ficaria sem vazia.
         listaEventos.appendChild(elemento);
     }
 
@@ -166,14 +357,44 @@ export function createEventCard(eventSnapshot, listaEventos) {
 
     // Trata os eventos
     const inscreverBtn = document.getElementById(getEventElementId('inscrever-btn', eventId));
+    const desinscreverBtn = document.getElementById(getEventElementId('cancelar-inscricao-btn', eventId));
     const detalhesBtn = document.getElementById(getEventElementId('detalhes-btn', eventId));
 
-    inscreverBtn.addEventListener('click', () => {
+    setupSubscribeObserver(eventId, eventData, {subscribe: inscreverBtn, unsubscribe: desinscreverBtn});
 
-    });
     detalhesBtn.addEventListener('click', () => {
         fillEventModal(eventId, eventData);
         EventModalEl.style.display = 'flex';
+    });
+}
+
+/**
+ * Retorna os links das fotos do evento dado.
+ * @param eventId id do evento que se deseja obter os links das fotos
+ * @return {Promise<Array>} uma promessa que resolve para um array de links das fotos do evento dado.
+ */
+function getEventPhotos(eventId) {
+    return getDataFromDatabase(PhotosDatabaseRef, eventId).then(snapshot => {
+        // Obtém os links
+        return snapshot.val() || [];
+    });
+}
+
+/**
+ * Carrega os eventos (listeners) da página.
+ */
+function loadPageEvents() {
+
+    // Evento de fechar o modal
+    document.getElementById("fecharMenuEvento").addEventListener("click", () => {
+        EventModalEl.style.display = "none";
+    });
+
+    EventModalInscreverBtnEl.addEventListener('click', () => {
+        subscribeToEvent(currentSelectedEvent, EventModalInscreverBtnEl, EventModalCancelarInscricaoBtnEl);
+    });
+    EventModalCancelarInscricaoBtnEl.addEventListener('click', () => {
+        unsubscribeFromEvent(currentSelectedEvent, EventModalInscreverBtnEl, EventModalCancelarInscricaoBtnEl);
     });
 }
 
@@ -186,11 +407,12 @@ if (!document.getElementById("event-modal")) {
                 <div class="event-modal-image" id="event-modal-image" style="position: relative;">
                 </div>
                 
+                <!-- Botão de Ver Fotos -->
                 <div class="event-modal-photos-corner">
                     <img id="fotosMenuEventoLoading" src="/assets/icons/loading.svg" alt="Fotos" class="icon invert-color event-modal-top-button loading-animation">
                     <button id="fotosMenuEventoBtn" class="primary icon-button flex-center">
-                        <img id="fotosMenuEventoImg" src="/assets/icons/loading.svg" alt="Fotos" class="icon invert-color">
-                        <span id="fotosMenuEventoText" class="google-font font-bold text big-text white-color">Ver Fotos</span>
+                        <img id="fotosMenuEventoImg" src="/assets/icons/loading.svg" alt="Fotos" class="icon">
+                        <span id="fotosMenuEventoText" class="google-font font-bold text big-text black-color">Ver Fotos</span>
                     </button>
                 </div>
                 
@@ -204,8 +426,9 @@ if (!document.getElementById("event-modal")) {
                 <h3 class="event-modal-title" id="event-modal-title">Titulo</h3>
                 <p class="event-modal-description" id="event-modal-description">Descrição</p>
 
+                <!-- Informações do Evento -->
                 <div class="event-modal-data">
-                    <!-- 1 -->
+                    <!-- Linha 1 -->
                     <div>
                         <p class="google-font font-bold text-align-left">Evento</p>
                         <div class="event-modal-line">
@@ -239,7 +462,7 @@ if (!document.getElementById("event-modal")) {
                             </div>
                         </div>
                     </div>
-                    <!-- 2 -->
+                    <!-- Linha 2 -->
                     <div>
                         <p class="google-font font-bold text-align-left">Trilha</p>
 
@@ -287,7 +510,7 @@ if (!document.getElementById("event-modal")) {
                     </div>
                 </div>
 
-
+                <!-- Botões da parte de baixo -->
                 <div class="event-modal-buttons">
                     <button id="event-modal-inscrever-btn" class="primary event-modal-btn" style="cursor: pointer; display: inline-block;">Inscrever-se</button>
                     <button id="event-modal-cancelar-inscricao-btn" class="danger event-modal-btn" style="display: none;">Cancelar inscrição</button>
@@ -297,18 +520,6 @@ if (!document.getElementById("event-modal")) {
 
     // Injeta o modal
     document.body.insertAdjacentHTML('beforeend', modalHTML);
-}
-
-/**
- * Retorna os links das fotos do evento dado.
- * @param eventId id do evento que se deseja obter os links das fotos
- * @return {Promise<Array>} uma promessa que resolve para um array de links das fotos do evento dado.
- */
-function getEventPhotos(eventId) {
-    return getDataFromDatabase(PhotosDatabaseRef, eventId).then(snapshot => {
-        // Obtém os links
-        return snapshot.val() || [];
-    });
 }
 
 EventModalEl = document.getElementById("event-modal");
@@ -331,7 +542,4 @@ EventModalFotosText = document.getElementById("fotosMenuEventoText");
 EventModalFotosBtn = document.getElementById("fotosMenuEventoBtn");
 EventModalFotosImg = document.getElementById("fotosMenuEventoImg");
 
-// Evento de fechar o modal
-document.getElementById("fecharMenuEvento").addEventListener("click", () => {
-    EventModalEl.style.display = "none";
-});
+loadPageEvents();

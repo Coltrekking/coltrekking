@@ -19,7 +19,7 @@ import {isAdmin} from "../auth";
 import {listarInscritos, removeEvent, updateEvent} from "./eventAdmin";
 import {remove, set, update, serverTimestamp} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
-import {createEventCard} from "./eventUI";
+import {createEventCard, setSubscribeAndUnsubscribeFunctions, setSubscribeButtons} from "./eventUI";
 
 export const modalInscricaoEvento = document.getElementById("modalOverlayInscricaoEvento");
 
@@ -163,7 +163,7 @@ function fillEventCard(eventContainer, item, uid, updating = false) {
     if (isAdmin()) {
         const removeBtn = document.createElement('button');
         removeBtn.textContent = 'Remover';
-        removeBtn.className = 'danger eventBtn';
+        removeBtn.className = 'danger event-btn';
         removeBtn.onclick = () => removeEvent(item.key);
 
         const editBtn = document.createElement('button');
@@ -227,7 +227,7 @@ function updateEventCard(eventId) {
 
         // Preenche o novo card com as informações atualizadas
         //fillEventCard(eventContainer, {key: eventId, value: data}, localStorage.getItem('uid'), true);
-        createEventCard({ key: snapshot.key, value: data }, eventContainer);
+        createEventCard({ key: snapshot.key, value: data }, eventContainer, {subscribe: subscribeToEvent, unsubscribe: unsubscribeFromEvent});
     }).catch(err => {
         enviarErroParaSentry(err);
     });
@@ -277,7 +277,7 @@ function fillEventContainer(dataSnapshot) {
     // Preenche os cards dos eventos
     eventosArray.forEach(item => {
         //fillEventCard(eventContainer, item, uid);
-        createEventCard(item, eventContainer);
+        createEventCard(item, eventContainer, {subscribe: subscribeToEvent, unsubscribe: unsubscribeFromEvent});
     });
 }
 
@@ -312,22 +312,27 @@ function setSubscribeButtonState(button, state) {
     switch (state) {
         case SubscribeButtonStates.INSCREVER: {
             button.textContent = 'Inscrever-se';
-            button.className = 'primary eventBtn';
+            button.className = 'primary event-btn';
             //button.style.backgroundColor = '#ccc';
             button.style.backgroundColor = '';
+            button.style.outline = '';
             button.style.cursor = 'pointer';
             button.disabled = false;
             break;
         }
         case SubscribeButtonStates.DESINSCREVER: {
             button.textContent = 'Cancelar inscrição';
-            button.className = 'danger eventBtn';
+            button.className = 'danger event-btn';
+            button.style.backgroundColor = '';
+            button.style.outline = '';
             button.style.display = 'none';
             break;
         }
         case SubscribeButtonStates.EVENTO_REALIZADO: {
-            button.style.backgroundColor = '#008000';
+            button.className = 'past-event event-btn';
             button.textContent = 'Evento realizado';
+            button.style.backgroundColor = '';
+            button.style.outline = '';
             button.disabled = true;
             button.style.cursor = 'not-allowed';
             break;
@@ -335,6 +340,7 @@ function setSubscribeButtonState(button, state) {
 
         case SubscribeButtonStates.NAO_HABILITADO: {
             button.style.backgroundColor = '#ccc';
+            button.style.outline = '2px solid #ccc';
             button.disabled = true;
             button.style.cursor = 'not-allowed';
             break;
@@ -573,12 +579,11 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, alreadyRetrying
             // Se chegou até aqui, deu tudo certo na inscrição chama a função de sucesso.
             // NOTA: não é usado "await" aqui pq não tem motivos de esperar (essa função tem efeito puramente visual).
             onSuccessfulSubscription(eventId).then( );
+            setSubscribeButtons(true, subscribeBtn, unsubscribeBtn);
             hideLoading(); // Some o loading que foi colocado logo antes de
         })
         .then(async () => {
             //abrirAlerta('Inscrição realizada com sucesso!');
-            subscribeBtn.style.display = 'none';
-            unsubscribeBtn.style.display = 'inline-block';
         })
         .catch(error => {
             hideLoading();
@@ -598,7 +603,7 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, alreadyRetrying
 }
 
 // função para cancelar inscrição
-async function unsubscribeFromEvent(eventId, unsubscribeBtn, subscribeBtn) {
+async function unsubscribeFromEvent(eventId, subscribeBtn, unsubscribeBtn) {
     const confirmar = await abrirConfirmacao("Tem certeza que deseja cancelar sua inscrição?");
     if (!confirmar) return;
 
@@ -616,8 +621,7 @@ async function unsubscribeFromEvent(eventId, unsubscribeBtn, subscribeBtn) {
     // Retira o usuário do evento
     return unsubscribeUserFromEvent(eventId, uid).then(() => {
         abrirAlerta('Inscrição removida com sucesso!');
-        unsubscribeBtn.style.display = 'none';
-        subscribeBtn.style.display = 'inline-block';
+        setSubscribeButtons(false, subscribeBtn, unsubscribeBtn);
     }).finally(_ => {
         hideItem(loading);
     });
@@ -1002,3 +1006,6 @@ async function onSuccessfulSubscription(eventId) {
     hideItem(loadingElement);
     showItem(positionElement);
 }
+
+// Define as função de inscrever/desinscrever no eventUI.js
+setSubscribeAndUnsubscribeFunctions(subscribeToEvent, unsubscribeFromEvent);

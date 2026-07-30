@@ -83,9 +83,9 @@ export function loadCommonEvents() {
     document.getElementById("eventBtn").onclick = (event) => {
         openTab('eventos', event);
     };
-    document.getElementById("photoBtn").onclick = (event) => {
-        openTab('photos', event);
-    };
+    // document.getElementById("photoBtn").onclick = (event) => {
+    //     openTab('photos', event);
+    // };
     document.getElementById("blockListBtn").onclick = (event) => {
         openTab('lista-blocks', event);
     };
