@@ -19,7 +19,10 @@ import {isAdmin} from "../auth";
 import {listarInscritos, removeEvent, updateEvent} from "./eventAdmin";
 import {remove, set, update, serverTimestamp} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
-import {createEventCard, setSubscribeAndUnsubscribeFunctions, setSubscribeButtons} from "./eventUI";
+import {
+    createEventCard, fillEventModal, getEventPhotos, setEventFunctions, setSubscribeButtons,
+    setSubscribeButtonState, SubscribeButtonStates
+} from "./eventUI";
 
 export const modalInscricaoEvento = document.getElementById("modalOverlayInscricaoEvento");
 
@@ -47,29 +50,6 @@ export async function getPontuacaoMinimaParaEvento(eventoId) {
         // Retorna a pontuação necessária definida para o evento
         return snap.val().pontuacaoNecessaria;
     }
-}
-
-/**
- * Verifica a dificuldade do evento. Se o usuário não tiver a pontuação
- * que precisa para participar do evento, mostra um aviso para ele.
- * @param userUid UID do usuário
- * @param pontuacaoNecessaria pontuação necessária para participar do evento
- * @param eventDate data do evento, para mostrar o aviso apenas se o evento ainda não tiver acontecido
- * @param eventCard elemento eventCard do evento, para mostrar o aviso
- */
-function checkForDifficult(userUid, pontuacaoNecessaria, eventDate, eventCard) {
-    getAttributeFromUser(userUid, "pontos").then(pontuacaoUsuario => {
-        // Se não tiver pontos suficientes, mostra um aviso.
-        if (pontuacaoUsuario < pontuacaoNecessaria) {
-            if (eventDate && getRealTime() > eventDate.getTime()) return; // se o evento já passou, não mostra aviso
-
-            // Cria elemento de aviso em vez de usar innerHTML +=
-            const avisoElem = document.createElement('p');
-            avisoElem.className = 'soft-warn';
-            avisoElem.textContent = `Você precisa de ${pontuacaoNecessaria} pontos para participar deste evento!`;
-            eventCard.appendChild(avisoElem);
-        }
-    });
 }
 
 /**
@@ -219,15 +199,9 @@ function updateEventCard(eventId) {
         if (!data) // Se não encontrou as informações do evento, lança um erro
             throw new Error(`Evento com id ${eventId} não encontrado para atualizar o card.`);
 
-        // Cria um novo card com as informações atualizadas
-        /*const newEventCard = document.createElement('div');
-        newEventCard.className = 'event-card';
-        newEventCard.style.position = "relative";
-        newEventCard.id = eventId;*/
-
-        // Preenche o novo card com as informações atualizadas
-        //fillEventCard(eventContainer, {key: eventId, value: data}, localStorage.getItem('uid'), true);
-        createEventCard({ key: snapshot.key, value: data }, eventContainer, {subscribe: subscribeToEvent, unsubscribe: unsubscribeFromEvent});
+        // Preenche os cards com as informações atualizadas
+        createEventCard({ key: snapshot.key, value: data }, eventContainer);
+        fillEventModal(eventId, data);
     }).catch(err => {
         enviarErroParaSentry(err);
     });
@@ -244,7 +218,8 @@ function fillEventContainer(dataSnapshot) {
     const uid = localStorage.getItem('uid');
     if (!uid) {
         // Isso só acontece se o usuário (na maioria das vezes) porque o usuário
-        // está com o email inválido. Nesse caso, só retorna.
+        // está com o email inválido. Nesse caso, só retornar é suficiente.
+
         /*console.warn('UID não encontrado no localStorage.');
         enviarErroParaSentry("UID não foi encontrado no localStorage. Por isso, os eventos não serão carregados.");
         hideItem(loading);
@@ -276,8 +251,7 @@ function fillEventContainer(dataSnapshot) {
 
     // Preenche os cards dos eventos
     eventosArray.forEach(item => {
-        //fillEventCard(eventContainer, item, uid);
-        createEventCard(item, eventContainer, {subscribe: subscribeToEvent, unsubscribe: unsubscribeFromEvent});
+        createEventCard(item, eventContainer);
     });
 }
 
@@ -288,64 +262,7 @@ function fillEventContainer(dataSnapshot) {
  */
 function fillEventListAsAdmin(dataSnapshot) {
     // Preenche o container de eventos
-    // TODO: quando terminar de fazer o card de eventos, retira isso
     fillEventContainer(dataSnapshot);
-}
-
-
-// Estados do botão de inscrição/desinscrição
-const SubscribeButtonStates = Object.freeze({  // O `Object.freeze()` certifica que não é possível atualizar
-    INSCREVER: 'Inscrever',
-    DESINSCREVER: 'Desinscrever',
-    EVENTO_REALIZADO: 'eventoRealizado',
-    NAO_HABILITADO: 'naoHabilitado'
-    // Lembre-se: se adicionar um novo estado, atualize a função setSubscribeButtonState() para refletir o estado visual do botão
-});
-/**
- * Define o estado do botão de inscrição/desinscrição a partir do estado dado.
- * @param button o elemento do botão a ser modificado
- * @param state estado do botão, dado pelos estados do SubscribeButtonStates
- */
-function setSubscribeButtonState(button, state) {
-    if (!button)
-        throw new Error("Botão dado para definir o estado é inválido!")
-    switch (state) {
-        case SubscribeButtonStates.INSCREVER: {
-            button.textContent = 'Inscrever-se';
-            button.className = 'primary event-btn';
-            //button.style.backgroundColor = '#ccc';
-            button.style.backgroundColor = '';
-            button.style.outline = '';
-            button.style.cursor = 'pointer';
-            button.disabled = false;
-            break;
-        }
-        case SubscribeButtonStates.DESINSCREVER: {
-            button.textContent = 'Cancelar inscrição';
-            button.className = 'danger event-btn';
-            button.style.backgroundColor = '';
-            button.style.outline = '';
-            button.style.display = 'none';
-            break;
-        }
-        case SubscribeButtonStates.EVENTO_REALIZADO: {
-            button.className = 'past-event event-btn';
-            button.textContent = 'Evento realizado';
-            button.style.backgroundColor = '';
-            button.style.outline = '';
-            button.disabled = true;
-            button.style.cursor = 'not-allowed';
-            break;
-        }
-
-        case SubscribeButtonStates.NAO_HABILITADO: {
-            button.style.backgroundColor = '#ccc';
-            button.style.outline = '2px solid #ccc';
-            button.disabled = true;
-            button.style.cursor = 'not-allowed';
-            break;
-        }
-    }
 }
 
 /**
@@ -861,8 +778,8 @@ async function showEventPhotos(eventName, eventId) {
 
         if (btnAddImg)
             btnAddImg.onclick = _ => {
-            askForPhotoForEvent(eventId);
-        };
+                askForPhotoForEvent(eventId);
+            };
     }
 
     hideItem(loading);
@@ -1008,4 +925,4 @@ async function onSuccessfulSubscription(eventId) {
 }
 
 // Define as função de inscrever/desinscrever no eventUI.js
-setSubscribeAndUnsubscribeFunctions(subscribeToEvent, unsubscribeFromEvent);
+setEventFunctions(subscribeToEvent, unsubscribeFromEvent, showEventPhotos);

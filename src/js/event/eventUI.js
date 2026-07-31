@@ -3,9 +3,15 @@
  * @since 2026-07
  */
 import {formattedDate} from "../date";
-import {getDataFromDatabase, getRealTime, InscricoesDatabaseRef, PhotosDatabaseRef} from "../utils";
+import {
+    getAttributeFromUser,
+    getDataFromDatabase,
+    getRealTime,
+    InscricoesDatabaseRef,
+    PhotosDatabaseRef
+} from "../utils";
 import {isAdmin} from "../auth";
-import {Auth} from "../../config/firebase";
+import {Auth} from "/src/config/firebase";
 import {abrirAlerta} from "../modal";
 import {enviarErroParaSentry} from "../main";
 
@@ -41,29 +47,33 @@ const EventImagesIcons = {
 }
 
 // Id do Evento atualmente selecionado
-let currentSelectedEvent = null;
+let currentSelectedEventId = null;
+// Nome do Evento atualmente selecionado
+let currentSelectedEventName = null;
 
-// Funções de inscrever/desinscrever.
+// Funções do event.js.
 // São definidas mais tarde pelo event.js
 let subscribeToEvent;
 let unsubscribeFromEvent;
+let showEventPhotos;
 
 // Retorna o id do elemento com o nome e o id dado
 const getEventElementId = (name, id) => `event-${name}-${id}`;
 
 /**
- * Define as funções de inscrever/desinscrever locais (do eventUI.js)
- * como as funções dadas.
- * @param subscribe função de inscrever
- * @param unsubscribe função de desinscrever
+ * Define as funções locais (do eventUI.js) como as funções dadas.
+ * @param f_subscribe função de inscrever
+ * @param f_unsubscribe função de desinscrever
+ * @param f_showEventPhotos função de mostrar fotos do evento
  */
-export function setSubscribeAndUnsubscribeFunctions(subscribe, unsubscribe) {
-    subscribeToEvent = subscribe;
-    unsubscribeFromEvent = unsubscribe;
+export function setEventFunctions(f_subscribe, f_unsubscribe, f_showEventPhotos) {
+    subscribeToEvent = f_subscribe;
+    unsubscribeFromEvent = f_unsubscribe;
+    showEventPhotos = f_showEventPhotos;
 }
 
 // Estados do botão de inscrição/desinscrição
-const SubscribeButtonStates = Object.freeze({  // O `Object.freeze()` certifica que não é possível atualizar
+export const SubscribeButtonStates = Object.freeze({  // O `Object.freeze()` certifica que não é possível atualizar
     INSCREVER: 'Inscrever',
     DESINSCREVER: 'Desinscrever',
     EVENTO_REALIZADO: 'eventoRealizado',
@@ -75,13 +85,16 @@ const SubscribeButtonStates = Object.freeze({  // O `Object.freeze()` certifica 
  * @param button o elemento do botão a ser modificado
  * @param state estado do botão, dado pelos estados do SubscribeButtonStates
  */
-function setSubscribeButtonState(button, state) {
+export function setSubscribeButtonState(button, state) {
     if (!button)
         throw new Error("Botão dado para definir o estado é inválido!")
+
+    let btn_class =
+        (button === EventModalInscreverBtnEl || button === EventModalCancelarInscricaoBtnEl) ? 'event-modal-btn' : 'event-btn';
     switch (state) {
         case SubscribeButtonStates.INSCREVER: {
             button.textContent = 'Inscrever-se';
-            button.className = 'primary event-btn';
+            button.className = `primary ${btn_class}`;
             //button.style.backgroundColor = '#ccc';
             button.style.backgroundColor = '';
             button.style.outline = '';
@@ -91,7 +104,7 @@ function setSubscribeButtonState(button, state) {
         }
         case SubscribeButtonStates.DESINSCREVER: {
             button.textContent = 'Cancelar inscrição';
-            button.className = 'danger event-btn';
+            button.className = `danger ${btn_class}`;
             button.style.backgroundColor = '';
             button.style.outline = '';
             button.style.display = 'none';
@@ -99,7 +112,7 @@ function setSubscribeButtonState(button, state) {
         }
         case SubscribeButtonStates.EVENTO_REALIZADO: {
             // button.style.backgroundColor = '#008000';
-            button.className = 'past-event event-btn';
+            button.className = `past-event ${btn_class}`;
             button.textContent = 'Evento realizado';
             button.style.backgroundColor = '';
             button.style.outline = '';
@@ -260,7 +273,8 @@ function setupSubscribeObserver(key, eventData, buttons) {
  * @param {Object} eventData dados do evento
  */
 export function fillEventModal(eventId, eventData) {
-    currentSelectedEvent = eventId;
+    currentSelectedEventId = eventId;
+    currentSelectedEventName = eventData.nome;
 
     // Faz o loading de "obter fotos" aparecer para mostrar já está tentando obter as fotos
     // e desaparece o botão de "ver fotos"
@@ -323,6 +337,29 @@ export function fillEventModal(eventId, eventData) {
 }
 
 /**
+ * Verifica a dificuldade do evento. Se o usuário não tiver a pontuação
+ * que precisa para participar do evento, mostra um aviso para ele.
+ * @param userUid UID do usuário
+ * @param pontuacaoNecessaria pontuação necessária para participar do evento
+ * @param eventDate data do evento, para mostrar o aviso apenas se o evento ainda não tiver acontecido
+ * @param eventCard elemento eventCard do evento, para mostrar o aviso
+ */
+function checkForDifficult(userUid, pontuacaoNecessaria, eventDate, eventCard) {
+    getAttributeFromUser(userUid, "pontos").then(pontuacaoUsuario => {
+        // Se não tiver pontos suficientes, mostra um aviso.
+        if (pontuacaoUsuario < pontuacaoNecessaria) {
+            if (eventDate && getRealTime() > eventDate.getTime()) return; // se o evento já passou, não mostra aviso
+
+            // Cria elemento de aviso em vez de usar innerHTML +=
+            const avisoElem = document.createElement('p');
+            avisoElem.className = 'soft-warn';
+            avisoElem.textContent = `Você precisa de ${pontuacaoNecessaria} pontos para participar deste evento!`;
+            eventCard.appendChild(avisoElem);
+        }
+    });
+}
+
+/**
  * Cria um card de evento na lista dos eventos com o evento dado
  * @param {Object} eventSnapshot dados do evento
  * @param {Object} listaEventos elemento da lista de eventos
@@ -355,6 +392,10 @@ export function createEventCard(eventSnapshot, listaEventos) {
     const elementoString = getFormattedEventCard(eventId, eventData);
     elemento.insertAdjacentHTML('beforeend', elementoString);
 
+    let pontuacaoNecessaria = eventData.pontuacaoNecessaria;
+    if (pontuacaoNecessaria === null || pontuacaoNecessaria === undefined) pontuacaoNecessaria = 0; // dificuldade padrão
+    checkForDifficult(uid, pontuacaoNecessaria, eventDate, eventCard); // TODO: completa os argumentos aí
+
     // Trata os eventos
     const inscreverBtn = document.getElementById(getEventElementId('inscrever-btn', eventId));
     const desinscreverBtn = document.getElementById(getEventElementId('cancelar-inscricao-btn', eventId));
@@ -373,7 +414,7 @@ export function createEventCard(eventSnapshot, listaEventos) {
  * @param eventId id do evento que se deseja obter os links das fotos
  * @return {Promise<Array>} uma promessa que resolve para um array de links das fotos do evento dado.
  */
-function getEventPhotos(eventId) {
+export function getEventPhotos(eventId) {
     return getDataFromDatabase(PhotosDatabaseRef, eventId).then(snapshot => {
         // Obtém os links
         return snapshot.val() || [];
@@ -391,10 +432,13 @@ function loadPageEvents() {
     });
 
     EventModalInscreverBtnEl.addEventListener('click', () => {
-        subscribeToEvent(currentSelectedEvent, EventModalInscreverBtnEl, EventModalCancelarInscricaoBtnEl);
+        subscribeToEvent(currentSelectedEventId, EventModalInscreverBtnEl, EventModalCancelarInscricaoBtnEl);
     });
     EventModalCancelarInscricaoBtnEl.addEventListener('click', () => {
-        unsubscribeFromEvent(currentSelectedEvent, EventModalInscreverBtnEl, EventModalCancelarInscricaoBtnEl);
+        unsubscribeFromEvent(currentSelectedEventId, EventModalInscreverBtnEl, EventModalCancelarInscricaoBtnEl);
+    });
+    EventModalFotosBtn.addEventListener('click', _ => {
+        showEventPhotos(currentSelectedEventName, currentSelectedEventId).then( );
     });
 }
 

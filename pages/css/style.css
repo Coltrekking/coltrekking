@@ -690,9 +690,13 @@ textarea {
     outline: 2px solid #f39d9d;
 }
 
+.event-modal-buttons .past-event {
+    background-color: #24a400;
+    outline: 2px solid #40bf77;
+}
+
 .event-buttons .past-event {
-    background-color: #008000;
-    outline: 2px solid #9df39d;
+    display: none !important;
 }
 
 .event-buttons .danger:hover, .event-modal-buttons .danger:hover {
