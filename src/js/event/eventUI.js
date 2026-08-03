@@ -10,7 +10,7 @@ import {
     InscricoesDatabaseRef,
     PhotosDatabaseRef
 } from "../utils";
-import {isAdmin} from "../auth";
+import {isAdmin, waitForUser} from "../auth";
 import {Auth} from "/src/config/firebase";
 import {abrirAlerta} from "../modal";
 import {enviarErroParaSentry} from "../main";
@@ -36,6 +36,7 @@ let EventModalFotosLoading;
 let EventModalFotosText;
 let EventModalFotosBtn;
 let EventModalFotosImg;
+let EventModalButtons;
 
 
 // Ícones para as ações relacionadas às imagens dos eventos
@@ -328,7 +329,11 @@ export function fillEventModal(eventId, eventData) {
         setSubscribeButtonState(EventModalInscreverBtnEl, SubscribeButtonStates.EVENTO_REALIZADO);
         setSubscribeButtons(false, EventModalInscreverBtnEl, EventModalCancelarInscricaoBtnEl);
     } else {
-        // verifica se o usuário já está inscrito
+        // Reseta os botões
+        setSubscribeButtonState(EventModalInscreverBtnEl, SubscribeButtonStates.INSCREVER);
+        setSubscribeButtonState(EventModalCancelarInscricaoBtnEl, SubscribeButtonStates.DESINSCREVER);
+
+        // Verifica se o usuário já está inscrito
         getDataFromDatabase(InscricoesDatabaseRef, eventId + '/' + Auth.currentUser.uid)
             .then(snapshot => {
                 setSubscribeButtons(snapshot.exists(), EventModalInscreverBtnEl, EventModalCancelarInscricaoBtnEl);
@@ -394,7 +399,7 @@ export function createEventCard(eventSnapshot, listaEventos) {
 
     let pontuacaoNecessaria = eventData.pontuacaoNecessaria;
     if (pontuacaoNecessaria === null || pontuacaoNecessaria === undefined) pontuacaoNecessaria = 0; // dificuldade padrão
-    checkForDifficult(uid, pontuacaoNecessaria, eventDate, eventCard); // TODO: completa os argumentos aí
+    checkForDifficult(eventId, pontuacaoNecessaria, eventData.data, elemento);
 
     // Trata os eventos
     const inscreverBtn = document.getElementById(getEventElementId('inscrever-btn', eventId));
@@ -440,6 +445,32 @@ function loadPageEvents() {
     EventModalFotosBtn.addEventListener('click', _ => {
         showEventPhotos(currentSelectedEventName, currentSelectedEventId).then( );
     });
+}
+
+/**
+ * Carrega as funcionalidades admin.
+ * É bom isso estar separado para o usuário comum não ter acesso às
+ * funcionalidades dos administradores (nem a interface delas, como
+ * os botões).
+ */
+async function setupForAdmin() {
+    // Verifica se é admin. Se não for, retorna
+    await waitForUser();
+    if (!isAdmin()) return;
+
+    // Botões para os admins
+    const editarBtn = document.createElement("button");
+    editarBtn.classList = "alternative event-modal-btn";
+    editarBtn.innerText = "Editar";
+
+    const removerBtn = document.createElement("button");
+    removerBtn.classList = "alternative event-modal-btn";
+    removerBtn.innerText = "Remover";
+
+    const gerenciarInscricoesBtn = document.createElement("button");
+    gerenciarInscricoesBtn.classList = "alternative event-modal-btn";
+    gerenciarInscricoesBtn.innerText = "Gerenciar Inscrições";
+
 }
 
 // Adiciona o modal no site (se não houver)
@@ -555,8 +586,8 @@ if (!document.getElementById("event-modal")) {
                 </div>
 
                 <!-- Botões da parte de baixo -->
-                <div class="event-modal-buttons">
-                    <button id="event-modal-inscrever-btn" class="primary event-modal-btn" style="cursor: pointer; display: inline-block;">Inscrever-se</button>
+                <div class="event-modal-buttons" id="event-modal-buttons">
+                    <button id="event-modal-inscrever-btn" class="primary event-modal-btn">Inscrever-se</button>
                     <button id="event-modal-cancelar-inscricao-btn" class="danger event-modal-btn" style="display: none;">Cancelar inscrição</button>
                 </div>
         </div>
@@ -585,5 +616,7 @@ EventModalFotosLoading = document.getElementById("fotosMenuEventoLoading");
 EventModalFotosText = document.getElementById("fotosMenuEventoText");
 EventModalFotosBtn = document.getElementById("fotosMenuEventoBtn");
 EventModalFotosImg = document.getElementById("fotosMenuEventoImg");
+EventModalButtons = document.getElementById("event-modal-buttons");
 
 loadPageEvents();
+setupForAdmin();
