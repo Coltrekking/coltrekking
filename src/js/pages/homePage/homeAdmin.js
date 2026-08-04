@@ -75,7 +75,7 @@ function loadEvents() {
 
     // Trata a exibição do formulário de eventos
     document.getElementById('createEvent').onclick = function () {
-        showItem(eventForm);
+        showItem(eventFormModal); // showItem(eventForm);
         hideItem(loading);
         hideItem(editEventForm);
         showItem(submitEventForm);

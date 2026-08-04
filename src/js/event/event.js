@@ -190,7 +190,7 @@ function fillEventCard(eventContainer, item, uid, updating = false) {
  * Atualiza o card do evento com o id dado.
  * @param eventId id do evento
  */
-function updateEventCard(eventId) {
+export function updateEventCard(eventId) {
     const eventContainer = document.getElementById('eventContainer');
 
     // Obtém as informações
@@ -925,4 +925,4 @@ async function onSuccessfulSubscription(eventId) {
 }
 
 // Define as função de inscrever/desinscrever no eventUI.js
-setEventFunctions(subscribeToEvent, unsubscribeFromEvent, showEventPhotos);
+setEventFunctions(subscribeToEvent, unsubscribeFromEvent, showEventPhotos, updateEvent, removeEvent, listarInscritos);

@@ -126,106 +126,90 @@
                 Criar Evento
             </button>
 
-            <form id="eventForm" class="startHidden">
-                <label>Nome do Evento:</label><br>
-                <input type="text" id="nome" required><br>
-
-                <br><label>Distância (km):</label><br>
-                <input type="number" id="distancia" required><br>
-
-                <br><label>Subida (m):</label><br>
-                <input type="number" id="subida" required><br>
-
-                <br><label>Descida (m):</label><br>
-                <input type="number" id="descida" required><br>
-
-                <br><label>Tipo de Trajeto:</label>
-                <select id="trajeto" required>
-                    <option value="">Selecione</option>
-                    <option value="Ping-pong">Ping-pong</option>
-                    <option value="Circuito">Circuito</option>
-                    <option value="Travessia">Travessia</option>
-                </select>
-
-                <label>Nível de Dificuldade:</label>
-                <select id="dificuldade" required>
-                    <option value="">Selecione</option>
-                    <option value="Fácil pacas ++">Fácil pacas ++</option>
-                    <option value="Fácil pacas +">Fácil pacas +</option>
-                    <option value="Fácil pacas">Fácil pacas</option>
-                    <option value="Fácil">Fácil</option>
-                    <option value="Médio (acampas)">Médio (acampas)</option>
-                </select><br>
-
-                <br><label>Início das inscrições:</label><br>
-                <input type="datetime-local" id="dataInscricao" required><br>
-
-                <br><label>Preleção:</label><br>
-                <input type="datetime-local" id="dataPrelecao" required><br>
-
-                <br><label>Data do evento:</label><br>
-                <input type="datetime-local" id="data" required><br>
-
-                <br><label>Local da Preleção:</label><br>
-                <input type="text" id="localPrelecao" required><br>
-
-                <br><label>Ponto de Encontro:</label><br>
-                <input type="text" id="localEncontro" required><br>
-
-                <br><label>Descrição:</label><br>
-                <textarea id="descricao" rows="4" cols="40"></textarea><br>
-
-                <!-- Inserir altimetria depois (precisa do cloud storage)
-                <br><label>Percuso e Altimetria:</label><br>
-                <input type="file" id="percursoAltimetria" accept=".png, .jpg"><br>
-                -->
-
-                <!-- Pontuação necessária para o evento -->
-                <p class="big-text"><i>Pontuação necessária para poder se inscrever no evento:</i></p>
-                <p class="small-text"><i>Dica: se quiser que apenas <b>pessoas que já foram em um evento</b> consigam se inscrever, coloque como 1 ponto.</i></p>
-                <span id="eventoPontuacaoNecessaria" class="soft-warn text" style="font-style: normal; font-size: 2rem; margin: 0;">0 pontos</span>
-
-                <!-- Botão para editar a pontuação necessária-->
-                <button id="eventoAlterarPontuacaoNecessaria" type="button" class="icon-button">
-                    <img src="/assets/icons/edit-icon.svg" alt="Editar Pontos" id="editPointsIcon" class="edit-icon">
-                </button>
-
-                <!-- Botões de Salvar/Cancelar -->
-                <br><button type="submit" id="submitEventForm">Salvar Evento</button>
-                <br><button type="button" class="alternative" id="editEventForm">Salvar Edição</button>
-                <button type="button" class="danger" id="cancelEventForm">Cancelar</button>
-            </form>
-
         </div>
 
-<!--        <div id="photos" class="tab-content">-->
-<!--            <h2>Fotos</h2>-->
-<!--            <p class="big-text" style="margin-bottom: 5px;"><b>Atenção!</b> <br> Agora, as fotos mudaram!</p>-->
-<!--            <p class="big-text">Para ver as fotos de um evento, clique no ícone-->
-<!--                <img src="/assets/icons/image-icon.svg" alt="Ícone de fotos" class="icon" style="height: max(15px, 1.5vw); width: auto; margin: 0 3px 0 3px;">-->
-<!--                do evento na página dos eventos.</p>-->
-<!--            <p class="medium-text italic-text">Se o evento não possuir fotos, o ícone <img src="/assets/icons/add-image-icon.svg" alt="Ícone de sem fotos" class="icon" style="height: max(15px, 1.5vw); width: auto; margin: 0 3px 0 3px; vertical-align: middle;"> será exibido.</p>-->
-<!--            <img src="/assets/images/tutorial_fotos/nova_seção_fotos.png" alt="Nova seção de fotos" style="width: 100%; max-width: 800px; margin-top: 20px; border: 3px dashed #000;">-->
+        <!-- Modal para criar/editar um evento -->
+        <div class="modal-overlay" id="eventFormModal" style="z-index: 9998; display: none;">
+            <div class="event-modal-content">
+                <h2>Criar/Editar Evento</h2>
 
-<!--            <h3>Adicionar ou remover fotos</h3>-->
-<!--            <p class="super-small-text italic-text" style="color: #333; margin: 0 0 5px 0;">Se você está vendo isso, é porque você é um administrador.</p>-->
-<!--            <p class="big-text">Para adicionar fotos a um evento, clique no ícone-->
-<!--                <img src="/assets/icons/image-icon.svg" alt="Ícone de ver fotos" class="icon" style="height: max(15px, 1.5vw); width: auto; margin: 0 3px 0 3px;">-->
-<!--                (ou-->
-<!--                <img src="/assets/icons/add-image-icon.svg" alt="Ícone de adicionar foto" class="icon" style="height: max(15px, 1.5vw); width: auto; margin: 0 3px 0 3px; vertical-align: middle;">,-->
-<!--                se o evento não possuir fotos)-->
-<!--                do evento na página dos eventos.-->
-<!--            </p>-->
-<!--            <img src="/assets/images/tutorial_fotos/novo_adicionar_foto.png" alt="Novo botão de adicionar de fotos" style="width: 100%; max-width: 800px; margin-top: 20px; border: 3px dashed #000;">-->
+                <!-- Botão de fechar -->
+                <button id="cancelEventForm" title="Fechar" class="icon-button close-image-modal-button">
+                    <img src="/assets/icons/close-icon.svg" alt="Ícone de X, para fechar" class="close-modal-icon">
+                </button>
 
-<!--            <p>Após isso, clique no botão de adicionar fotos</p>-->
-<!--            <img src="/assets/images/tutorial_fotos/tutorial_botao_adicionar_foto.png" alt="Botão de adicionar uma foto" style="width: 100%; max-width: 800px; margin-top: 20px; border: 3px dashed #000;">-->
+                <!-- Formulário -->
+                <form id="eventForm">
+                    <label>Nome do Evento:</label><br>
+                    <input type="text" id="nome" required><br>
 
-<!--            <p style="margin-top: 50px;">Para remover uma foto, apenas clique no símbolo de lixeira ao lado do link.</p>-->
-<!--            <img src="/assets/images/tutorial_fotos/tutorial_remover_foto.png" alt="Botão de remover uma foto" style="width: 100%; max-width: 800px; margin-top: 20px; border: 3px dashed #000;">-->
+                    <br><label>Distância (km):</label><br>
+                    <input type="number" id="distancia" required><br>
+
+                    <br><label>Subida (m):</label><br>
+                    <input type="number" id="subida" required><br>
+
+                    <br><label>Descida (m):</label><br>
+                    <input type="number" id="descida" required><br>
 
 
-<!--        </div>-->
+                    <br><label>Tipo de Trajeto:</label>
+                    <select id="trajeto" required>
+                        <option value="">Selecione</option>
+                        <option value="Ping-pong">Ping-pong</option>
+                        <option value="Circuito">Circuito</option>
+                        <option value="Travessia">Travessia</option>
+                    </select>
+
+                    <label>Nível de Dificuldade:</label>
+                    <select id="dificuldade" required>
+                        <option value="">Selecione</option>
+                        <option value="Fácil pacas ++">Fácil pacas ++</option>
+                        <option value="Fácil pacas +">Fácil pacas +</option>
+                        <option value="Fácil pacas">Fácil pacas</option>
+                        <option value="Fácil">Fácil</option>
+                        <option value="Médio (acampas)">Médio (acampas)</option>
+                    </select><br>
+
+                    <br><label>Início das inscrições:</label><br>
+                    <input type="datetime-local" id="dataInscricao" required><br>
+
+                    <br><label>Preleção:</label><br>
+                    <input type="datetime-local" id="dataPrelecao" required><br>
+
+                    <br><label>Data do evento:</label><br>
+                    <input type="datetime-local" id="data" required><br>
+
+                    <br><label>Local da Preleção:</label><br>
+                    <input type="text" id="localPrelecao" required><br>
+
+                    <br><label>Ponto de Encontro:</label><br>
+                    <input type="text" id="localEncontro" required><br>
+
+                    <br><label>Descrição:</label><br>
+                    <textarea id="descricao" rows="4" cols="40"></textarea><br>
+
+                    <!-- Inserir altimetria depois (precisa do cloud storage)
+                    <br><label>Percuso e Altimetria:</label><br>
+                    <input type="file" id="percursoAltimetria" accept=".png, .jpg"><br>
+                    -->
+
+                    <!-- Pontuação necessária para o evento -->
+                    <p class="big-text"><i>Pontuação necessária para poder se inscrever no evento:</i></p>
+                    <p class="small-text"><i>Dica: se quiser que apenas <b>pessoas que já foram em um evento</b> consigam se inscrever, coloque como 1 ponto.</i></p>
+                    <span id="eventoPontuacaoNecessaria" class="soft-warn text" style="font-style: normal; font-size: 2rem; margin: 0;">0 pontos</span>
+
+                    <!-- Botão para editar a pontuação necessária-->
+                    <button id="eventoAlterarPontuacaoNecessaria" type="button" class="icon-button">
+                        <img src="/assets/icons/edit-icon.svg" alt="Editar Pontos" id="editPointsIcon" class="edit-icon">
+                    </button>
+
+                    <!-- Botões de Salvar/Cancelar -->
+                    <br><button type="submit" id="submitEventForm">Salvar Evento</button>
+                    <br><button type="button" class="alternative" id="editEventForm">Salvar Edição</button>
+                </form>
+            </div>
+        </div>
 
         <!-- Modal que lista os links das fotos de um evento -->
         <div id="modalOverlayFotosEvento" class="modal-overlay startHidden" style="display: none;">

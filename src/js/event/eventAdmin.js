@@ -1,7 +1,7 @@
 // Importa as coisas do firebase que serão usadas
 import {
     editEventForm,
-    eventForm,
+    eventForm, eventFormModal,
     EventsDatabaseRef,
     getDataFromDatabase,
     hideItem,
@@ -19,15 +19,17 @@ import {
     atualizarPontuacaoUsuario,
     calcularPontuacaoDoEvento, checkSubscribedEventsRequiringMinimumPoints,
     getPontuacaoMinimaParaEvento,
-    unsubscribeUserFromEvent
+    unsubscribeUserFromEvent, updateEventCard
 } from "/src/js/event/event";
 import {enviarErroParaSentry} from "/src/js/main";
 import {Auth} from "/src/config/firebase";
 import * as XLSX from 'xlsx-js-style';
 import {abrirAlerta, abrirConfirmacao, abrirModal, EntradasModal} from "/src/js/modal";
+import {closeEventModal, getEventElementId} from "./eventUI";
 
 export function criarEvento() {
-    hideItem(eventForm);
+    // hideItem(eventForm);
+    hideItem(eventFormModal);
     showItem(loading);
 
     let nome = document.getElementById('nome').value;
@@ -47,7 +49,7 @@ export function criarEvento() {
     if (nome && distancia && trajeto && dificuldade && data && dataInscricao && dataPrelecao && localPrelecao && localEncontro && descricao) {
         if (!validarOrdemDatas(dataInscricao, dataPrelecao, data)) {
             hideItem(loading);
-            showItem(eventForm);
+            showItem(eventFormModal); // showItem(eventForm);
             return;
         }
 
@@ -69,18 +71,19 @@ export function criarEvento() {
             //percursoAltimetria: percursoAltimetria
         })
             .then(function () {
-                abrirAlerta('Evento criado com sucesso!');
+                abrirAlerta('Evento criado com sucesso!').then( );
                 hideItem(loading);
-                hideItem(eventForm);
+                // hideItem(eventForm);
+                hideItem(eventFormModal);
             }).catch(function (error) {
                 showError('Erro ao criar evento:', error);
                 hideItem(loading);
-                showItem(eventForm);
+                showItem(eventFormModal); // showItem(eventForm);
         });
     } else {
         abrirAlerta('Por favor, preencha todos os campos do evento.');
         hideItem(loading);
-        showItem(eventForm);
+        showItem(eventFormModal); // showItem(eventForm);
     }
 }
 
@@ -178,6 +181,7 @@ export async function atualizarEvento() {
             dataPrelecao,
             localPrelecao,
             localEncontro,
+            descricao,
             pontuacaoNecessaria
         };
 
@@ -205,9 +209,12 @@ export async function atualizarEvento() {
                     listarInscritos(key, true); // só atualiza, para evitar "inscritos fantasmas"
 
                 eventForm.reset();
-                hideItem(eventForm);
+                // hideItem(eventForm);
+                hideItem(eventFormModal);
                 showItem(submitEventForm);   // mostra de novo o botão de criar
                 hideItem(editEventForm);     // esconde o botão de editar
+
+                updateEventCard(key);
 
                 await abrirAlerta('Evento atualizado com sucesso!');
 
@@ -234,7 +241,8 @@ export async function cancelarFormEvento() {
         currentEditingEvent = null;
         currentEditingEventData = {};
         eventForm.reset();
-        hideItem(eventForm);
+        hideItem(eventFormModal);
+        // hideItem(eventForm);
         showItem(submitEventForm); // volta o botão de criar
         hideItem(editEventForm);   // esconde o botão de editar
     }
@@ -262,11 +270,9 @@ async function atualizarPontuacaoDosInscritosDoEvento(eventoId, adicionar) {
 }
 
 //botão para remover evento
-export async function removeEvent(key) {
-    let selectedItem = document.getElementById(key);
-
+export async function removeEvent(key, name) {
     // título dentro do elemento
-    let eventName = selectedItem.querySelector('h3')?.textContent || 'evento';
+    let eventName = name || 'evento';
 
     let confirmation = await abrirConfirmacao('Você tem certeza que deseja remover o evento: "' + eventName + '"?');
     if (confirmation) {
@@ -303,7 +309,9 @@ export async function removeEvent(key) {
                     remove(inscricoesRef)
                 ])
                     .then(async () => {
-                        selectedItem.remove();
+                        let card = document.getElementById(getEventElementId('card', key));
+                        card?.remove();
+                        closeEventModal();
                     })
                     .catch(function (error) {
                         showError("Falha ao remover o evento/inscrições: ", error);
@@ -324,7 +332,8 @@ export async function removeEvent(key) {
         // Fecha o menu de edição
         if (currentEditingEvent === key) {
             eventForm.reset();
-            hideItem(eventForm);
+            // hideItem(eventForm);
+            hideItem(eventFormModal);
             showItem(submitEventForm); // volta o botão de criar
             hideItem(editEventForm);   // esconde o botão de editar
         }
@@ -352,13 +361,13 @@ export function updateEvent(key) {
     currentEditingEventData = {};
     const eventRef = refFromDatabase(EventsDatabaseRef, key);
 
-    eventForm.scrollIntoView({ behavior: "smooth", block: "start" });
+    //eventForm.scrollIntoView({ behavior: "smooth", block: "start" });
 
     getDataFromDatabase(eventRef)
         .then(snapshot => {
         const value = snapshot.val();
         if (!value) {
-            abrirAlerta('Evento não encontrado no banco.');
+            abrirAlerta('Evento não encontrado no banco de dados.').then( );
             return;
         }
 
@@ -383,7 +392,7 @@ export function updateEvent(key) {
         eventForm.dataset.editingKey = key;
 
         // Mostra formulário de edição
-        showItem(eventForm);
+        showItem(eventFormModal); // showItem(eventForm);
         hideItem(submitEventForm);
         showItem(editEventForm);
     });

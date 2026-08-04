@@ -692,7 +692,7 @@ textarea {
 
 .event-modal-buttons .past-event {
     background-color: #24a400;
-    outline: 2px solid #40bf77;
+    outline: 2px solid #24a40044;
 }
 
 .event-buttons .past-event {
@@ -702,6 +702,11 @@ textarea {
 .event-buttons .danger:hover, .event-modal-buttons .danger:hover {
     background-color: #f53e3e;
     outline: 2px solid #e06a6a;
+}
+
+.event-buttons .past-event:hover, .event-modal-buttons .past-event:hover {
+    background-color: #269f01;
+    outline: 2px solid #26a25c;
 }
 
 .event-buttons {

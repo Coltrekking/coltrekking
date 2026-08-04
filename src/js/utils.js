@@ -25,6 +25,7 @@ export let editPersonalInfoInitial = { cpf: "", turma: "", curso: "" };
 
 //definindo referências para os elementos do html de evento
 export let eventForm = document.getElementById('eventForm');
+export let eventFormModal = document.getElementById('eventFormModal');
 export let submitEventForm = document.getElementById('submitEventForm');
 export let editEventForm = document.getElementById('editEventForm');
 //export let eventContainer = document.getElementById('eventContainer');
@@ -51,6 +52,7 @@ export function showItem(item) {
     if (item && item.style) {
         let _loading = document.getElementById('loading'); // Para ter certeza que o loading
         if (_loading && item === _loading) item.style.display = 'flex';
+        else if (item === eventFormModal) item.style.display = 'flex';
         else item.style.display = 'block';
     }
 }

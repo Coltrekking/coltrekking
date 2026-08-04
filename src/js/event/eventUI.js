@@ -6,7 +6,7 @@ import {formattedDate} from "../date";
 import {
     getAttributeFromUser,
     getDataFromDatabase,
-    getRealTime,
+    getRealTime, hideItem,
     InscricoesDatabaseRef,
     PhotosDatabaseRef
 } from "../utils";
@@ -57,20 +57,29 @@ let currentSelectedEventName = null;
 let subscribeToEvent;
 let unsubscribeFromEvent;
 let showEventPhotos;
+let updateEvent;
+let removeEvent;
+let listarInscritos;
 
 // Retorna o id do elemento com o nome e o id dado
-const getEventElementId = (name, id) => `event-${name}-${id}`;
+export const getEventElementId = (name, id) => `event-${name}-${id}`;
 
 /**
  * Define as funções locais (do eventUI.js) como as funções dadas.
  * @param f_subscribe função de inscrever
  * @param f_unsubscribe função de desinscrever
  * @param f_showEventPhotos função de mostrar fotos do evento
+ * @param f_updateEvent função de atualizar o evento
+ * @param f_removeEvent função de remover um evento
+ * @param f_listarInscritos função de listar os inscritos
  */
-export function setEventFunctions(f_subscribe, f_unsubscribe, f_showEventPhotos) {
+export function setEventFunctions(f_subscribe, f_unsubscribe, f_showEventPhotos, f_updateEvent, f_removeEvent, f_listarInscritos) {
     subscribeToEvent = f_subscribe;
     unsubscribeFromEvent = f_unsubscribe;
     showEventPhotos = f_showEventPhotos;
+    updateEvent = f_updateEvent;
+    removeEvent = f_removeEvent;
+    listarInscritos = f_listarInscritos;
 }
 
 // Estados do botão de inscrição/desinscrição
@@ -433,7 +442,7 @@ function loadPageEvents() {
 
     // Evento de fechar o modal
     document.getElementById("fecharMenuEvento").addEventListener("click", () => {
-        EventModalEl.style.display = "none";
+        closeEventModal();
     });
 
     EventModalInscreverBtnEl.addEventListener('click', () => {
@@ -458,19 +467,31 @@ async function setupForAdmin() {
     await waitForUser();
     if (!isAdmin()) return;
 
-    // Botões para os admins
+    // Botões do modal de evento para os admins
     const editarBtn = document.createElement("button");
     editarBtn.classList = "alternative event-modal-btn";
     editarBtn.innerText = "Editar";
+    editarBtn.onclick = () => updateEvent(currentSelectedEventId);
 
     const removerBtn = document.createElement("button");
-    removerBtn.classList = "alternative event-modal-btn";
+    removerBtn.classList = "danger event-modal-btn";
     removerBtn.innerText = "Remover";
+    removerBtn.onclick = () => removeEvent(currentSelectedEventId, currentSelectedEventName);
 
     const gerenciarInscricoesBtn = document.createElement("button");
     gerenciarInscricoesBtn.classList = "alternative event-modal-btn";
     gerenciarInscricoesBtn.innerText = "Gerenciar Inscrições";
+    gerenciarInscricoesBtn.onclick = () => listarInscritos(currentSelectedEventId);
 
+    EventModalButtons.appendChild(gerenciarInscricoesBtn);
+    EventModalButtons.appendChild(editarBtn);
+    EventModalButtons.appendChild(removerBtn);
+}
+
+export function closeEventModal() {
+    currentSelectedEventId = null;
+    currentSelectedEventName = null;
+    hideItem(EventModalEl);
 }
 
 // Adiciona o modal no site (se não houver)
@@ -619,4 +640,4 @@ EventModalFotosImg = document.getElementById("fotosMenuEventoImg");
 EventModalButtons = document.getElementById("event-modal-buttons");
 
 loadPageEvents();
-setupForAdmin();
+setupForAdmin().then( );
