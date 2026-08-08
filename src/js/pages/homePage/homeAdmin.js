@@ -5,7 +5,7 @@
 import "./homePage"; // Carrega tudo que já haveria na homePage normalmente
 import {
     editEventForm,
-    eventForm,
+    eventForm, eventFormModal,
     hideItem,
     loading,
     showItem,
@@ -121,6 +121,31 @@ function loadEvents() {
 
     // Quando o usuário apertar o botão de obter selecionados
     obterSelecionadosBtn.addEventListener('click', onObterSelecionadosBtnClicked);
+
+    document.getElementById('inscritosListGoToTop').addEventListener('click', () => {
+        const modalContent = document.querySelector("#modalOverlayGerenciarInscritosEvento .modal-content");
+        if (modalContent) {
+            modalContent.scrollTo({
+                top: 0,
+                left: 0,
+                behavior: "smooth"
+            });
+        }
+    });
+
+    const eventoFormGoToTopBtn = document.getElementById('eventoFormGoToTop');
+    if (eventoFormGoToTopBtn) {
+        eventoFormGoToTopBtn.addEventListener('click', () => {
+            const modalContent = document.getElementById('eventformContent');
+            if (modalContent) {
+                modalContent.scrollTo({
+                    top: 0,
+                    left: 0,
+                    behavior: "smooth"
+                });
+            }
+        });
+    }
 }
 
 function loadPage() {

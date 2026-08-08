@@ -130,7 +130,7 @@
 
         <!-- Modal para criar/editar um evento -->
         <div class="modal-overlay" id="eventFormModal" style="z-index: 9998; display: none;">
-            <div class="event-modal-content">
+            <div class="event-modal-content" id="eventformContent">
                 <h2>Criar/Editar Evento</h2>
 
                 <!-- Botão de fechar -->
@@ -189,6 +189,10 @@
                     <br><label>Descrição:</label><br>
                     <textarea id="descricao" rows="4" cols="40"></textarea><br>
 
+                    <br><label>Foto do Evento:</label><br>
+                    <p class="small-text italic-text">De preferência larga e de alta qualidade!</p>
+                    <input type="file" name="fotoEvento" id="fotoEvento" accept="image/*"><br>
+
                     <!-- Inserir altimetria depois (precisa do cloud storage)
                     <br><label>Percuso e Altimetria:</label><br>
                     <input type="file" id="percursoAltimetria" accept=".png, .jpg"><br>
@@ -207,6 +211,13 @@
                     <!-- Botões de Salvar/Cancelar -->
                     <br><button type="submit" id="submitEventForm">Salvar Evento</button>
                     <br><button type="button" class="alternative" id="editEventForm">Salvar Edição</button>
+
+                    <div class="flex-center">
+                        <span id="eventoFormGoToTop" class="text big-text flex-center cursor-pointer" style="width: auto; margin-bottom: 3px;">
+                            <img src="/assets/icons/up-arrow-icon.svg" alt="Seta para cima" class="icon icon-on-button">
+                            <u>Voltar ao topo</u>
+                        </span>
+                    </div>
                 </form>
             </div>
         </div>
@@ -247,7 +258,7 @@
         <!-- Modal que mostra os inscritos e as informações ligadas a eles -->
         <div id="modalOverlayGerenciarInscritosEvento" class="modal-overlay" style="display: none;">
             <div class="modal-content modal-large inscritos-admin-frame">
-                <div>
+                <div id="inscritosListContent">
                     <button id="fecharMenuInscritos" title="Fechar" class="icon-button close-image-modal-button">
                         <img src="/assets/icons/close-icon.svg" alt="Ícone de X, para fechar" class="close-modal-icon">
                     </button>
@@ -283,6 +294,13 @@
 
                     <div id="inscritosList">
 
+                    </div>
+
+                    <div class="flex-center">
+                        <span id="inscritosListGoToTop" class="text big-text flex-center cursor-pointer" style="width: auto; margin-bottom: 3px;">
+                            <img src="/assets/icons/up-arrow-icon.svg" alt="Seta para cima" class="icon icon-on-button">
+                            <u>Voltar ao topo</u>
+                        </span>
                     </div>
                 </div>
             </div>

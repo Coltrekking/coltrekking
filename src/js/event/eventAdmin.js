@@ -44,6 +44,9 @@ export function criarEvento() {
     let localPrelecao = document.getElementById('localPrelecao').value;
     let localEncontro = document.getElementById('localEncontro').value;
     let descricao = document.getElementById('descricao').value;
+    let foto = document.getElementById('fotoEvento').value;
+    console.log(foto);
+    console.log(typeof foto);
     //let percursoAltimetria = document.getElementById('percursoAltimetria').files[0] ? document.getElementById('percursoAltimetria').files[0].name : '';
 
     if (nome && distancia && trajeto && dificuldade && data && dataInscricao && dataPrelecao && localPrelecao && localEncontro && descricao) {
@@ -157,6 +160,13 @@ export async function atualizarEvento() {
     let localPrelecao = document.getElementById('localPrelecao').value.trim();
     let localEncontro = document.getElementById('localEncontro').value.trim();
     let descricao = document.getElementById('descricao').value.trim();
+    let foto = document.getElementById('fotoEvento').files;
+    foto = foto ? foto[0] : '';
+    uploadFotoEvento(foto).then(v => {
+        console.log("Resultado: ");
+        console.log(v);
+    });
+
     let pontuacaoNecessaria;
 
     if (currentEditingEventData.pontuacaoNecessaria !== undefined)
@@ -384,6 +394,7 @@ export function updateEvent(key) {
         document.getElementById('subida').value = value.subida || '';
         document.getElementById('descida').value = value.descida || '';
         document.getElementById('trajeto').value = value.trajeto || '';
+        document.getElementById('fotoEvento').value = value.imagem || '';
         // Escreve a pontuação + a palavra "ponto" ou "pontos" dependendo do número
         document.getElementById("eventoPontuacaoNecessaria").innerHTML
             = `${value.pontuacaoNecessaria || 0} ${Number(value.pontuacaoNecessaria) === 1 ? 'ponto' : 'pontos'}`;
@@ -1065,3 +1076,50 @@ export async function onObterSelecionadosBtnClicked() {
 
     exportarSelecionadosXLSX(currentListingSubscribeEvent, nome, null, qntd);
 }
+
+// Converte o arquivo do <input type="file"> para Base64
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+    });
+}
+
+// Função para fazer o upload via GAS
+export async function uploadFotoEvento(file) {
+    console.log("a")
+    if (!file) return null;
+
+    const base64Data = await fileToBase64(file);
+    console.log("b")
+
+    const payload = {
+        fileName: `evento_${Date.now()}_${file.name}`,
+        mimeType: file.type,
+        base64: base64Data
+    };
+
+    // URL da API do Google Drive feita
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbyBSEEIxswCLy9nF0bAHrsUNXaDbEV-jOM3JsqoG6a2dfZwn3rbfaRROQ_hVPJYSx6h/exec";
+    console.log("c")
+
+    const response = await fetch(GAS_URL, {
+        method: "POST",
+        // Usamos text/plain no Content-Type para evitar bloqueio de CORS pelo GAS
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+    });
+
+    console.log("oi")
+    const result = await response.json();
+    console.log("tchau")
+
+    if (result.status === "success") {
+        return result.url; // Retorna a URL "https://lh3.googleusercontent.com/d/FILE_ID"
+    } else {
+        throw new Error("Erro no upload: " + result.message);
+    }
+}
+

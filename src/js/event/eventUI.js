@@ -4,6 +4,7 @@
  */
 import {formattedDate} from "../date";
 import {
+    eventForm,
     getAttributeFromUser,
     getDataFromDatabase,
     getRealTime, hideItem,
@@ -453,6 +454,19 @@ function loadPageEvents() {
     });
     EventModalFotosBtn.addEventListener('click', _ => {
         showEventPhotos(currentSelectedEventName, currentSelectedEventId).then( );
+    });
+
+    document.getElementById("inscritosListGoToTop").addEventListener("click", () => {
+        // Scrolla pra cima
+        // Obtém o modal (o elemento com a classe .modal-content que contém a lista)
+        const modalContent = document.querySelector("#modalOverlayGerenciarInscritosEvento .modal-content");
+        if (modalContent) {
+            modalContent.scrollTo({
+                top: 0,
+                left: 0,
+                behavior: "smooth"
+            });
+        }
     });
 }
 
