@@ -1,10 +1,12 @@
 // Importa as coisas do firebase que serão usadas
 import {
+    checkPhotoSize,
+    compressImageToBlob,
     editEventForm,
     eventForm, eventFormModal,
     EventsDatabaseRef,
     getDataFromDatabase,
-    hideItem,
+    hideItem, hideLoading,
     InscricoesDatabaseRef,
     loading,
     refFromDatabase,
@@ -27,7 +29,7 @@ import * as XLSX from 'xlsx-js-style';
 import {abrirAlerta, abrirConfirmacao, abrirModal, EntradasModal} from "/src/js/modal";
 import {closeEventModal, getEventElementId} from "./eventUI";
 
-export function criarEvento() {
+export async function criarEvento() {
     // hideItem(eventForm);
     hideItem(eventFormModal);
     showItem(loading);
@@ -44,9 +46,8 @@ export function criarEvento() {
     let localPrelecao = document.getElementById('localPrelecao').value;
     let localEncontro = document.getElementById('localEncontro').value;
     let descricao = document.getElementById('descricao').value;
-    let foto = document.getElementById('fotoEvento').value;
-    console.log(foto);
-    console.log(typeof foto);
+    let imagem = await uploadFotoEvento(); // o link que será salvo
+
     //let percursoAltimetria = document.getElementById('percursoAltimetria').files[0] ? document.getElementById('percursoAltimetria').files[0].name : '';
 
     if (nome && distancia && trajeto && dificuldade && data && dataInscricao && dataPrelecao && localPrelecao && localEncontro && descricao) {
@@ -70,22 +71,23 @@ export function criarEvento() {
             localPrelecao: localPrelecao,
             localEncontro: localEncontro,
             descricao: descricao,
-            pontuacaoNecessaria: currentEditingEventData.pontuacaoNecessaria || 0
+            pontuacaoNecessaria: currentEditingEventData.pontuacaoNecessaria || 0,
+            imagem: imagem,
             //percursoAltimetria: percursoAltimetria
         })
             .then(function () {
-                abrirAlerta('Evento criado com sucesso!').then( );
                 hideItem(loading);
+                abrirAlerta('Evento criado com sucesso!').then( );
                 // hideItem(eventForm);
                 hideItem(eventFormModal);
             }).catch(function (error) {
-                showError('Erro ao criar evento:', error);
                 hideItem(loading);
+                showError('Erro ao criar evento:', error);
                 showItem(eventFormModal); // showItem(eventForm);
         });
     } else {
-        abrirAlerta('Por favor, preencha todos os campos do evento.');
         hideItem(loading);
+        abrirAlerta('Por favor, preencha todos os campos do evento.').then( );
         showItem(eventFormModal); // showItem(eventForm);
     }
 }
@@ -142,6 +144,8 @@ export async function atualizarEvento() {
         return;
     }
 
+    showItem(loading);
+
     // Retira a pontuação do evento de todos os inscritos
     //  obs: retirar e depois colocar a pontuação foi a forma que
     //  encontrei de lidar com a lógica duvidosa do código inteiro.
@@ -160,12 +164,7 @@ export async function atualizarEvento() {
     let localPrelecao = document.getElementById('localPrelecao').value.trim();
     let localEncontro = document.getElementById('localEncontro').value.trim();
     let descricao = document.getElementById('descricao').value.trim();
-    let foto = document.getElementById('fotoEvento').files;
-    foto = foto ? foto[0] : '';
-    uploadFotoEvento(foto).then(v => {
-        console.log("Resultado: ");
-        console.log(v);
-    });
+    let imagem = await uploadFotoEvento(); // o link que será salvo
 
     let pontuacaoNecessaria;
 
@@ -192,7 +191,8 @@ export async function atualizarEvento() {
             localPrelecao,
             localEncontro,
             descricao,
-            pontuacaoNecessaria
+            pontuacaoNecessaria,
+            imagem
         };
 
 
@@ -226,6 +226,7 @@ export async function atualizarEvento() {
 
                 updateEventCard(key);
 
+                hideLoading();
                 await abrirAlerta('Evento atualizado com sucesso!');
 
                 currentEditingEvent = null;
@@ -1077,49 +1078,76 @@ export async function onObterSelecionadosBtnClicked() {
     exportarSelecionadosXLSX(currentListingSubscribeEvent, nome, null, qntd);
 }
 
-// Converte o arquivo do <input type="file"> para Base64
-function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-        reader.readAsDataURL(file);
-    });
-}
+/**
+ * Faz o upload da foto do evento usando o ImgBB.
+ * @returns {Promise<string|null>} a URL da imagem enviada ou null em caso de erro.
+ */
+async function uploadFotoEvento() {
+    let files = document.getElementById('fotoEvento').files;
+    let file = files ? files[0] : null;
 
-// Função para fazer o upload via GAS
-export async function uploadFotoEvento(file) {
-    console.log("a")
-    if (!file) return null;
+    if (!file) throw new Error("Nenhuma imagem selecionada.");
 
-    const base64Data = await fileToBase64(file);
-    console.log("b")
+    // Se a foto for muito pesada, avisa para o usuário
+    // que a foto deve ser menor
+    if (!checkPhotoSize(file)) {
+        hideLoading();
+        await abrirAlerta(
+            "A foto deve ter menos que 32MB! Por favor, tente novamente com uma foto menor."
+        );
+        return null;
+    }
 
-    const payload = {
-        fileName: `evento_${Date.now()}_${file.name}`,
-        mimeType: file.type,
-        base64: base64Data
-    };
+    // Se chegou até aqui, pode enviar a foto
+    try {
+        console.log("Enviando foto...");
 
-    // URL da API do Google Drive feita
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbyBSEEIxswCLy9nF0bAHrsUNXaDbEV-jOM3JsqoG6a2dfZwn3rbfaRROQ_hVPJYSx6h/exec";
-    console.log("c")
+        const name = `evento_${Date.now()}.jpg`;
+        // Comprime a imagem antes de enviar
+        const compressedBlob = await compressImageToBlob(file, 2600, 1000, 1);
 
-    const response = await fetch(GAS_URL, {
-        method: "POST",
-        // Usamos text/plain no Content-Type para evitar bloqueio de CORS pelo GAS
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload)
-    });
-
-    console.log("oi")
-    const result = await response.json();
-    console.log("tchau")
-
-    if (result.status === "success") {
-        return result.url; // Retorna a URL "https://lh3.googleusercontent.com/d/FILE_ID"
-    } else {
-        throw new Error("Erro no upload: " + result.message);
+        return await uploadPhotoOnImgBB(compressedBlob, name);
+    } catch (error) {
+        enviarErroParaSentry(error);
+        hideLoading();
+        await abrirAlerta(
+            "Erro ao enviar a foto do evento. Por favor, tente novamente. Mensagem de erro:" + error.message
+        );
+        // (não precisa do retorno abaixo, pois ele é inútil)
+        // return;
     }
 }
 
+/**
+ * Faz o upload da foto dada para o ImgBB, retornando o link.
+ * @param {Blob} blob o blob da imagem a ser enviado.
+ * @param {string} name o nome da imagem.
+ * @returns {Promise<string|null>} a URL da imagem enviada ou null em caso de erro.
+ */
+export async function uploadPhotoOnImgBB(blob, name) {
+    if (!blob || !name) return null;
+
+    // Prepara o pacote de dados (FormData)
+    const formData = new FormData();
+    formData.append("image", blob, name);
+
+    // Obtém a URL do ImgBB
+    const IMGBB_API_KEY = import.meta.env.VITE_IMGBB_API_KEY;
+    const url = `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`;
+
+    // Envia para o ImgBB
+    const response = await fetch(url, {
+        method: "POST",
+        body: formData
+    });
+
+    const result = await response.json();
+
+    console.log("Resultado do envio: ", result.data.url);
+
+    if (result.success) {
+        return result.data.url; // Retorna a URL direta da imagem (ex: https://i.ibb.co/CshtN68v/evento-1786392438958.jpgg)
+    } else {
+        throw new Error("Erro no ImgBB: " + result.error.message);
+    }
+}

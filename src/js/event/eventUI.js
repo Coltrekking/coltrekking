@@ -398,8 +398,8 @@ export function createEventCard(eventSnapshot, listaEventos) {
         // NOTA: é importante fazer isso antes de tentar obter os botões!
         // NOTA 2: isso faz o evento ser colocado na tela antes de haver coisas dentro.
         //         Por mais que isso não seja recomendado (se sentir necessidade, pode
-        //         colocar depois do "insertAdjacentHTML" abaixo), é por um mínimo
-        //         tempo que a div ficaria sem vazia.
+        //         colocar essa linha depois do "insertAdjacentHTML" abaixo), é por um
+        //         tempo mínimo que a div ficaria sem vazia.
         listaEventos.appendChild(elemento);
     }
 

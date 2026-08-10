@@ -4,7 +4,7 @@
  */
 
 /* Cria o modal se já não tiver criado */
-import {hideItem, showItem} from "/src/js/utils";
+import {hideItem, loading, showItem} from "/src/js/utils";
 
 if (!document.getElementById("modalOverlay")) {
     const modalHTML = `
@@ -229,6 +229,7 @@ export function abrirModal(titulo, mensagem, tipoDeEntrada, opcoes = {}) {
         }
 
 
+        hideItem(loading); // apenas para certificar que não terá nada na frente
         showItem(Modal);
 
         // Evento para quando clicar no botão Ok.

@@ -1,5 +1,6 @@
 // Converte data BR para formato yyyy-mm-dd (para input type="date")
 import {abrirAlerta} from "/src/js/modal";
+import {hideLoading} from "/src/js/utils";
 
 export function formattedDate(date) {
     const dateObj = new Date(date);
@@ -17,12 +18,12 @@ export function validarOrdemDatas(dataInscricao, dataPrelecao, dataEvento) {
     const evento = new Date(dataEvento).getTime();
 
     if (isNaN(inscricao) || isNaN(prelecao) || isNaN(evento)) {
-        abrirAlerta("⚠️ Datas inválidas. Verifique os campos.");
+        abrirAlerta("⚠️ Datas inválidas. Verifique os campos.").then( );
         return false;
     }
 
     if (!(inscricao < prelecao && prelecao < evento)) {
-        abrirAlerta("⚠️ Ordem das datas inválida:\nInscrição -> Preleção -> Evento");
+        abrirAlerta("⚠️ Ordem das datas inválida:\nInscrição -> Preleção -> Evento").then( );
         return false;
     }
 

@@ -356,3 +356,82 @@ export function getRealTime() {
     // Relógio do usuário + a diferença exata para o servidor
     return Date.now() + serverTimeOffset;
 }
+
+/**
+ * Comprime uma imagem antes de transformá-la em blob.
+ * @param {File} file o arquivo de imagem original.
+ * @param {number} maxWidth largura máxima permitida (padrão: 1200px).
+ * @param {number} maxHeight altura máxima permitida (padrão: 1200px).
+ * @param {number} quality qualidade da imagem de 0 a 1 (padrão: 0.7 = 70%).
+ * @returns {Promise<Blob>} o blob da imagem comprimida em formato JPEG.
+ */
+export function compressImageToBlob(file, maxWidth = 1200, maxHeight = 1200, quality = 0.7) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+
+            img.onload = () => {
+                let width = img.width;
+                let height = img.height;
+
+                // Mantém a proporção da imagem
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width = Math.round((width * maxHeight) / height);
+                        height = maxHeight;
+                    }
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Converte o canvas direto para um arquivo binário (Blob) em JPEG
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        resolve(blob);
+                    } else {
+                        reject(new Error("Falha ao comprimir a imagem."));
+                    }
+                }, 'image/jpeg', quality);
+            };
+
+            img.onerror = (err) => reject(new Error("Erro ao processar a imagem: " + err.message));
+        };
+
+        reader.onerror = (err) => reject(new Error("Erro ao ler o arquivo: " + err.message));
+        reader.readAsDataURL(file); // Lê o arquivo original
+    });
+}
+
+/**
+ * Verifica se o tamanho do arquivo é menor ou igual ao tamanho máximo permitido.
+ * @param {File} file arquivo que deseja se verificar o tamanho.
+ * @param {number} maxSizeInMB tamanho máximo permitido (em megabytes).
+ * @returns {boolean} se o arquivo está dentro do tamanho máximo.
+ */
+export function checkFileSize(file, maxSizeInMB) {
+    const maxSizeInBytes = maxSizeInMB * 1024 * 1024; // 5MB in bytes
+    return file.size <= maxSizeInBytes;
+}
+
+/**
+ * Verifica se o tamanho da foto é menor ou igual ao tamanho máximo
+ * permitido, que é de 32MB.
+ * @param {File} file foto que deseja se verificar o tamanho.
+ * @returns {boolean} se a foto está dentro do tamanho máximo.
+ */
+export function checkPhotoSize(file) {
+    return checkFileSize(file, 32);
+}
