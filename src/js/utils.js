@@ -360,12 +360,12 @@ export function getRealTime() {
 /**
  * Comprime uma imagem antes de transformá-la em blob.
  * @param {File} file o arquivo de imagem original.
- * @param {number} maxWidth largura máxima permitida (padrão: 1200px).
- * @param {number} maxHeight altura máxima permitida (padrão: 1200px).
+ * @param {number} width largura (padrão: 1200px).
+ * @param {number} height altura (padrão: 1200px).
  * @param {number} quality qualidade da imagem de 0 a 1 (padrão: 0.7 = 70%).
  * @returns {Promise<Blob>} o blob da imagem comprimida em formato JPEG.
  */
-export function compressImageToBlob(file, maxWidth = 1200, maxHeight = 1200, quality = 0.7) {
+export function compressImageToBlob(file, width = 1200, height = 1200, quality = 0.7) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
 
@@ -374,21 +374,21 @@ export function compressImageToBlob(file, maxWidth = 1200, maxHeight = 1200, qua
             img.src = event.target.result;
 
             img.onload = () => {
-                let width = img.width;
-                let height = img.height;
-
-                // Mantém a proporção da imagem
-                if (width > height) {
-                    if (width > maxWidth) {
-                        height = Math.round((height * maxWidth) / width);
-                        width = maxWidth;
-                    }
-                } else {
-                    if (height > maxHeight) {
-                        width = Math.round((width * maxHeight) / height);
-                        height = maxHeight;
-                    }
-                }
+                // let width = img.width;
+                // let height = img.height;
+                //
+                // // Mantém a proporção da imagem
+                // if (width > height) {
+                //     if (width > maxWidth) {
+                //         height = Math.round((height * maxWidth) / width);
+                //         width = maxWidth;
+                //     }
+                // } else {
+                //     if (height > maxHeight) {
+                //         width = Math.round((width * maxHeight) / height);
+                //         height = maxHeight;
+                //     }
+                // }
 
                 const canvas = document.createElement('canvas');
                 canvas.width = width;

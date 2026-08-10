@@ -46,7 +46,15 @@ export async function criarEvento() {
     let localPrelecao = document.getElementById('localPrelecao').value;
     let localEncontro = document.getElementById('localEncontro').value;
     let descricao = document.getElementById('descricao').value;
-    let imagem = await uploadFotoEvento(); // o link que será salvo
+    let imagemData = await uploadFotoEvento();
+    console.log(imagemData);
+    // imagem: link da imagem
+    // deleteImagem: link para apagar a imagem
+    let imagem = null, deleteImagem = null;
+    if (imagemData) {
+        imagem = imagemData.url;
+        deleteImagem = imagemData.deleteUrl;
+    }
 
     //let percursoAltimetria = document.getElementById('percursoAltimetria').files[0] ? document.getElementById('percursoAltimetria').files[0].name : '';
 
@@ -73,6 +81,7 @@ export async function criarEvento() {
             descricao: descricao,
             pontuacaoNecessaria: currentEditingEventData.pontuacaoNecessaria || 0,
             imagem: imagem,
+            deleteImagem: deleteImagem
             //percursoAltimetria: percursoAltimetria
         })
             .then(function () {
@@ -164,7 +173,15 @@ export async function atualizarEvento() {
     let localPrelecao = document.getElementById('localPrelecao').value.trim();
     let localEncontro = document.getElementById('localEncontro').value.trim();
     let descricao = document.getElementById('descricao').value.trim();
-    let imagem = await uploadFotoEvento(); // o link que será salvo
+    let imagemData = await uploadFotoEvento();
+    console.log(imagemData);
+    // imagem: link da imagem
+    // deleteImagem: link para apagar a imagem
+    let imagem = null, deleteImagem = null;
+    if (imagemData) {
+        imagem = imagemData.url;
+        deleteImagem = imagemData.deleteUrl;
+    }
 
     let pontuacaoNecessaria;
 
@@ -192,7 +209,8 @@ export async function atualizarEvento() {
             localEncontro,
             descricao,
             pontuacaoNecessaria,
-            imagem
+            imagem,
+            deleteImagem
         };
 
 
@@ -395,7 +413,7 @@ export function updateEvent(key) {
         document.getElementById('subida').value = value.subida || '';
         document.getElementById('descida').value = value.descida || '';
         document.getElementById('trajeto').value = value.trajeto || '';
-        document.getElementById('fotoEvento').value = value.imagem || '';
+        document.getElementById('fotoEvento').value = '';
         // Escreve a pontuação + a palavra "ponto" ou "pontos" dependendo do número
         document.getElementById("eventoPontuacaoNecessaria").innerHTML
             = `${value.pontuacaoNecessaria || 0} ${Number(value.pontuacaoNecessaria) === 1 ? 'ponto' : 'pontos'}`;
@@ -1080,13 +1098,13 @@ export async function onObterSelecionadosBtnClicked() {
 
 /**
  * Faz o upload da foto do evento usando o ImgBB.
- * @returns {Promise<string|null>} a URL da imagem enviada ou null em caso de erro.
+ * @returns {Promise<Object|null>} a url e a deleteUrl da imagem enviada ou null (em caso de erro).
  */
 async function uploadFotoEvento() {
     let files = document.getElementById('fotoEvento').files;
     let file = files ? files[0] : null;
 
-    if (!file) throw new Error("Nenhuma imagem selecionada.");
+    if (!file) return;
 
     // Se a foto for muito pesada, avisa para o usuário
     // que a foto deve ser menor
@@ -1104,7 +1122,7 @@ async function uploadFotoEvento() {
 
         const name = `evento_${Date.now()}.jpg`;
         // Comprime a imagem antes de enviar
-        const compressedBlob = await compressImageToBlob(file, 2600, 1000, 1);
+        const compressedBlob = await compressImageToBlob(file, 1500, 600, 1);
 
         return await uploadPhotoOnImgBB(compressedBlob, name);
     } catch (error) {
@@ -1122,7 +1140,7 @@ async function uploadFotoEvento() {
  * Faz o upload da foto dada para o ImgBB, retornando o link.
  * @param {Blob} blob o blob da imagem a ser enviado.
  * @param {string} name o nome da imagem.
- * @returns {Promise<string|null>} a URL da imagem enviada ou null em caso de erro.
+ * @returns {Promise<Object|null>} a url e a deleteUrl da imagem enviada ou null (em caso de erro).
  */
 export async function uploadPhotoOnImgBB(blob, name) {
     if (!blob || !name) return null;
@@ -1145,8 +1163,11 @@ export async function uploadPhotoOnImgBB(blob, name) {
 
     console.log("Resultado do envio: ", result.data.url);
 
+    console.log(result.data);
+
     if (result.success) {
-        return result.data.url; // Retorna a URL direta da imagem (ex: https://i.ibb.co/CshtN68v/evento-1786392438958.jpgg)
+        // Retorna a URL direta da imagem (ex: https://i.ibb.co/CshtN68v/evento-1786392438958.jpg)
+        return {url: result.data.url, deleteUrl: result.data.delete_url};
     } else {
         throw new Error("Erro no ImgBB: " + result.error.message);
     }

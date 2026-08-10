@@ -292,7 +292,6 @@ export function fillEventModal(eventId, eventData) {
     EventModalFotosBtn.style.display = 'none';
     EventModalFotosLoading.style.display = 'flex';
 
-    console.log("TODO: adicionar imagem"); // TODO: adicionar imagem
     EventModalImgEl.style.backgroundImage = `url(${eventData.imagem || '/assets/images/default-event-image.jpg'})`;
 
     EventModalTitleEl.innerText = eventData.nome || '---';
@@ -401,6 +400,10 @@ export function createEventCard(eventSnapshot, listaEventos) {
         //         colocar essa linha depois do "insertAdjacentHTML" abaixo), é por um
         //         tempo mínimo que a div ficaria sem vazia.
         listaEventos.appendChild(elemento);
+    }
+    if (eventData.imagem) {
+        console.log(eventData.imagem);
+        elemento.style.backgroundImage = `url(${eventData.imagem})`;
     }
 
     // Obtém o elemento (por string)
