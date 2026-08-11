@@ -29,6 +29,12 @@ import * as XLSX from 'xlsx-js-style';
 import {abrirAlerta, abrirConfirmacao, abrirModal, EntradasModal} from "/src/js/modal";
 import {closeEventModal, getEventElementId} from "./eventUI";
 
+// Botão para apagar foto de um evento
+const apagarFotoBtn = document.getElementById("apagarFotoBtn");
+// Input para colocar uma foto em um evento
+const fotoEventoEl = document.getElementById('fotoEvento');
+
+
 export async function criarEvento() {
     // hideItem(eventForm);
     hideItem(eventFormModal);
@@ -46,8 +52,7 @@ export async function criarEvento() {
     let localPrelecao = document.getElementById('localPrelecao').value;
     let localEncontro = document.getElementById('localEncontro').value;
     let descricao = document.getElementById('descricao').value;
-    let imagemData = await uploadFotoEvento();
-    console.log(imagemData);
+    let imagemData = await uploadFotoEvento(); // faz upload e obtém as informações da imagem
     // imagem: link da imagem
     // deleteImagem: link para apagar a imagem
     let imagem = null, deleteImagem = null;
@@ -173,11 +178,14 @@ export async function atualizarEvento() {
     let localPrelecao = document.getElementById('localPrelecao').value.trim();
     let localEncontro = document.getElementById('localEncontro').value.trim();
     let descricao = document.getElementById('descricao').value.trim();
-    let imagemData = await uploadFotoEvento();
-    console.log(imagemData);
     // imagem: link da imagem
     // deleteImagem: link para apagar a imagem
-    let imagem = null, deleteImagem = null;
+    let imagem = currentEditingEventData.imagem || null;
+    let deleteImagem = currentEditingEventData.deleteImagem || null;
+
+    // Tenta fazer upload da imagem, se houver.
+    let imagemData = await uploadFotoEvento();
+
     if (imagemData) {
         imagem = imagemData.url;
         deleteImagem = imagemData.deleteUrl;
@@ -380,17 +388,17 @@ export function fecharListaInscritos() {
 let currentEditingEvent = null
 let currentEditingEventData = {};
 
-//botão para editar evento
+
+// botão para editar evento
 export function updateEvent(key) {
     currentEditingEvent = key;
     currentEditingEventData = {};
     const eventRef = refFromDatabase(EventsDatabaseRef, key);
 
-    //eventForm.scrollIntoView({ behavior: "smooth", block: "start" });
-
     getDataFromDatabase(eventRef)
         .then(snapshot => {
         const value = snapshot.val();
+        currentEditingEventData = value;
         if (!value) {
             abrirAlerta('Evento não encontrado no banco de dados.').then( );
             return;
@@ -409,16 +417,20 @@ export function updateEvent(key) {
         document.getElementById('subida').value = value.subida || '';
         document.getElementById('descida').value = value.descida || '';
         document.getElementById('trajeto').value = value.trajeto || '';
-        document.getElementById('fotoEvento').value = '';
+        fotoEventoEl.value = ''; // não é possível definir o nome
         // Escreve a pontuação + a palavra "ponto" ou "pontos" dependendo do número
         document.getElementById("eventoPontuacaoNecessaria").innerHTML
             = `${value.pontuacaoNecessaria || 0} ${Number(value.pontuacaoNecessaria) === 1 ? 'ponto' : 'pontos'}`;
 
-        // Guarda a key para usar depois na atualização
+        setApagarFotoBtnState(value.imagem);
+
+
+
+            // Guarda a key para usar depois na atualização
         eventForm.dataset.editingKey = key;
 
         // Mostra formulário de edição
-        showItem(eventFormModal); // showItem(eventForm);
+        showItem(eventFormModal);
         hideItem(submitEventForm);
         showItem(editEventForm);
     });
@@ -1097,7 +1109,7 @@ export async function onObterSelecionadosBtnClicked() {
  * @returns {Promise<Object|null>} a url e a deleteUrl da imagem enviada ou null (em caso de erro).
  */
 async function uploadFotoEvento() {
-    let files = document.getElementById('fotoEvento').files;
+    let files = fotoEventoEl.files;
     let file = files ? files[0] : null;
 
     if (!file) return;
@@ -1166,5 +1178,53 @@ export async function uploadPhotoOnImgBB(blob, name) {
         return {url: result.data.url, deleteUrl: result.data.delete_url};
     } else {
         throw new Error("Erro no ImgBB: " + result.error.message);
+    }
+}
+
+let arquivoDeFotoEventoColocado = false;
+// Se o botão de "Apagar Foto" for pressionado
+apagarFotoBtn?.addEventListener('click', async (ev) => {
+    ev.preventDefault(); // evita enviar o formulário
+
+    // Se não tiver informação do que estiver editando agora nem imagem anexada
+    if (!currentEditingEventData.imagem && !arquivoDeFotoEventoColocado) return;
+
+    const confirmacao = await abrirConfirmacao("Deseja realmente apagar a foto? Essa ação não pode ser desfeita.");
+    if (!confirmacao) return;
+
+    // Deixa as informações das imagens como nulas
+    currentEditingEventData.imagem = null;
+    currentEditingEventData.deleteImagem = null;
+
+    fotoEventoEl.value = ''; // limpa o input do arquivo
+
+    // Muda visualmente
+    setApagarFotoBtnState(false);
+
+    // Nota: a imagem não é apagada do ImgBB, pois:
+    //  - Não há motivos para apagar (o espaço é ilimitado);
+    //  - O usuário precisaria ser redirecionado para outra página
+    //    e, nessa página, clicar no botão de "Eliminar". Como isso
+    //    não é prático para o usuário, não vale a pena implementar.
+});
+
+fotoEventoEl?.addEventListener('change', async (ev) => {
+    // Se alguma foto for colocada/retirada, atualiza a variável
+    const files = ev.target.files;
+    arquivoDeFotoEventoColocado = files.length > 0;
+    setApagarFotoBtnState(arquivoDeFotoEventoColocado);
+})
+
+/**
+ * Define o estado visual do botão de apagar foto.
+ * @param {Boolean} state verdadeiro se for clicável, falso se não.
+ */
+function setApagarFotoBtnState(state) {
+    if (state) {
+        apagarFotoBtn.classList.remove("unable");
+        apagarFotoBtn.classList.add("danger");
+    } else {
+        apagarFotoBtn.classList.add("unable");
+        apagarFotoBtn.classList.remove("danger");
     }
 }

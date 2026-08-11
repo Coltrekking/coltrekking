@@ -402,7 +402,6 @@ export function createEventCard(eventSnapshot, listaEventos) {
         listaEventos.appendChild(elemento);
     }
     if (eventData.imagem) {
-        console.log(eventData.imagem);
         elemento.style.backgroundImage = `url(${eventData.imagem})`;
     }
 

@@ -402,6 +402,7 @@ p {
     height: max(150px, 15vh);
     object-fit: cover;
     border-radius: 50%;
+    border: 2px solid #15140e;
 }
 
 .user-header h3 {
@@ -720,7 +721,13 @@ textarea {
 
 .event-card-blur {
     position: absolute;
-    inset: 0; /* Ocupa todo o espaço da foto */
+
+    /* Faz o blur cobrir todo o cartão + um pouco da parte de baixo */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: -2px;
+
     pointer-events: none; /* Garante que o blur não atrapalhe cliques */
 
     /* Aplica o desfoque no fundo */
@@ -963,12 +970,23 @@ textarea {
 
 .top-buttons {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start; /* Alinha o botão ao topo da div */
+    justify-content: flex-end; /* Alinha o botão à direita da div */
+
+    padding: 5px 5px 0 0;
 
     position: absolute;
-    top: 5px;
-    right: 0.5vw;
+    top: 0;
+    right: 0;
+
+    width: 90px;
+    height: 90px;
+
+    background: radial-gradient(circle at top right, rgba(0, 0, 0, 0.7) 10%, rgba(0, 0, 0, 0) 70%);
+
+    border-top-right-radius: 8px;
+    z-index: 10;
+
 }
 
 .event-modal-top-button {
@@ -1096,7 +1114,7 @@ textarea {
     color: white;
 }
 
-.user-card .user-row button.unable {
+.user-card .user-row button.unable, button.unable {
     background-color: lightgray;
     color: white;
 
