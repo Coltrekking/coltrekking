@@ -249,10 +249,6 @@ export async function atualizarEvento() {
 
                 currentEditingEvent = null;
                 currentEditingEventData = {};
-
-                /*dbRefEvents.once('value').then(dataSnapshot => {
-                    fillEventList(dataSnapshot);
-                });*/
             }).catch((error) => {
                 showError('Erro ao atualizar evento:', error);
             });
