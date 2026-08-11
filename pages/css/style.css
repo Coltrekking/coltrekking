@@ -402,7 +402,7 @@ p {
     height: max(150px, 15vh);
     object-fit: cover;
     border-radius: 50%;
-    border: 2px solid #15140e;
+    /*border: 2px solid #15140e;*/
 }
 
 .user-header h3 {
@@ -917,7 +917,6 @@ textarea {
 .event-modal-data > div > p.font-bold {
     font-size: max(22px, 1.8vw);
     color: #15140e;
-    border-bottom: 2px solid #d8c4a0;
     padding-bottom: 4px;
     margin-bottom: 8px;
 }

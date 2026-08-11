@@ -576,7 +576,7 @@ if (!document.getElementById("event-modal")) {
                     </div>
                     <!-- Linha 2 -->
                     <div>
-                        <p class="google-font font-bold text-align-left">Trilha</p>
+                        <p class="google-font font-bold text-align-left" style="border-top: 2px solid #d8c4a0; margin-top: 10px;">Trilha</p>
 
                         <div class="event-modal-line">
                             <div class="text event-modal-text-icon" title="Dificuldade">

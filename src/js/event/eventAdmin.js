@@ -1126,11 +1126,9 @@ async function uploadFotoEvento() {
 
     // Se chegou até aqui, pode enviar a foto
     try {
-        console.log("Enviando foto...");
-
         const name = `evento_${Date.now()}.jpg`;
         // Comprime a imagem antes de enviar
-        const compressedBlob = await compressImageToBlob(file, 1500, 600, 1);
+        const compressedBlob = await compressImageToBlob(file, 1500, 800, 0.7);
 
         return await uploadPhotoOnImgBB(compressedBlob, name);
     } catch (error) {
@@ -1168,10 +1166,6 @@ export async function uploadPhotoOnImgBB(blob, name) {
     });
 
     const result = await response.json();
-
-    console.log("Resultado do envio: ", result.data.url);
-
-    console.log(result.data);
 
     if (result.success) {
         // Retorna a URL direta da imagem (ex: https://i.ibb.co/CshtN68v/evento-1786392438958.jpg)
@@ -1223,8 +1217,10 @@ function setApagarFotoBtnState(state) {
     if (state) {
         apagarFotoBtn.classList.remove("unable");
         apagarFotoBtn.classList.add("danger");
+        apagarFotoBtn.style.display = 'block';
     } else {
         apagarFotoBtn.classList.add("unable");
         apagarFotoBtn.classList.remove("danger");
+        apagarFotoBtn.style.display = 'none';
     }
 }
