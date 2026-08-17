@@ -266,13 +266,51 @@ function getFormattedEventCard(id, eventData) {
 }
 
 /**
+ * Verifica se já é hora de inscrição e se ainda não passou a data do evento.
+ * - Essa função é usada apenas em contextos específicos.
+ */
+function _checkSubscriptionTime(eventData, subscribeBtn, eventDate, subscriptionTimer, key) {
+    // pega a hora do evento
+    const eventStart = eventData.dataInscricao ? new Date(eventData.dataInscricao) : null;
+
+    if (!eventStart) return;
+
+    const now = getRealTime();
+
+    // se ainda não chegou a hora de inscrição
+    if (now < eventStart.getTime()) {
+        setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.NAO_HABILITADO);
+        if (currentSelectedEventId === key)
+            setSubscribeButtonState(EventModalInscreverBtnEl, SubscribeButtonStates.NAO_HABILITADO);
+        return;
+    }
+
+    // se a data do evento já passou
+    if (eventDate && now > eventDate.getTime()) {
+        setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.EVENTO_REALIZADO);
+        if (currentSelectedEventId === key)
+            setSubscribeButtonState(EventModalInscreverBtnEl, SubscribeButtonStates.EVENTO_REALIZADO);
+
+        if (subscriptionTimer) clearInterval(subscriptionTimer);
+        return;
+    }
+
+    // se está no período válido de inscrição
+    setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.INSCREVER);
+    if (currentSelectedEventId === key)
+        setSubscribeButtonState(EventModalInscreverBtnEl, SubscribeButtonStates.INSCREVER);
+
+}
+
+/**
  * Lida com as atualizações de inscrição/desinscrição de um evento.
  * @param eventData o evento em que se quer colocar o botão
  * @param key o uid do evento
  * @param buttons os botões de inscrever/desinscrever (em um mapa)
+ * @param cardElement o elemento do card do evento (para guardar o timer)
  */
-function setupSubscribeObserver(key, eventData, buttons) {
-    const eventDate = eventData.data ? new Date(eventData.data) : null;
+function setupSubscribeObserver(key, eventData, buttons, cardElement = null) {
+    const eventSubscriptionDate = eventData.data ? new Date(eventData.data) : null;
 
     const subscribeBtn = buttons.subscribe;
     setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.INSCREVER);
@@ -282,35 +320,14 @@ function setupSubscribeObserver(key, eventData, buttons) {
     const unsubscribeBtn = buttons.unsubscribe;
     setSubscribeButtonState(unsubscribeBtn, SubscribeButtonStates.DESINSCREVER);
 
-    // verifica se já é hora de inscrição e se ainda não passou a data do evento
-    function checkSubscriptionTime() {
-        // pega a hora do evento
-        const eventStart = eventData.dataInscricao ? new Date(eventData.dataInscricao) : null;
-
-        if (!eventStart) return;
-
-        const now = getRealTime();
-
-        // se ainda não chegou a hora de inscrição
-        if (now < eventStart.getTime()) {
-            setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.NAO_HABILITADO);
-            return;
-        }
-
-        // se a data do evento já passou
-        if (eventDate && now > eventDate.getTime()) {
-            setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.EVENTO_REALIZADO);
-            clearInterval(subscriptionTimer);
-            return;
-        }
-
-        // se está no período válido de inscrição
-        setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.INSCREVER);
-    }
-
     // chama a função a cada segundo até habilitar
-    const subscriptionTimer = setInterval(checkSubscriptionTime, 100);
-    checkSubscriptionTime(); // checa imediatamente
+    let subscriptionTimer;
+    subscriptionTimer = setInterval(() => {
+        _checkSubscriptionTime(eventData, subscribeBtn, eventSubscriptionDate, subscriptionTimer, key);
+    }, 100);
+
+    if (cardElement) cardElement._subscriptionTimer = subscriptionTimer; // Guarda o timer no elemento
+    _checkSubscriptionTime(eventData, subscribeBtn, eventSubscriptionDate, subscriptionTimer, key); // checa imediatamente
 
     // verifica se o usuário já está inscrito
     getDataFromDatabase(InscricoesDatabaseRef, key + '/' + Auth.currentUser.uid)
@@ -464,6 +481,9 @@ export function createEventCard(eventSnapshot, listaEventos) {
 
     let elemento = document.getElementById(cardElementId);
     if (elemento) {
+        // Limpa o timer anterior, se houver, para evitar vazamento de memória
+        if (elemento._subscriptionTimer) clearInterval(elemento._subscriptionTimer);
+
         elemento.replaceChildren(); // limpa o cartão
     } else {
         // Cria o elemento (transforma de string para um elemento em si)
@@ -502,7 +522,7 @@ export function createEventCard(eventSnapshot, listaEventos) {
     const desinscreverBtn = document.getElementById(getEventElementId('cancelar-inscricao-btn', eventId));
     const detalhesBtn = document.getElementById(getEventElementId('detalhes-btn', eventId));
 
-    setupSubscribeObserver(eventId, eventData, {subscribe: inscreverBtn, unsubscribe: desinscreverBtn});
+    setupSubscribeObserver(eventId, eventData, {subscribe: inscreverBtn, unsubscribe: desinscreverBtn}, elemento);
 
     detalhesBtn.addEventListener('click', () => {
         fillEventModal(eventId, eventData);
@@ -568,24 +588,32 @@ async function setupForAdmin() {
     if (!isAdmin()) return;
 
     // Botões do modal de evento para os admins
-    const editarBtn = document.createElement("button");
-    editarBtn.classList = "alternative event-modal-btn";
-    editarBtn.innerText = "Editar";
-    editarBtn.onclick = () => updateEvent(currentSelectedEventId);
+    if (!document.getElementById("admin-btn-gerenciar")) {
+        const gerenciarInscricoesBtn = document.createElement("button");
+        gerenciarInscricoesBtn.id = "admin-btn-gerenciar";
+        gerenciarInscricoesBtn.classList = "alternative event-modal-btn";
+        gerenciarInscricoesBtn.innerText = "Gerenciar Inscrições";
+        gerenciarInscricoesBtn.onclick = () => listarInscritos(currentSelectedEventId);
+        EventModalButtons.appendChild(gerenciarInscricoesBtn);
+    }
 
-    const removerBtn = document.createElement("button");
-    removerBtn.classList = "danger event-modal-btn";
-    removerBtn.innerText = "Remover";
-    removerBtn.onclick = () => removeEvent(currentSelectedEventId, currentSelectedEventName);
+    if (!document.getElementById("admin-btn-editar")) {
+        const editarBtn = document.createElement("button");
+        editarBtn.id = "admin-btn-editar";
+        editarBtn.classList = "alternative event-modal-btn";
+        editarBtn.innerText = "Editar";
+        editarBtn.onclick = () => updateEvent(currentSelectedEventId);
+        EventModalButtons.appendChild(editarBtn);
+    }
 
-    const gerenciarInscricoesBtn = document.createElement("button");
-    gerenciarInscricoesBtn.classList = "alternative event-modal-btn";
-    gerenciarInscricoesBtn.innerText = "Gerenciar Inscrições";
-    gerenciarInscricoesBtn.onclick = () => listarInscritos(currentSelectedEventId);
-
-    EventModalButtons.appendChild(gerenciarInscricoesBtn);
-    EventModalButtons.appendChild(editarBtn);
-    EventModalButtons.appendChild(removerBtn);
+    if (!document.getElementById("admin-btn-remover")) {
+        const removerBtn = document.createElement("button");
+        removerBtn.id = "admin-btn-remover";
+        removerBtn.classList = "danger event-modal-btn";
+        removerBtn.innerText = "Remover";
+        removerBtn.onclick = () => removeEvent(currentSelectedEventId, currentSelectedEventName);
+        EventModalButtons.appendChild(removerBtn);
+    }
 }
 
 export function closeEventModal() {

@@ -115,41 +115,50 @@ export async function criarEvento() {
  */
 function retirarUsuariosComPontuacaoInsuficiente(eventId, pontuacaoEvento) {
     return getDataFromDatabase(refFromDatabase(InscricoesDatabaseRef, eventId))
-        .then(snapshot => {
+        .then(async snapshot => {
+            const promessas = [];
+            
             // Atualiza a pontuação de cada inscrito
-            snapshot.forEach(async snapshot => {
-                if (!snapshot.exists()) return;
+            snapshot.forEach(snapshotChild => {
+                if (!snapshotChild.exists()) return;
 
-                const uid = snapshot.key;
-
-                // Retira a pontuação do evento para ver a pontuação "real" do usuário, sem contar o evento que ele pode ser retirado
-                let pontuacao = snapshot.val().pontos || 0;
-                const presenca = snapshot.val().presenca;
-                // Se o usuário tiver presente, retira a pontuação do evento (que el
-                if (presenca) {
-                    pontuacao = Math.max(pontuacao - pontuacaoEvento, 0);
-                }
-
-                // Se a pontuação do usuário for menor que a pontuação mínima
-                // para o evento, retira ele
-                if (pontuacao <= getPontuacaoMinimaParaEvento(eventId)) {
-                    // Se o usuário estiver presente, retira a pontuação do evento dele antes de retirar ele do evento
-                    if (presenca)
-                        await atualizarPontuacaoUsuario(uid, eventId, false);
-
-                    // Desinscreve o usuário
-                    await unsubscribeUserFromEvent(eventId, uid);
-
-                    // Se o usuário que foi retirado for o usuário atual, atualiza os botões de inscrever/desinscrever
-                    if (uid === Auth.currentUser.uid) {
-                        const inscreverBtn = document.getElementById(`subscribeBtn-${eventId}`);
-                        inscreverBtn.style.display = "inline-block";
-
-                        const desinscreverBtn = document.getElementById(`unsubscribeBtn-${eventId}`);
-                        hideItem(desinscreverBtn);
+                const uid = snapshotChild.key;
+                
+                const promessa = (async () => {
+                    // Retira a pontuação do evento para ver a pontuação "real" do usuário, sem contar o evento que ele pode ser retirado
+                    let pontuacao = await getAttributeFromUser(uid, "pontos") || 0;
+                    const presenca = snapshotChild.val().presenca;
+                    
+                    // Se o usuário tiver presente, retira a pontuação do evento
+                    if (presenca) {
+                        pontuacao = Math.max(pontuacao - pontuacaoEvento, 0);
                     }
-                }
+
+                    // Se a pontuação do usuário for menor que a pontuação mínima
+                    // para o evento, retira ele
+                    if (pontuacao < await getPontuacaoMinimaParaEvento(eventId)) {
+                        // Se o usuário estiver presente, retira a pontuação do evento dele antes de retirar ele do evento
+                        if (presenca)
+                            await atualizarPontuacaoUsuario(uid, eventId, false);
+
+                        // Desinscreve o usuário
+                        await unsubscribeUserFromEvent(eventId, uid);
+
+                        // Se o usuário que foi retirado for o usuário atual, atualiza os botões de inscrever/desinscrever
+                        if (uid === Auth.currentUser.uid) {
+                            const inscreverBtn = document.getElementById(getEventElementId('inscrever-btn', eventId));
+                            if (inscreverBtn) inscreverBtn.style.display = "inline-block";
+
+                            const desinscreverBtn = document.getElementById(getEventElementId('cancelar-inscricao-btn', eventId));
+                            hideItem(desinscreverBtn);
+                        }
+                    }
+                })();
+                
+                promessas.push(promessa);
             });
+            
+            await Promise.all(promessas);
         });
 }
 
@@ -290,18 +299,22 @@ export async function cancelarFormEvento() {
  *                  a pontuação dos inscritos (`false`)
  */
 async function atualizarPontuacaoDosInscritosDoEvento(eventoId, adicionar) {
-    await getDataFromDatabase(refFromDatabase(InscricoesDatabaseRef, eventoId))
-        .then(snapshot => {
-            // Atualiza a pontuação de cada inscrito
-            snapshot.forEach(async snapshot => {
-                const uid = snapshot.key;
-                const presenca = snapshot.val().presenca;
+    const snapshot = await getDataFromDatabase(refFromDatabase(InscricoesDatabaseRef, eventoId));
+    
+    const promessas = [];
+    // Atualiza a pontuação de cada inscrito
+    snapshot.forEach(snapshotChild => {
+        const uid = snapshotChild.key;
+        const presenca = snapshotChild.val().presenca;
 
-                if (presenca) // Só atualiza se o usuário estiver presente
-                    // Atualiza a pontuação do usuário (retirando ela)
-                    await atualizarPontuacaoUsuario(uid, eventoId, adicionar);
-            });
-        });
+        if (presenca) { // Só atualiza se o usuário estiver presente
+            // Adiciona a promessa de atualização ao array
+            promessas.push(atualizarPontuacaoUsuario(uid, eventoId, adicionar));
+        }
+    });
+    
+    // Aguarda todas as atualizações de pontuação
+    await Promise.all(promessas);
 }
 
 //botão para remover evento
@@ -1216,6 +1229,8 @@ fotoEventoEl?.addEventListener('change', async (ev) => {
  * @param {Boolean} state verdadeiro se for clicável, falso se não.
  */
 function setApagarFotoBtnState(state) {
+    if (!apagarFotoBtn) return;
+    
     if (state) {
         apagarFotoBtn.classList.remove("unable");
         apagarFotoBtn.classList.add("danger");

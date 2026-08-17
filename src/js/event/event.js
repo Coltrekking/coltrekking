@@ -251,6 +251,13 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, alreadyRetrying
                         throw new Error("Evento inexistente");
                     }
 
+                    // Bloqueia inscrições antes da hora
+                    const eventStart = new Date(evento.dataInscricao).getTime();
+                    if (getRealTime() < eventStart) {
+                        await abrirAlerta("⚠️ Inscrições ainda não começaram para este evento.");
+                        throw new Error("Inscrição antes do horário");
+                    }
+
                     // Verifica pontuação mínima para eventos médios
                     const pontos = parseFloat(userData.pontos) || 0;
                     const pontuacaoNecessaria = await getPontuacaoMinimaParaEvento(eventId);
@@ -408,10 +415,10 @@ export async function checkSubscribedEventsRequiringMinimumPoints(uid) {
 
                 // Se o usuário que foi retirado for o usuário atual, atualiza os botões de inscrever/desinscrever
                 if (uid === Auth.currentUser.uid) {
-                    const inscreverBtn = document.getElementById(`subscribeBtn-${eventId}`);
-                    inscreverBtn.style.display = "inline-block";
+                    const inscreverBtn = document.getElementById(getEventElementId('inscrever-btn', eventId));
+                    if (inscreverBtn) inscreverBtn.style.display = "inline-block";
 
-                    const desinscreverBtn = document.getElementById(`unsubscribeBtn-${eventId}`);
+                    const desinscreverBtn = document.getElementById(getEventElementId('cancelar-inscricao-btn', eventId));
                     hideItem(desinscreverBtn);
                 }
             }
@@ -631,7 +638,11 @@ async function removeLink(eventKey, url) {
 
     return getDataFromDatabase(PhotosDatabaseRef, eventKey).then(async snapshot => {
         const links = snapshot.val() || [];
-        links.splice(links.indexOf(url), 1);
+        const index = links.indexOf(url);
+        
+        if (index === -1) return; // Se o link não estiver na lista, não faz nada
+        
+        links.splice(index, 1);
 
         await set(refFromDatabase(PhotosDatabaseRef, eventKey), links)
             .then(async () => {
