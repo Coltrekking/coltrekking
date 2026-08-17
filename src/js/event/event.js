@@ -20,7 +20,7 @@ import {listarInscritos, removeEvent, updateEvent} from "./eventAdmin";
 import {remove, set, update, serverTimestamp} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
 import {
-    createEventCard, fillEventModal, getEventPhotos, setEventFunctions, setSubscribeButtons,
+    createEventCard, fillEventModal, getEventElementId, getEventPhotos, setEventFunctions, setSubscribeButtons,
     setSubscribeButtonState, SubscribeButtonStates
 } from "./eventUI";
 
@@ -50,140 +50,6 @@ export async function getPontuacaoMinimaParaEvento(eventoId) {
         // Retorna a pontuação necessária definida para o evento
         return snap.val().pontuacaoNecessaria;
     }
-}
-
-/**
- * Preenche um card de evento com as informações dadas.
- * @param eventContainer o container onde o cartão deve ficar
- * @param item o item do evento, com a chave e o valor (informações do evento)
- * @param uid o uid do usuário
- * @param updating se está atualizando um cartão. Se estiver, ele *não* vai criar um novo cartão.
- */
-function fillEventCard(eventContainer, item, uid, updating = false) {
-    const value = item.value;
-    if (!updating && document.getElementById(item.key)) return; // evita duplicação
-
-    let eventCard = null;
-    if (updating) { // Se estiver atualizando, tenta obter o cartão
-        eventCard = document.getElementById(item.key);
-        if (eventCard) eventCard.replaceChildren(); // limpa o cartão para preencher com as informações atualizadas
-    }
-    if (!eventCard) { // Se o cartão não existir, cria um novo
-        eventCard = document.createElement('div');
-        eventCard.className = 'event-card';
-        eventCard.style.position = "relative";
-        eventCard.id = item.key;
-    }
-
-    // Cria e estiliza o botão de ver as imagens do evento
-    const seeImagesBtn = document.createElement("button");
-    seeImagesBtn.id = `evento-imagens-${item.key}`;
-    seeImagesBtn.title = "Imagens";
-    seeImagesBtn.className = "icon-button";
-    seeImagesBtn.style.position = "absolute";
-    seeImagesBtn.style.right = "15px";
-    seeImagesBtn.style.zIndex = "3";
-
-    //const styleHeight = "max(40px, 2.5em)";
-    const seeImagesImg = document.createElement("img");
-    seeImagesImg.id = "evento-imagens-img-" + item.key;
-    seeImagesImg.src = "assets/icons/loading.svg";//EventImagesIcons.view;
-    seeImagesImg.alt = "Fotos";
-    seeImagesImg.className = "icon";
-    seeImagesImg.classList.add("loading-animation");
-    seeImagesImg.style.height = "max(40px, 2.5em)";
-
-    //seeImagesImg.style.display = 'none'; // Desaparece até terminar de configurar (ou seja, até colocar a imagem certa)
-
-    if (!seeImagesImg.parentElement)
-        seeImagesBtn.appendChild(seeImagesImg);
-    if (!seeImagesBtn.parentElement)
-        eventCard.appendChild(seeImagesBtn);
-
-    // Esconde o botão se não houver fotos (ou, se for admin,
-    // troca para algo que indique para adicionar uma foto)
-    getEventPhotos(item.key).then(links => {
-        seeImagesImg.src = EventImagesIcons.view; // Inicialmente, considera que tem fotos
-        if (links.length === 0) {
-            if (!isAdmin()) { // Se o usuário não for admin, mostra o botão como sem imagem
-                seeImagesImg.src = EventImagesIcons.no_image;
-            } else { // Se for admin, troca para a foto de adicionar imagem
-                seeImagesImg.src = EventImagesIcons.add;
-            }
-        }
-        seeImagesImg.classList.remove("loading-animation"); // Retira a animação de carregamento
-    });
-
-    // TODO: atualizar o cartão aqui
-    // Coloca as informações do evento
-    eventCard.insertAdjacentHTML('beforeend', `
-                    <h3 class="event-title">${value.nome}</h3>
-                    <h4>${value.descricao || '---'}</h4>
-                    <p>Data: ${value.data ? formattedDate(value.data) : '---'}</p>
-                    <p>Ponto de Encontro: ${value.localEncontro || '---'}</p>
-                    <p>Data de Inscrição: ${value.dataInscricao ? formattedDate(value.dataInscricao) : '---'}</p>
-                    <p>Data da Preleção: ${value.dataPrelecao ? formattedDate(value.dataPrelecao) : '---'}</p>
-                    <p>Local da preleção: ${value.localPrelecao || '---'}</p>
-                    <p>Dificuldade: ${value.dificuldade || '---'}</p>
-                    <p>Distância: ${value.distancia || '---'} km</p>
-                    <p>Subida: ${value.subida || '---'} m</p>
-                    <p>Descida: ${value.descida || '---'} m</p>
-                    <p>Trajeto: ${value.trajeto || '---'}</p>
-                `);
-
-    /* inserir altimentria depois (precisa do cloud storage)
-    <p>Altimetria:<br>
-        ${value.percursoAltimetria
-        ? `<img src="${value.percursoAltimetria}" alt="altimetria" style="max-width: 100%;">`
-        : '---'}
-    </p>
-    */
-
-    // Se o usuário for admin, mostra os botões de admin
-    if (isAdmin()) {
-        const removeBtn = document.createElement('button');
-        removeBtn.textContent = 'Remover';
-        removeBtn.className = 'danger event-btn';
-        removeBtn.onclick = () => removeEvent(item.key);
-
-        const editBtn = document.createElement('button');
-        editBtn.textContent = 'Editar';
-        editBtn.className = 'alternative eventBtn';
-        editBtn.onclick = () => updateEvent(item.key);
-
-        const listarBtn = document.createElement('button');
-        listarBtn.textContent = 'Gerenciar Inscrições';
-        listarBtn.className = 'alternative eventBtn';
-        listarBtn.onclick = () => listarInscritos(item.key);
-
-        eventCard.appendChild(removeBtn);
-        eventCard.appendChild(editBtn);
-        eventCard.appendChild(listarBtn);
-    }
-
-    // Nova linha para o botão de inscrição
-    eventCard.appendChild(
-        document.createElement('br')
-    );
-
-    // Cria o botão de inscrever e desinscrever
-    const eventDate = value.data ? new Date(value.data) : null;
-    let [subscribeBtn, unsubscribeBtn] = createSubscribeButton(value, item.key, uid, eventDate);
-    eventCard.appendChild(subscribeBtn);
-    eventCard.appendChild(unsubscribeBtn);
-
-    // Verifica a dificuldade (para mostrar o aviso se precisar)
-    let pontuacaoNecessaria = value.pontuacaoNecessaria;
-    if (pontuacaoNecessaria === null || pontuacaoNecessaria === undefined) pontuacaoNecessaria = 0; // dificuldade padrão
-    checkForDifficult(uid, pontuacaoNecessaria, eventDate, eventCard);
-
-    // Conecta o botão de imagens com a função de apresentar as fotos
-    seeImagesBtn.addEventListener('click', _ => {
-        showEventPhotos(value.nome, item.key).then(_ => { });
-    });
-
-    if (!eventCard.parentElement)
-        eventContainer.appendChild(eventCard);
 }
 
 /**
@@ -263,97 +129,6 @@ function fillEventContainer(dataSnapshot) {
 function fillEventListAsAdmin(dataSnapshot) {
     // Preenche o container de eventos
     fillEventContainer(dataSnapshot);
-}
-
-/**
- * Cria o botão de inscrever/desinscrever.
- * @param evento o evento em que se quer colocar o botão
- * @param key o uid do evento
- * @param userUid o uid do usuário
- * @param eventDate data do evento
- * @return {HTMLButtonElement[]} os botões de inscrição/desinscrição
- */
-function createSubscribeButton(evento, key, userUid, eventDate) {
-    const subscribeBtn = document.createElement('button');
-    subscribeBtn.id = `subscribeBtn-${key}`;
-    setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.INSCREVER);
-    subscribeBtn.disabled = true; // começa desativado
-    subscribeBtn.style.cursor = 'not-allowed';
-
-    // pega a hora do evento
-    const eventStart = evento.dataInscricao ? new Date(evento.dataInscricao) : null;
-
-
-    // verifica se já é hora de inscrição e se ainda não passou a data do evento
-    function checkSubscriptionTime() {
-        if (!eventStart) return;
-
-        const now = getRealTime();
-
-        // se ainda não chegou a hora de inscrição
-        if (now < eventStart.getTime()) {
-            setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.NAO_HABILITADO);
-            return;
-        }
-
-        // se a data do evento já passou
-        if (eventDate && now > eventDate.getTime()) {
-            setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.EVENTO_REALIZADO);
-            clearInterval(subscriptionTimer);
-            return;
-        }
-
-        // se está no período válido de inscrição
-        setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.INSCREVER);
-    }
-
-    // chama a função a cada segundo até habilitar
-    const subscriptionTimer = setInterval(checkSubscriptionTime, 100);
-    checkSubscriptionTime(); // checa imediatamente
-
-    const unsubscribeBtn = document.createElement('button');
-    unsubscribeBtn.id = `unsubscribeBtn-${key}`;
-    setSubscribeButtonState(unsubscribeBtn, SubscribeButtonStates.DESINSCREVER);
-
-    // verifica se o usuário já está inscrito
-    getDataFromDatabase(InscricoesDatabaseRef, key + '/' + userUid)
-        .then(snapshot => {
-            if (snapshot.exists()) {
-                subscribeBtn.style.display = 'none';
-                unsubscribeBtn.style.display = 'inline-block';
-
-                // checa se a data do evento já passou
-                const eventDate = evento.data ? new Date(evento.data) : null;
-                if (eventDate && getRealTime() > eventDate.getTime()) {
-                    setSubscribeButtonState(unsubscribeBtn, SubscribeButtonStates.EVENTO_REALIZADO);
-                }
-            }
-        });
-
-    // chama subscribe passando ambos os botões
-    subscribeBtn.onclick = () => {
-        const eventStart = new Date(evento.dataInscricao);
-
-        //camada extra de segurança
-        if (getRealTime() < eventStart.getTime()) {
-            abrirAlerta("⚠️ Inscrições ainda não começaram para este evento.").then( );
-            return;
-        }
-
-        subscribeToEvent(key, subscribeBtn, unsubscribeBtn)
-            .then( () => {
-                if (isAdmin()) listarInscritos(key, true)
-            } );
-    };
-
-    unsubscribeBtn.onclick = () => {
-        unsubscribeFromEvent(key, unsubscribeBtn, subscribeBtn)
-            .then( () => {
-                if (isAdmin()) listarInscritos(key, true)
-            } );
-    };
-
-    return [subscribeBtn, unsubscribeBtn];
 }
 
 /**
@@ -497,7 +272,13 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, alreadyRetrying
             // NOTA: não é usado "await" aqui pq não tem motivos de esperar (essa função tem efeito puramente visual).
             onSuccessfulSubscription(eventId).then( );
             setSubscribeButtons(true, subscribeBtn, unsubscribeBtn);
-            hideLoading(); // Some o loading que foi colocado logo antes de
+
+            // Botões do card de evento
+            const cardSubscribeBtn = document.getElementById(getEventElementId('inscrever-btn', eventId));
+            const cardUnsubscribeBtn = document.getElementById(getEventElementId('cancelar-inscricao-btn', eventId));
+            setSubscribeButtons(true, cardSubscribeBtn, cardUnsubscribeBtn);
+
+            hideLoading(); // Some o loading que foi colocado logo antes
         })
         .then(async () => {
             //abrirAlerta('Inscrição realizada com sucesso!');
@@ -508,7 +289,7 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, alreadyRetrying
                 // Tenta se inscrever novamente se não conseguiu de primeira
                 if (!alreadyRetrying) {
                     enviarErroParaSentry(error);
-                    subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, true).then( );
+                    subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, true);
                 // Se já tentou se inscrever duas vezes, apenas envia o erro
                 } else {
                     console.error('Erro ao inscrever:', error);
@@ -539,6 +320,11 @@ async function unsubscribeFromEvent(eventId, subscribeBtn, unsubscribeBtn) {
     return unsubscribeUserFromEvent(eventId, uid).then(() => {
         abrirAlerta('Inscrição removida com sucesso!');
         setSubscribeButtons(false, subscribeBtn, unsubscribeBtn);
+
+        // Atualiza botões no card também
+        const cardSubscribeBtn = document.getElementById(getEventElementId('inscrever-btn', eventId));
+        const cardUnsubscribeBtn = document.getElementById(getEventElementId('cancelar-inscricao-btn', eventId));
+        setSubscribeButtons(false, cardSubscribeBtn, cardUnsubscribeBtn);
     }).finally(_ => {
         hideItem(loading);
     });

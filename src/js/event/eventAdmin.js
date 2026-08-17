@@ -37,7 +37,6 @@ const fotoEventoEl = document.getElementById('fotoEvento');
 
 export async function criarEvento() {
     // hideItem(eventForm);
-    hideItem(eventFormModal);
     showItem(loading);
 
     let nome = document.getElementById('nome').value;
@@ -91,16 +90,19 @@ export async function criarEvento() {
         })
             .then(function () {
                 hideItem(loading);
+                hideItem(eventFormModal);
                 abrirAlerta('Evento criado com sucesso!').then( );
                 // hideItem(eventForm);
                 hideItem(eventFormModal);
             }).catch(function (error) {
                 hideItem(loading);
+                hideItem(eventFormModal);
                 showError('Erro ao criar evento:', error);
                 showItem(eventFormModal); // showItem(eventForm);
         });
     } else {
         hideItem(loading);
+        hideItem(eventFormModal);
         abrirAlerta('Por favor, preencha todos os campos do evento.').then( );
         showItem(eventFormModal); // showItem(eventForm);
     }
