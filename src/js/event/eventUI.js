@@ -119,6 +119,8 @@ const EventImagesIcons = {
 let currentSelectedEventId = null;
 // Nome do Evento atualmente selecionado
 let currentSelectedEventName = null;
+// Timer para o modal de evento (para garantir que ele sempre atualize)
+let eventModalTimer = null;
 
 // Funções do event.js.
 // São definidas mais tarde pelo event.js
@@ -269,43 +271,62 @@ function getFormattedEventCard(id, eventData) {
  * Verifica se já é hora de inscrição e se ainda não passou a data do evento.
  * - Essa função é usada apenas em contextos específicos.
  */
-function _checkSubscriptionTime(eventData, subscribeBtn, eventDate, subscriptionTimer, key) {
+function _checkSubscriptionTime(eventData, subscribeBtn, eventDate, key) {
     // pega a hora do evento
     const eventStart = eventData.dataInscricao ? new Date(eventData.dataInscricao) : null;
 
-    if (!eventStart) return;
+    if (!eventStart) return false;
 
     const now = getRealTime();
 
     // se ainda não chegou a hora de inscrição
     if (now < eventStart.getTime()) {
-        setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.NAO_HABILITADO);
+        if (subscribeBtn) setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.NAO_HABILITADO);
         if (currentSelectedEventId === key)
             setSubscribeButtonState(EventModalInscreverBtnEl, SubscribeButtonStates.NAO_HABILITADO);
-        return;
+        return false;
     }
+
+
+
+    // CORRIGIR BUG Q BOTAO INSCREVER NAO ATUALIZA NO MODAL
+    // CORRIGIR BUG Q BOTAO INSCREVER NAO ATUALIZA NO MODAL
+    // CORRIGIR BUG Q BOTAO INSCREVER NAO ATUALIZA NO MODAL
+    // CORRIGIR BUG Q BOTAO INSCREVER NAO ATUALIZA NO MODAL
+    // CORRIGIR BUG Q BOTAO INSCREVER NAO ATUALIZA NO MODAL
+    // CORRIGIR BUG Q BOTAO INSCREVER NAO ATUALIZA NO MODAL
+    // CORRIGIR BUG Q BOTAO INSCREVER NAO ATUALIZA NO MODAL
+    throw new Error("corrigir bug");
+
+
+
+
+
+
+
+
 
     // se a data do evento já passou
     if (eventDate && now > eventDate.getTime()) {
-        setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.EVENTO_REALIZADO);
+        if (subscribeBtn) setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.EVENTO_REALIZADO);
         if (currentSelectedEventId === key)
             setSubscribeButtonState(EventModalInscreverBtnEl, SubscribeButtonStates.EVENTO_REALIZADO);
 
-        if (subscriptionTimer) clearInterval(subscriptionTimer);
-        return;
+        return true; // Indica que o tempo passou e o timer pode parar para este evento
     }
 
     // se está no período válido de inscrição
-    setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.INSCREVER);
+    if (subscribeBtn) setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.INSCREVER);
     if (currentSelectedEventId === key)
         setSubscribeButtonState(EventModalInscreverBtnEl, SubscribeButtonStates.INSCREVER);
 
+    return false;
 }
 
 /**
  * Lida com as atualizações de inscrição/desinscrição de um evento.
- * @param eventData o evento em que se quer colocar o botão
  * @param key o uid do evento
+ * @param eventData o evento em que se quer colocar o botão
  * @param buttons os botões de inscrever/desinscrever (em um mapa)
  * @param cardElement o elemento do card do evento (para guardar o timer)
  */
@@ -323,11 +344,12 @@ function setupSubscribeObserver(key, eventData, buttons, cardElement = null) {
     // chama a função a cada segundo até habilitar
     let subscriptionTimer;
     subscriptionTimer = setInterval(() => {
-        _checkSubscriptionTime(eventData, subscribeBtn, eventSubscriptionDate, subscriptionTimer, key);
+        const finished = _checkSubscriptionTime(eventData, subscribeBtn, eventSubscriptionDate, key);
+        if (finished) clearInterval(subscriptionTimer);
     }, 100);
 
     if (cardElement) cardElement._subscriptionTimer = subscriptionTimer; // Guarda o timer no elemento
-    _checkSubscriptionTime(eventData, subscribeBtn, eventSubscriptionDate, subscriptionTimer, key); // checa imediatamente
+    _checkSubscriptionTime(eventData, subscribeBtn, eventSubscriptionDate, key); // checa imediatamente
 
     // verifica se o usuário já está inscrito
     getDataFromDatabase(InscricoesDatabaseRef, key + '/' + Auth.currentUser.uid)
@@ -436,6 +458,14 @@ export function fillEventModal(eventId, eventData) {
         // Reseta os botões
         setSubscribeButtonState(EventModalInscreverBtnEl, SubscribeButtonStates.INSCREVER);
         setSubscribeButtonState(EventModalCancelarInscricaoBtnEl, SubscribeButtonStates.DESINSCREVER);
+
+        // Inicia o timer para o modal (caso a inscrição ainda não tenha começado)
+        if (eventModalTimer) clearInterval(eventModalTimer);
+        eventModalTimer = setInterval(() => {
+            const finished = _checkSubscriptionTime(eventData, null, eventDate, eventId);
+            if (finished) clearInterval(eventModalTimer);
+            console.log("aa")
+        }, 100);
 
         // Verifica se o usuário já está inscrito
         getDataFromDatabase(InscricoesDatabaseRef, eventId + '/' + Auth.currentUser.uid)
@@ -619,6 +649,12 @@ async function setupForAdmin() {
 export function closeEventModal() {
     currentSelectedEventId = null;
     currentSelectedEventName = null;
+
+    if (eventModalTimer) {
+        clearInterval(eventModalTimer);
+        eventModalTimer = null;
+    }
+
     hideItem(EventModalEl);
 }
 
