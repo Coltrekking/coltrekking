@@ -4,7 +4,6 @@
  */
 import {formattedDate} from "../date";
 import {
-    eventForm,
     getAttributeFromUser,
     getDataFromDatabase,
     getRealTime, hideItem,
@@ -14,7 +13,6 @@ import {
 import {isAdmin, waitForUser} from "../auth";
 import {Auth} from "/src/config/firebase";
 import {abrirAlerta} from "../modal";
-import {enviarErroParaSentry} from "../main";
 
 // Elementos do event modal
 // (São definidos mais tarde, depois que há certeza que os elementos estão no site)
@@ -345,7 +343,7 @@ function setupSubscribeObserver(key, eventData, buttons, cardElement = null) {
     }, 100);
 
     if (cardElement) cardElement._subscriptionTimer = eventTimers[key]; // Guarda o timer no elemento
-    _checkSubscriptionTime(eventData, subscribeBtn, eventSubscriptionDate, key, eventTimers[key]); // checa imediatamente
+    _checkSubscriptionTime(eventData, subscribeBtn, eventSubscriptionDate, key); // checa imediatamente
 
     // verifica se o usuário já está inscrito
     getDataFromDatabase(InscricoesDatabaseRef, key + '/' + Auth.currentUser.uid)
@@ -456,6 +454,9 @@ export function fillEventModal(eventId, eventData) {
         // Reseta os botões
         setSubscribeButtonState(EventModalInscreverBtnEl, SubscribeButtonStates.INSCREVER);
         setSubscribeButtonState(EventModalCancelarInscricaoBtnEl, SubscribeButtonStates.DESINSCREVER);
+
+        // Atualiza o botão de inscrição
+        _checkSubscriptionTime(eventData, null, eventDate, eventId);
 
         // Verifica se o usuário já está inscrito
         getDataFromDatabase(InscricoesDatabaseRef, eventId + '/' + Auth.currentUser.uid)
