@@ -205,7 +205,7 @@ export async function atualizarEvento() {
     let pontuacaoNecessaria;
 
     if (currentEditingEventData.pontuacaoNecessaria !== undefined)
-        pontuacaoNecessaria = String(currentEditingEventData.pontuacaoNecessaria).trim();
+        pontuacaoNecessaria = Number(currentEditingEventData.pontuacaoNecessaria);
     else
         pontuacaoNecessaria = "0";
 
@@ -832,7 +832,7 @@ export function exportarSelecionadosXLSX(eventId, nomeEvento = 'Evento', dataIni
             worksheet['!cols'] = [
                 {wch: 10},  // #
                 {wch: 50}, // Nome
-                {wch: 15}  // Status
+                {wch: 25}  // Status
             ];
 
             // Cria um arquivo e adiciona a planilha a ele

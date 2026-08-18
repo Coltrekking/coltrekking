@@ -1361,21 +1361,28 @@ textarea {
 }
 
 #fecharMenuInscritos {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    background: none;
-    border: none;
-    font-size: 1.6rem;
-    font-weight: bold;
-    color: #666;
-    cursor: pointer;
-    z-index: 10;
-    transition: color 0.2s, transform 0.2s;
-    padding: 5px;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    position: sticky;
+    top: 0;
+    float: right;
+
+    padding: 5px;
+
+    background: none;
+    border: none;
+    color: #666;
+
+    font-size: 1.6rem;
+    font-weight: bold;
+
+    z-index: 10;
+
+    transition: color 0.2s, transform 0.2s;
+
+    cursor: pointer;
 }
 
 #fecharMenuInscritos:hover {

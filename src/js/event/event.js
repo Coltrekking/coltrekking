@@ -397,7 +397,7 @@ export async function checkSubscribedEventsRequiringMinimumPoints(uid) {
     const verifications = events.map(async eventSnap => {
         const eventId = eventSnap.key;
         const event = eventSnap.val();
-        const pontuacaoNecessaria = event.pontuacaoNecessaria;
+        const pontuacaoNecessaria = Number(event.pontuacaoNecessaria);
 
         // Se não houver pontuação necessária, não tem motivo para olhar mais
         if (pontuacaoNecessaria === 0) return;

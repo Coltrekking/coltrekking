@@ -43,6 +43,8 @@ let EventModalButtons;
 const imageQueue = [];
 let isProcessingQueue = false;
 
+const DEFAULT_EVENT_BACKGROUND_IMAGE = `url('/assets/images/default-event-image.jpg')`;
+
 /**
  * Função que processa uma imagem de evento por vez
  */
@@ -119,6 +121,8 @@ const EventImagesIcons = {
 let currentSelectedEventId = null;
 // Nome do Evento atualmente selecionado
 let currentSelectedEventName = null;
+// Lista dos timers
+let eventTimers = {}
 
 // Funções do event.js.
 // São definidas mais tarde pelo event.js
@@ -269,7 +273,7 @@ function getFormattedEventCard(id, eventData) {
  * Verifica se já é hora de inscrição e se ainda não passou a data do evento.
  * - Essa função é usada apenas em contextos específicos.
  */
-function _checkSubscriptionTime(eventData, subscribeBtn, eventDate, key, timerId) {
+function _checkSubscriptionTime(eventData, subscribeBtn, eventDate, key) {
     const eventStart = eventData.dataInscricao ? new Date(eventData.dataInscricao) : null;
     if (!eventStart) return false;
 
@@ -280,10 +284,8 @@ function _checkSubscriptionTime(eventData, subscribeBtn, eventDate, key, timerId
             setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.NAO_HABILITADO);
         }
 
-        // Só atualiza o modal se o evento clicado for o evento
-        // deste timer específico
+        // Só atualiza o modal se o evento clicado for o evento deste timer específico
         if (currentSelectedEventId === key) {
-            console.log("casca de bala")
             setSubscribeButtonState(EventModalInscreverBtnEl, SubscribeButtonStates.NAO_HABILITADO);
         }
         return false;
@@ -298,8 +300,9 @@ function _checkSubscriptionTime(eventData, subscribeBtn, eventDate, key, timerId
             setSubscribeButtonState(EventModalInscreverBtnEl, SubscribeButtonStates.EVENTO_REALIZADO);
         }
 
-        if (timerId) {
-            clearInterval(timerId);
+        // Para o timer se der para se inscrever
+        if (eventTimers[key]) {
+            clearInterval(eventTimers[key]);
         }
         return true;
     }
@@ -307,8 +310,6 @@ function _checkSubscriptionTime(eventData, subscribeBtn, eventDate, key, timerId
     if (subscribeBtn) setSubscribeButtonState(subscribeBtn, SubscribeButtonStates.INSCREVER);
 
     if (currentSelectedEventId === key) {
-        console.log("nossa choquei")
-
         setSubscribeButtonState(EventModalInscreverBtnEl, SubscribeButtonStates.INSCREVER);
     }
 
@@ -333,15 +334,18 @@ function setupSubscribeObserver(key, eventData, buttons, cardElement = null) {
     const unsubscribeBtn = buttons.unsubscribe;
     setSubscribeButtonState(unsubscribeBtn, SubscribeButtonStates.DESINSCREVER);
 
+    // Para se já houver outro timer
+    if (eventTimers[key])
+        clearInterval(eventTimers[key])
+
     // chama a função a cada segundo até habilitar
-    let subscriptionTimer;
-    subscriptionTimer = setInterval(() => {
-        const finished = _checkSubscriptionTime(eventData, subscribeBtn, eventSubscriptionDate, key, subscriptionTimer);
-        if (finished) clearInterval(subscriptionTimer);
+    eventTimers[key] = setInterval(() => {
+        const finished = _checkSubscriptionTime(eventData, subscribeBtn, eventSubscriptionDate, key);
+        if (finished) clearInterval(eventTimers[key]);
     }, 100);
 
-    if (cardElement) cardElement._subscriptionTimer = subscriptionTimer; // Guarda o timer no elemento
-    _checkSubscriptionTime(eventData, subscribeBtn, eventSubscriptionDate, key, subscriptionTimer); // checa imediatamente
+    if (cardElement) cardElement._subscriptionTimer = eventTimers[key]; // Guarda o timer no elemento
+    _checkSubscriptionTime(eventData, subscribeBtn, eventSubscriptionDate, key, eventTimers[key]); // checa imediatamente
 
     // verifica se o usuário já está inscrito
     getDataFromDatabase(InscricoesDatabaseRef, key + '/' + Auth.currentUser.uid)
@@ -391,7 +395,7 @@ export function fillEventModal(eventId, eventData) {
     EventModalFotosLoading.style.display = 'flex';
 
     // Define a imagem padrão inicialmente (para garantir que nunca fique vazio)
-    EventModalImgEl.style.backgroundImage = `url('/assets/images/default-event-image.jpg')`;
+    EventModalImgEl.style.backgroundImage = DEFAULT_EVENT_BACKGROUND_IMAGE;
 
     // Se o evento tiver uma imagem específica, carrega
     if (eventData.imagem) {
@@ -426,11 +430,13 @@ export function fillEventModal(eventId, eventData) {
                 EventModalFotosText.textContent = "Não há fotos"
                 EventModalFotosBtn.disabled = true;
             } else { // Se for admin, troca para a foto de adicionar imagem
+                EventModalFotosBtn.disabled = false;
                 EventModalFotosImg.src = EventImagesIcons.add;
                 EventModalFotosText.textContent = "Adicionar Fotos"
             }
         } else {
             // Se houver fotos
+            EventModalFotosBtn.disabled = false;
             EventModalFotosImg.src = EventImagesIcons.view;
             EventModalFotosText.textContent = "Ver Fotos"
         }
@@ -519,6 +525,11 @@ export function createEventCard(eventSnapshot, listaEventos) {
 
         // O lazy observer fica observando o elemento (para renderizar a foto quando precisar)
         lazyBackgroundObserver.observe(elemento);
+    } else {
+        // Se não houver foto
+        elemento.removeAttribute('data-bg');
+        lazyBackgroundObserver.unobserve(elemento);
+        elemento.style.backgroundImage = DEFAULT_EVENT_BACKGROUND_IMAGE;
     }
 
     elemento.loading = "lazy";
