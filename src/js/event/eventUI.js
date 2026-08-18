@@ -520,6 +520,14 @@ export function createEventCard(eventSnapshot, listaEventos) {
         //         tempo mínimo que a div ficaria sem vazia.
         listaEventos.appendChild(elemento);
     }
+
+    // Exibe uma miniatura borrada
+    if (eventData.imagemThumb) {
+        elemento.style.backgroundImage = `url(${eventData.imagemThumb})`;
+    } else {
+        elemento.style.backgroundImage = DEFAULT_EVENT_BACKGROUND_IMAGE;
+    }
+
     if (eventData.imagem) {
         // Salva o link da imagem no elemento
         elemento.setAttribute('data-bg', eventData.imagem);
@@ -574,7 +582,7 @@ export function getEventPhotos(eventId) {
 function loadPageEvents() {
 
     // Evento de fechar o modal
-    document.getElementById("fecharMenuEvento").addEventListener("click", () => {
+    document.getElementById("fecharMenuEvento")?.addEventListener("click", () => {
         closeEventModal();
     });
 
@@ -588,7 +596,7 @@ function loadPageEvents() {
         showEventPhotos(currentSelectedEventName, currentSelectedEventId).then( );
     });
 
-    document.getElementById("inscritosListGoToTop").addEventListener("click", () => {
+    document.getElementById("inscritosListGoToTop")?.addEventListener("click", () => {
         // Scrolla pra cima
         // Obtém o modal (o elemento com a classe .modal-content que contém a lista)
         const modalContent = document.querySelector("#modalOverlayGerenciarInscritosEvento .modal-content");

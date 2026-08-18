@@ -51,14 +51,15 @@ export async function criarEvento() {
     let localPrelecao = document.getElementById('localPrelecao').value;
     let localEncontro = document.getElementById('localEncontro').value;
     let descricao = document.getElementById('descricao').value;
-    let imagemData = await uploadFotoEvento(); // faz upload e obtém as informações da imagem
+    let [imagemData, thumbBase64] = await uploadFotoEvento(); // faz upload e obtém as informações da imagem
     // imagem: link da imagem
     // deleteImagem: link para apagar a imagem
-    let imagem = null, deleteImagem = null;
+    let imagem = null, deleteImagem = null, thumbImagem = null ;
     if (imagemData) {
         imagem = imagemData.url;
         deleteImagem = imagemData.deleteUrl;
     }
+    thumbImagem = thumbBase64 ? thumbBase64 : null;
 
     //let percursoAltimetria = document.getElementById('percursoAltimetria').files[0] ? document.getElementById('percursoAltimetria').files[0].name : '';
 
@@ -85,7 +86,8 @@ export async function criarEvento() {
             descricao: descricao,
             pontuacaoNecessaria: currentEditingEventData.pontuacaoNecessaria || 0,
             imagem: imagem,
-            deleteImagem: deleteImagem
+            deleteImagem: deleteImagem,
+            thumbImagem: thumbImagem
             //percursoAltimetria: percursoAltimetria
         })
             .then(function () {
@@ -193,14 +195,18 @@ export async function atualizarEvento() {
     // deleteImagem: link para apagar a imagem
     let imagem = currentEditingEventData.imagem || null;
     let deleteImagem = currentEditingEventData.deleteImagem || null;
+    let thumbImagem = currentEditingEventData.thumbImagem || null;
 
     // Tenta fazer upload da imagem, se houver.
-    let imagemData = await uploadFotoEvento();
+    let [imagemData, thumbBase64] = await uploadFotoEvento();
 
+    // Obtém as novas imagens se tiver mudado
     if (imagemData) {
         imagem = imagemData.url;
         deleteImagem = imagemData.deleteUrl;
     }
+    thumbImagem = thumbBase64 ? thumbBase64 : thumbImagem;
+
 
     let pontuacaoNecessaria;
 
@@ -229,7 +235,8 @@ export async function atualizarEvento() {
             descricao,
             pontuacaoNecessaria,
             imagem,
-            deleteImagem
+            deleteImagem,
+            thumbImagem
         };
 
 
@@ -1144,13 +1151,26 @@ async function uploadFotoEvento() {
         const name = `evento_${Date.now()}.jpg`;
         // Comprime a imagem antes de enviar
         const compressedBlob = await compressImageToBlob(file, 1500, 800, 0.7);
+        const uploadedImage = await uploadPhotoOnImgBB(compressedBlob, name); // obtém a imagem
 
-        return await uploadPhotoOnImgBB(compressedBlob, name);
+        // Obtém uma versão MUITO leve da imagem (para ficar no site até a imagem com qualidade carregar)
+        const thumbBlob = await compressImageToBlob(file, 75, 40, 0.1);
+
+        return await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(thumbBlob);
+            reader.onloadend = () => {
+                const imagemThumb = reader.result; // "data:image/jpeg;base64,..."
+                resolve([uploadedImage, imagemThumb]);
+            };
+        });
+
+
     } catch (error) {
         enviarErroParaSentry(error);
         hideLoading();
         await abrirAlerta(
-            "Erro ao enviar a foto do evento. Por favor, tente novamente. Mensagem de erro:" + error.message
+            "Erro ao enviar a foto do evento. Por favor, tente novamente. Mensagem de erro: " + error.message
         );
         // (não precisa do retorno abaixo, pois ele é inútil)
         // return;
