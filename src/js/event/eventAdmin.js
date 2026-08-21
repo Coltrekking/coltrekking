@@ -1148,19 +1148,19 @@ async function uploadFotoEvento() {
 
     // Se chegou até aqui, pode enviar a foto
     try {
-        const name = `evento_${Date.now()}.jpg`;
+        const name = `evento_${Date.now()}.webp`;
         // Comprime a imagem antes de enviar
-        const compressedBlob = await compressImageToBlob(file, 1500, 800, 0.7);
+        const compressedBlob = await compressImageToBlob(file, 1280, 720, 0.75);
         const uploadedImage = await uploadPhotoOnImgBB(compressedBlob, name); // obtém a imagem
 
-        // Obtém uma versão MUITO leve da imagem (para ficar no site até a imagem com qualidade carregar)
-        const thumbBlob = await compressImageToBlob(file, 75, 40, 0.1);
+        // Obtém uma versão MUITO leve da imagem
+        const thumbBlob = await compressImageToBlob(file, 75*1.5, 40*1.5, 0.5);
 
         return await new Promise((resolve) => {
             const reader = new FileReader();
             reader.readAsDataURL(thumbBlob);
             reader.onloadend = () => {
-                const imagemThumb = reader.result; // "data:image/jpeg;base64,..."
+                const imagemThumb = reader.result; // "data:image/webp;base64,..."
                 resolve([uploadedImage, imagemThumb]);
             };
         });

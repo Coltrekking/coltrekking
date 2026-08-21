@@ -358,60 +358,98 @@ export function getRealTime() {
 }
 
 /**
- * Comprime uma imagem antes de transformá-la em blob.
- * @param {File} file o arquivo de imagem original.
- * @param {number} maxWidth largura (padrão: 1200px).
- * @param {number} maxHeight altura (padrão: 1200px).
- * @param {number} quality qualidade da imagem de 0 a 1 (padrão: 0.7 = 70%).
- * @returns {Promise<Blob>} o blob da imagem comprimida em formato JPEG.
+ * Comprime e redimensiona uma imagem antes de transformá-la em blob WebP.
+ * @param {File|Blob} file o arquivo de imagem original.
+ * @param {number} maxWidth largura máxima (padrão: 1200px).
+ * @param {number} maxHeight altura máxima (padrão: 1200px).
+ * @param {number} quality qualidade da imagem de 0 a 1 (padrão: 0.75 = 75%).
+ * @returns {Promise<Blob>} o blob da imagem comprimida em formato WebP.
  */
-export function compressImageToBlob(file, maxWidth = 1200, maxHeight = 1200, quality = 0.7) {
+export function compressImageToBlob(file, maxWidth = 1200, maxHeight = 1200, quality = 0.75) {
     return new Promise((resolve, reject) => {
-        const reader = new FileReader();
+        const img = new Image();
+        const objectUrl = URL.createObjectURL(file);
+        img.src = objectUrl;
 
-        reader.onload = (event) => {
-            const img = new Image();
-            img.src = event.target.result;
+        img.onload = () => {
+            let width = img.naturalWidth || img.width;
+            let height = img.naturalHeight || img.height;
 
-            img.onload = () => {
-                let width = img.width;
-                let height = img.height;
+            // Mantém a proporção real da imagem (Aspect Ratio)
+            if (width > maxWidth || height > maxHeight) {
+                const ratio = Math.min(maxWidth / width, maxHeight / height);
+                width = Math.round(width * ratio);
+                height = Math.round(height * ratio);
+            }
 
-                // Mantém a proporção real da imagem (Aspect Ratio)
-                if (width >= height) {
-                    if (width > maxWidth) {
-                        height = Math.round((height * maxWidth) / width);
-                        width = maxWidth;
-                    }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            URL.revokeObjectURL(objectUrl);
+
+            // Converte o canvas direto para um Blob em WebP
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    resolve(blob);
                 } else {
-                    if (height > maxHeight) {
-                        width = Math.round((width * maxHeight) / height);
-                        height = maxHeight;
-                    }
+                    reject(new Error("Falha ao comprimir a imagem."));
                 }
-
-                const canvas = document.createElement('canvas');
-                canvas.width = width;
-                canvas.height = height;
-
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
-
-                // Converte o canvas direto para um arquivo binário (Blob) em JPEG
-                canvas.toBlob((blob) => {
-                    if (blob) {
-                        resolve(blob);
-                    } else {
-                        reject(new Error("Falha ao comprimir a imagem."));
-                    }
-                }, 'image/jpeg', quality);
-            };
-
-            img.onerror = (err) => reject(new Error("Erro ao processar a imagem: " + err.message));
+            }, 'image/webp', quality);
         };
 
-        reader.onerror = (err) => reject(new Error("Erro ao ler o arquivo: " + err.message));
-        reader.readAsDataURL(file); // Lê o arquivo original
+        img.onerror = (err) => {
+            URL.revokeObjectURL(objectUrl);
+            reject(new Error("Erro ao processar a imagem: " + (err?.message || "formato não suportado")));
+        };
+    });
+}
+
+/**
+ * Converte uma imagem para um .webp
+ * @param {File} file imagem que se deseja converter
+ * @param {number} quality qualidade da foto (a padrão é 0.8)
+ * @returns {Promise<File>} arquivo convertido
+ */
+export function convertToWebp(file, quality = 0.8) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        const objectUrl = URL.createObjectURL(file);
+        img.src = objectUrl;
+
+        img.onload = () => {
+            // Cria um canvas para colocar a imagem
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0); // Coloca a imagem no canvas
+
+            // Transforma o canvas em um .webp
+            canvas.toBlob((blob) => {
+                URL.revokeObjectURL(objectUrl);
+
+                if (!blob) {
+                    reject(new Error('Erro na conversão da imagem!'));
+                    return;
+                }
+
+                // Cria o novo arquivo .webp
+                const newFileName = file.name.replace(/\.[^/.]+$/, "") + ".webp";
+                const webpFile = new File([blob], newFileName, { type: 'image/webp' });
+
+                resolve(webpFile);
+            }, 'image/webp', quality);
+        };
+
+        img.onerror = (error) => {
+            URL.revokeObjectURL(objectUrl);
+            reject(error);
+        };
     });
 }
 

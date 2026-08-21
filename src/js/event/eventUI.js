@@ -37,48 +37,7 @@ let EventModalFotosBtn;
 let EventModalFotosImg;
 let EventModalButtons;
 
-// Fila para guardar as imagens que precisam ser carregadas
-const imageQueue = [];
-let isProcessingQueue = false;
-
 const DEFAULT_EVENT_BACKGROUND_IMAGE = `url('/assets/images/default-event-image.jpg')`;
-
-/**
- * Função que processa uma imagem de evento por vez
- */
-async function processQueue() {
-    // Se já estiver baixando uma imagem ou a fila estiver vazia, não faz nada
-    if (isProcessingQueue || imageQueue.length === 0) return;
-
-    isProcessingQueue = true;
-
-    const { cardElement, imgUrl } = imageQueue.shift();
-
-    try {
-        await new Promise((resolve) => {
-            const imagePreloader = new Image();
-
-            // Quando carregar, define a imagem
-            imagePreloader.onload = () => {
-                cardElement.style.backgroundImage = `url(${imgUrl})`;
-                resolve();
-            };
-
-            // Se der erro, só resolve
-            imagePreloader.onerror = () => {
-                resolve();
-            };
-
-            // Define a imagem (começa a carregar a imagem)
-            imagePreloader.src = imgUrl;
-        });
-    } catch (error) {
-        console.error("Erro ao carregar imagem da fila", error);
-    }
-
-    isProcessingQueue = false; // Destrava a fila
-    processQueue().then(); // Puxa a próxima imagem da fila
-}
 
 // Usa lazy-load para carregar as imagens apenas quando for necessário.
 // Dessa forma, as imagens só serão carregadas quando o usuário ver ela
@@ -89,11 +48,29 @@ const lazyBackgroundObserver = new IntersectionObserver((entries, observer) => {
             const cardElement = entry.target;
             const imgUrl = cardElement.getAttribute('data-bg');
 
+            // Carrega a imagem
+            // (talvez dê para apagar isso depois que carregar a imagem)
+            // const link = document.createElement('link');
+            // link.rel = 'preload';
+            // link.as = 'image';
+            // link.href = imgUrl;
+            // link.fetchPriority = 'high';
+            // document.body.appendChild(link);
+
+            // Baixa a imagem (se houver)
             if (imgUrl) {
-                // Coloca na fila e manda processar
-                imageQueue.push({ cardElement, imgUrl });
-                cardElement.removeAttribute('data-bg'); // Limpa a variável
-                processQueue().then( );
+                const imagePreloader = new Image();
+
+                imagePreloader.onload = () => {
+                    // Quando a foto pesada terminar de baixar, substitui a borrada
+                    cardElement.style.backgroundImage = `url(${imgUrl})`;
+                };
+
+                // Inicia o download da imagem
+                imagePreloader.src = imgUrl;
+
+                // Limpa o atributo
+                cardElement.removeAttribute('data-bg');
             }
 
             // Para de observar esse card
@@ -398,11 +375,12 @@ export function fillEventModal(eventId, eventData) {
     // Se o evento tiver uma imagem específica, carrega
     if (eventData.imagem) {
         const modalPreloader = new Image();
-        modalPreloader.src = eventData.imagem;
         // Quando a imagem carregar, põe ela
         modalPreloader.onload = () => {
             EventModalImgEl.style.backgroundImage = `url(${eventData.imagem})`;
         };
+
+        modalPreloader.src = eventData.imagem;
     }
 
     EventModalTitleEl.innerText = eventData.nome || '---';
@@ -522,8 +500,8 @@ export function createEventCard(eventSnapshot, listaEventos) {
     }
 
     // Exibe uma miniatura borrada
-    if (eventData.imagemThumb) {
-        elemento.style.backgroundImage = `url(${eventData.imagemThumb})`;
+    if (eventData.thumbImagem) {
+        elemento.style.backgroundImage = `url(${eventData.thumbImagem})`;
     } else {
         elemento.style.backgroundImage = DEFAULT_EVENT_BACKGROUND_IMAGE;
     }
@@ -537,7 +515,7 @@ export function createEventCard(eventSnapshot, listaEventos) {
     } else {
         // Se não houver foto
         elemento.removeAttribute('data-bg');
-        lazyBackgroundObserver.unobserve(elemento);
+        lazyBackgroundObserver.unobserve(elemento); // para de observar (se estiver observando)
         elemento.style.backgroundImage = DEFAULT_EVENT_BACKGROUND_IMAGE;
     }
 
