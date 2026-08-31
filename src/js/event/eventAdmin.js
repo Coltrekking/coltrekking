@@ -51,7 +51,17 @@ export async function criarEvento() {
     let localPrelecao = document.getElementById('localPrelecao').value;
     let localEncontro = document.getElementById('localEncontro').value;
     let descricao = document.getElementById('descricao').value;
-    let [imagemData, thumbBase64] = await uploadFotoEvento(); // faz upload e obtém as informações da imagem
+    let imagemData, thumbBase64;
+
+    try {
+        [imagemData, thumbBase64] = await uploadFotoEvento(); // faz upload e obtém as informações da imagem
+    } catch (error) {
+        enviarErroParaSentry(error);
+        hideLoading();
+        await abrirAlerta(error.message);
+        return;
+    }
+
     // imagem: link da imagem
     // deleteImagem: link para apagar a imagem
     let imagem = null, deleteImagem = null, thumbImagem = null ;
@@ -198,7 +208,16 @@ export async function atualizarEvento() {
     let thumbImagem = currentEditingEventData.thumbImagem || null;
 
     // Tenta fazer upload da imagem, se houver.
-    let [imagemData, thumbBase64] = await uploadFotoEvento();
+    let imagemData, thumbBase64;
+
+    try {
+        [imagemData, thumbBase64] = await uploadFotoEvento(); // faz upload e obtém as informações da imagem
+    } catch (error) {
+        enviarErroParaSentry(error);
+        hideLoading();
+        await abrirAlerta(error.message);
+        return;
+    }
 
     // Obtém as novas imagens se tiver mudado
     if (imagemData) {
@@ -1131,10 +1150,12 @@ export async function onObterSelecionadosBtnClicked() {
  * @returns {Promise<Object|null>} a url e a deleteUrl da imagem enviada ou null (em caso de erro).
  */
 async function uploadFotoEvento() {
-    let files = fotoEventoEl.files;
-    let file = files ? files[0] : null;
+    const files = fotoEventoEl?.files;
+    const file = files ? files[0] : null;
 
-    if (!file) return;
+    if (!file) {
+        return [null, null];
+    }
 
     // Se a foto for muito pesada, avisa para o usuário
     // que a foto deve ser menor
@@ -1143,7 +1164,7 @@ async function uploadFotoEvento() {
         await abrirAlerta(
             "A foto deve ter menos que 32MB! Por favor, tente novamente com uma foto menor."
         );
-        return null;
+        throw new Error("A foto deve ter menos que 32MB!");
     }
 
     // Se chegou até aqui, pode enviar a foto
@@ -1154,7 +1175,7 @@ async function uploadFotoEvento() {
         const uploadedImage = await uploadPhotoOnImgBB(compressedBlob, name); // obtém a imagem
 
         // Obtém uma versão MUITO leve da imagem
-        const thumbBlob = await compressImageToBlob(file, 75*1.5, 40*1.5, 0.5);
+        const thumbBlob = await compressImageToBlob(file, 75 * 1.5, 40 * 1.5, 0.5);
 
         return await new Promise((resolve) => {
             const reader = new FileReader();
@@ -1164,16 +1185,8 @@ async function uploadFotoEvento() {
                 resolve([uploadedImage, imagemThumb]);
             };
         });
-
-
     } catch (error) {
-        enviarErroParaSentry(error);
-        hideLoading();
-        await abrirAlerta(
-            "Erro ao enviar a foto do evento. Por favor, tente novamente. Mensagem de erro: " + error.message
-        );
-        // (não precisa do retorno abaixo, pois ele é inútil)
-        // return;
+        throw new Error("Erro ao enviar a foto do evento. Por favor, tente novamente. Mensagem de erro: " + error.message);
     }
 }
 

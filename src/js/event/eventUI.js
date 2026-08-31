@@ -83,7 +83,6 @@ const lazyBackgroundObserver = new IntersectionObserver((entries, observer) => {
     threshold: 0.01
 });
 
-
 // Ícones para as ações relacionadas às imagens dos eventos
 // (o ícone que aperta para abrir a tela de imagens)
 const EventImagesIcons = {
@@ -751,6 +750,8 @@ if (!document.getElementById("event-modal")) {
                 <div class="event-modal-buttons" id="event-modal-buttons">
                     <button id="event-modal-inscrever-btn" class="primary event-modal-btn">Inscrever-se</button>
                     <button id="event-modal-cancelar-inscricao-btn" class="danger event-modal-btn" style="display: none;">Cancelar inscrição</button>
+<!--                    <button id="event-modal-arquivos-btn" class="primary event-modal-btn">Anexar Arquivos</button>-->
+                   
                 </div>
         </div>
     `;

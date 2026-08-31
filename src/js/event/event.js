@@ -20,8 +20,7 @@ import {listarInscritos, removeEvent, updateEvent} from "./eventAdmin";
 import {remove, set, update, serverTimestamp} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
 import {
-    createEventCard, fillEventModal, getEventElementId, getEventPhotos, setEventFunctions, setSubscribeButtons,
-    setSubscribeButtonState, SubscribeButtonStates
+    createEventCard, fillEventModal, getEventElementId, getEventPhotos, setEventFunctions, setSubscribeButtons
 } from "./eventUI";
 
 export const modalInscricaoEvento = document.getElementById("modalOverlayInscricaoEvento");
