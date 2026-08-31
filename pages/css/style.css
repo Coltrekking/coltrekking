@@ -981,8 +981,6 @@ textarea {
     width: 90px;
     height: 90px;
 
-    background: radial-gradient(circle at top right, rgba(0, 0, 0, 0.7) 10%, rgba(0, 0, 0, 0) 70%);
-
     border-top-right-radius: 8px;
     z-index: 10;
 
@@ -1008,6 +1006,15 @@ textarea {
 .event-modal-photos-corner img {
     min-height: max(15px, 1.5vw);
     width: auto;
+}
+
+.event-button-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap; /* caso falte espaço horizontal, pula pra próxima linha */
 }
 
 #fotosMenuEventoBtn {
@@ -1062,6 +1069,43 @@ textarea {
 
 .event-photo-links a:hover {
     text-decoration: underline;
+}
+
+.event-files-title {
+    text-align: center;
+
+    font-size: max(30px, 2.6vw);
+
+    font-family: 'Google Sans', sans-serif;
+    color: black;
+}
+
+.event-files-list {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+
+    gap: 6px;
+
+    padding: 3px;
+}
+
+.event-files-list-element {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: min(1%, 10px);
+
+    width: 90%;
+}
+
+.event-files-list-element > div {
+
+}
+
+.event-files-list-element input[type="file"] {
+
 }
 
 #createPhoto {

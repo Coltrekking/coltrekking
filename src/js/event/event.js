@@ -1,6 +1,5 @@
 // função para preencher a lista de eventos
 import {Auth} from "../../config/firebase";
-import {formattedDate} from "../date"
 import {
     EventsDatabaseRef,
     getAttributeFromUser,
@@ -24,14 +23,6 @@ import {
 } from "./eventUI";
 
 export const modalInscricaoEvento = document.getElementById("modalOverlayInscricaoEvento");
-
-// Ícones para as ações relacionadas às imagens dos eventos
-// (o ícone que aperta para abrir a tela de imagens)
-const EventImagesIcons = {
-    "add": "/assets/icons/add-image-icon.svg",
-    "view": "/assets/icons/image-icon.svg",
-    "no_image": "/assets/icons/no-image-icon.svg"
-}
 
 /**
  * Retorna a quantidade mínima de pontos para se inscrever
@@ -719,6 +710,7 @@ async function onSuccessfulSubscription(eventId) {
     hideItem(loadingElement);
     showItem(positionElement);
 }
+
 
 // Define as função de inscrever/desinscrever no eventUI.js
 setEventFunctions(subscribeToEvent, unsubscribeFromEvent, showEventPhotos, updateEvent, removeEvent, listarInscritos);

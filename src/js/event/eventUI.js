@@ -8,7 +8,7 @@ import {
     getDataFromDatabase,
     getRealTime, hideItem,
     InscricoesDatabaseRef,
-    PhotosDatabaseRef
+    PhotosDatabaseRef, showItem, showItemAsFlex
 } from "../utils";
 import {isAdmin, waitForUser} from "../auth";
 import {Auth} from "/src/config/firebase";
@@ -36,6 +36,10 @@ let EventModalFotosText;
 let EventModalFotosBtn;
 let EventModalFotosImg;
 let EventModalButtons;
+let EventModalArquivosBtn;
+let EventArquivosEl;
+let EventArquivosTitleEl;
+
 
 const DEFAULT_EVENT_BACKGROUND_IMAGE = `url('/assets/images/default-event-image.jpg')`;
 
@@ -554,6 +558,18 @@ export function getEventPhotos(eventId) {
 }
 
 /**
+ * Abre o modal de arquivos do evento atualmente selecionado
+ */
+function openFilesModal() {
+    // Se não tiver selecionado nada
+    if (!currentSelectedEventId || !currentSelectedEventName) return;
+
+    EventArquivosTitleEl.textContent = currentSelectedEventName;
+
+    showItemAsFlex(EventArquivosEl);
+}
+
+/**
  * Carrega os eventos (listeners) da página.
  */
 function loadPageEvents() {
@@ -561,6 +577,11 @@ function loadPageEvents() {
     // Evento de fechar o modal
     document.getElementById("fecharMenuEvento")?.addEventListener("click", () => {
         closeEventModal();
+    });
+
+    // Evento de fechar o modal
+    document.getElementById("fechar-menu-arquivos-evento")?.addEventListener("click", () => {
+        hideItem(EventArquivosEl);
     });
 
     EventModalInscreverBtnEl.addEventListener('click', () => {
@@ -571,6 +592,10 @@ function loadPageEvents() {
     });
     EventModalFotosBtn.addEventListener('click', _ => {
         showEventPhotos(currentSelectedEventName, currentSelectedEventId).then( );
+    });
+
+    EventModalArquivosBtn.addEventListener('click', _ => {
+        openFilesModal();
     });
 
     document.getElementById("inscritosListGoToTop")?.addEventListener("click", () => {
@@ -653,7 +678,7 @@ if (!document.getElementById("event-modal")) {
                 </div>
                 
                 <!-- Botões do topo -->
-                <div class="top-buttons">
+                <div class="top-buttons" style="background: radial-gradient(circle at top right, rgba(0, 0, 0, 0.7) 10%, rgba(0, 0, 0, 0) 70%);">
                     <button id="fecharMenuEvento" title="Fechar" class="icon-button">
                         <img src="/assets/icons/close-thicker-icon.svg" alt="Ícone de X, para fechar" class="close-modal-icon invert-color event-modal-top-button">
                     </button>
@@ -750,9 +775,45 @@ if (!document.getElementById("event-modal")) {
                 <div class="event-modal-buttons" id="event-modal-buttons">
                     <button id="event-modal-inscrever-btn" class="primary event-modal-btn">Inscrever-se</button>
                     <button id="event-modal-cancelar-inscricao-btn" class="danger event-modal-btn" style="display: none;">Cancelar inscrição</button>
-<!--                    <button id="event-modal-arquivos-btn" class="primary event-modal-btn">Anexar Arquivos</button>-->
+                    <button id="event-modal-arquivos-btn" class="primary event-modal-btn">Anexar Arquivos</button>
                    
                 </div>
+        </div>
+    `;
+
+    // Injeta o modal
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+// Adiciona o modal de anexar arquivos no evento
+if (!document.getElementById("event-files-modal")) {
+    const modalHTML = `
+        <div id="event-files-modal" class="event-modal-background" style="display: none">        
+            <div class="modal-content" style="position: relative; background-color: #e5d7bd;">
+                <!-- Botões do topo -->
+                <div class="top-buttons">
+                    <button id="fechar-menu-arquivos-evento" title="Fechar" class="icon-button">
+                        <img src="/assets/icons/close-thicker-icon.svg" alt="Ícone de X, para fechar" class="close-modal-icon invert-color" style="width: 40px; height: auto;">
+                    </button>
+                </div>
+
+                <h3 class="event-files-title" id="event-files-title">Titulo</h3>
+                
+                <!-- Lista dos inputs -->
+                <div class="event-files-list"> <!-- Tentei deixar de forma que dê para adicionar mais arquivos depois -->
+                    <div class="event-files-list-element">
+                        <span class="text google-font big-text font-bold flex-center center">
+                            Autorização
+                        </span>
+                        <div style="justify-content: flex-end">
+                            <input type="file" name="fotoEvento" id="arquivo-evento-input" accept="application/pdf"><br>
+                            <button class="danger" id="apagarFotoBtn" style="display: none">Apagar Documento Atual</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="event-files-enviar-btn" class="primary event-modal-btn">Enviar</button>
+            </div>
         </div>
     `;
 
@@ -780,6 +841,9 @@ EventModalFotosText = document.getElementById("fotosMenuEventoText");
 EventModalFotosBtn = document.getElementById("fotosMenuEventoBtn");
 EventModalFotosImg = document.getElementById("fotosMenuEventoImg");
 EventModalButtons = document.getElementById("event-modal-buttons");
+EventModalArquivosBtn = document.getElementById("event-modal-arquivos-btn");
+EventArquivosEl = document.getElementById("event-files-modal");
+EventArquivosTitleEl = document.getElementById("event-files-title");
 
 loadPageEvents();
 setupForAdmin().then( );
