@@ -36,6 +36,10 @@ export const InscricoesDatabaseRef = refFromDatabase("inscricoes/");
 export const PhotosDatabaseRef = refFromDatabase("photos/");
 export const UsersDatabaseRef = refFromDatabase("users/");
 export const GeralDatabaseRef = refFromDatabase("geral/");
+export const ArquivosDatabaseRef = refFromDatabase("arquivos/");
+// NOTA: não vale a pena colocar o ArquivosDatabase dentro de geral, pois a tendência
+// é que "geral" tenha poucas informações, enquanto o ArquivosDatabase tenha muitas.
+
 
 // Função estática para gerar um delay
 export const delay = ms => new Promise(resolve => setTimeout(resolve, ms));

@@ -11,7 +11,7 @@ import {
     PhotosDatabaseRef,
     refFromDatabase,
     refFromUser, showItem, showItemAsFlex, showLoading,
-    getRealTime, hideLoading, delay
+    getRealTime, hideLoading, delay, ArquivosDatabaseRef
 } from "../utils";
 import {abrirAlerta, abrirConfirmacao, abrirModal, EntradasModal} from "../modal";
 import {isAdmin} from "../auth";
@@ -711,6 +711,35 @@ async function onSuccessfulSubscription(eventId) {
     showItem(positionElement);
 }
 
+/**
+ * Função que salva os arquivos dados no banco de dados, ligando
+ * o evento do id dado com o dataId(identificador dos arquivos
+ * anexados em específico) dado.
+ * @param {String} eventId id do evento que os arquivos correspondem, que será a pasta-mãe
+ *                da pasta identificadora.
+ * @param {String} dataId  id dos arquivos que serão salvos, que será a pasta-filho da
+ *                pasta do evento (ou seja, a pasta-mãe dessa pasta é o `eventId`).
+ * @param {FileList} files lista dos arquivos que serão enviados
+ */
+export function sendEventFiles(eventId, dataId, files) {
+    if (!eventId || !dataId || !files)
+        throw new Error("Id do evento, id dos arquivos e lista de arquivos são obrigatórios para enviar arquivos do evento.");
+
+    const reference = refFromDatabase(ArquivosDatabaseRef, `${eventId}/arquivos/${dataId}`);
+    const filesList = Array.from(files);
+    saveFilesInDatabaseAsLinks(reference, files);
+}
+
+/**
+ * Função que salva os arquivos dados no banco de dados, colocando
+ * os arquivos na referência dada.
+ * @param {DatabaseReference} ref referência do banco de dados onde os arquivos serão salvos
+ * @param {Array<{id, arquivo}>} arquivos lista dos arquivos que serão salvos, com o respectivo identificador
+ */
+function saveFilesInDatabaseAsLinks(ref, arquivos) {
+    // salvar no formato {id, arquivo}
+}
+
 
 // Define as função de inscrever/desinscrever no eventUI.js
-setEventFunctions(subscribeToEvent, unsubscribeFromEvent, showEventPhotos, updateEvent, removeEvent, listarInscritos);
+setEventFunctions(subscribeToEvent, unsubscribeFromEvent, showEventPhotos, updateEvent, removeEvent, listarInscritos, sendEventFiles);

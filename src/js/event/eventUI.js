@@ -8,7 +8,7 @@ import {
     getDataFromDatabase,
     getRealTime, hideItem,
     InscricoesDatabaseRef,
-    PhotosDatabaseRef, showItem, showItemAsFlex
+    PhotosDatabaseRef, showItemAsFlex
 } from "../utils";
 import {isAdmin, waitForUser} from "../auth";
 import {Auth} from "/src/config/firebase";
@@ -110,6 +110,7 @@ let showEventPhotos;
 let updateEvent;
 let removeEvent;
 let listarInscritos;
+let sendEventFiles;
 
 // Retorna o id do elemento com o nome e o id dado
 export const getEventElementId = (name, id) => `event-${name}-${id}`;
@@ -122,14 +123,17 @@ export const getEventElementId = (name, id) => `event-${name}-${id}`;
  * @param f_updateEvent função de atualizar o evento
  * @param f_removeEvent função de remover um evento
  * @param f_listarInscritos função de listar os inscritos
+ * @param f_sendEventFiles função de enviar arquivos do evento
  */
-export function setEventFunctions(f_subscribe, f_unsubscribe, f_showEventPhotos, f_updateEvent, f_removeEvent, f_listarInscritos) {
+export function setEventFunctions
+(f_subscribe, f_unsubscribe, f_showEventPhotos, f_updateEvent, f_removeEvent, f_listarInscritos, f_sendEventFiles) {
     subscribeToEvent = f_subscribe;
     unsubscribeFromEvent = f_unsubscribe;
     showEventPhotos = f_showEventPhotos;
     updateEvent = f_updateEvent;
     removeEvent = f_removeEvent;
     listarInscritos = f_listarInscritos;
+    sendEventFiles = f_sendEventFiles;
 }
 
 // Estados do botão de inscrição/desinscrição
@@ -377,6 +381,7 @@ export function fillEventModal(eventId, eventData) {
 
     // Se o evento tiver uma imagem específica, carrega
     if (eventData.imagem) {
+        EventModalImgEl.style.backgroundImage = `url(${eventData.thumbImagem})`;
         const modalPreloader = new Image();
         // Quando a imagem carregar, põe ela
         modalPreloader.onload = () => {
