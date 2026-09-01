@@ -715,15 +715,19 @@ async function onSuccessfulSubscription(eventId) {
  * Função que salva os arquivos dados no banco de dados, ligando
  * o evento do id dado com o dataId(identificador dos arquivos
  * anexados em específico) dado.
- * @param {String} eventId id do evento que os arquivos correspondem, que será a pasta-mãe
- *                da pasta identificadora.
- * @param {String} dataId  id dos arquivos que serão salvos, que será a pasta-filho da
- *                pasta do evento (ou seja, a pasta-mãe dessa pasta é o `eventId`).
  * @param {Array<FileData>} files lista dos arquivos que serão enviados
+ * @param {String} eventId id do evento que os arquivos correspondem, que será a pasta-mãe
+ *                         da pasta identificadora.
+ * @param {String} dataId  id dos arquivos que serão salvos, que será a pasta-filho da pasta
+ *                         do evento (ou seja, a pasta-mãe dessa pasta é o `eventId`). Se não
+ *                         esse campo não for especificado, o arquivo será guardado na pasta
+ *                         "geral" do evento.
  */
-export async function sendEventFiles(eventId, dataId, files) {
-    if (!eventId || !dataId || !files)
-        throw new Error("Id do evento, id dos arquivos e lista de arquivos são obrigatórios para enviar arquivos do evento.");
+export async function sendEventFiles(files, eventId, dataId="geral") {
+    if (!eventId || !files)
+        throw new Error("Id do evento e lista de arquivos são obrigatórios para enviar arquivos do evento.");
+    else if (!dataId)
+        throw new Error("Id dos arquivos é obrigatório para enviar arquivos do evento. Se não for especificado, deixe esse campo vazio");
 
     const reference = refFromDatabase(ArquivosDatabaseRef, `${eventId}/${dataId}`);
     try {
@@ -732,6 +736,7 @@ export async function sendEventFiles(eventId, dataId, files) {
     } catch (e) {
         enviarErroParaSentry(e);
         abrirAlerta("Erro ao enviar arquivos. Tente novamente.").then( );
+        console.error(e);
     }
 }
 

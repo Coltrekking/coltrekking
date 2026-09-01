@@ -25,7 +25,7 @@ const firebaseConfig = {
 // Link do código do Apps Script
 export const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyBSEEIxswCLy9nF0bAHrsUNXaDbEV-jOM3JsqoG6a2dfZwn3rbfaRROQ_hVPJYSx6h/exec";
 // Chave secreta para poder usar o Apps Script
-export const APPS_SCRIPT_CHAVE_SECRETA = import.meta.env.APPS_SCRIPT_CHAVE_SECRETA;
+export const APPS_SCRIPT_CHAVE_SECRETA = import.meta.env.VITE_APPS_SCRIPT_CHAVE_SECRETA;
 
 // Inicializa o Firebase
 //if (!firebase.apps.length) {

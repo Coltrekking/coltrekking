@@ -568,6 +568,7 @@ export function saveFilesInDatabaseAsLinks(ref, arquivos) {
             tokenDeSeguranca: APPS_SCRIPT_CHAVE_SECRETA // Chave para poder enviar para o Apps Script (para evitar que qualquer um envie arquivos)
         };
 
+
         // Envia o payload para o Apps Script.
         // Retorna um objeto com os campos: {status, fileUrl, fileId}
         const resposta = await sendRequestToAppsScript(payload);
@@ -577,7 +578,7 @@ export function saveFilesInDatabaseAsLinks(ref, arquivos) {
             throw new Error("Erro ao salvar no Drive: " + resposta.message);
         }
 
-        const link = resposta.fileUrl;
+        const link = resposta.fileUrl; // link do arquivo no Google Drive
         const id = resposta.fileId; // o id é importante para apagar o arquivo depois, caso seja necessário.
         console.log("Arquivo enviado! Link:" + link + " com id: " + id);
 

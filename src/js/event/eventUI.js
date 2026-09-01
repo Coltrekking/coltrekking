@@ -4,6 +4,7 @@
  */
 import {formattedDate} from "../date";
 import {
+    FileData,
     getAttributeFromUser,
     getDataFromDatabase,
     getRealTime, hideItem,
@@ -39,7 +40,7 @@ let EventModalButtons;
 let EventModalArquivosBtn;
 let EventArquivosEl;
 let EventArquivosTitleEl;
-
+let EventArquivosEnviarBtn;
 
 const DEFAULT_EVENT_BACKGROUND_IMAGE = `url('/assets/images/default-event-image.jpg')`;
 
@@ -563,6 +564,35 @@ export function getEventPhotos(eventId) {
 }
 
 /**
+ * Quando o botão de "enviar" do modal de arquivos do evento é clicado,
+ * essa função é chamada.
+ */
+function onEventArquivosEnviarBtnClicked() {
+    // Obtém os arquivos
+        // NOTA: atualmente, só o arquivo de autorização é usado
+    const autorizacaoFileInput = document.getElementById("event-arquivos-autorizacao");
+    const autorizacaoFile = autorizacaoFileInput?.files[0];
+
+    // Se houver mais arquivos, guarde nesse vetor
+    const files = [
+        // obs: de preferência, o nome pode ter informações sobre quem enviou e em qual contexto
+        new FileData("autorizacao_" + currentSelectedEventId + "_" + Auth.currentUser.uid, autorizacaoFile)
+    ];
+
+    // Salva o arquivo no banco de dados
+    sendEventFiles(files, currentSelectedEventId, Auth.currentUser.uid)
+        .then(() => {
+            // Sucesso!
+            hideItem(EventArquivosEl);
+
+            if (files.length > 1)
+                abrirAlerta("Arquivos enviados com sucesso!").then( );
+            else
+                abrirAlerta("Arquivo enviado com sucesso!").then( );
+    });
+}
+
+/**
  * Abre o modal de arquivos do evento atualmente selecionado
  */
 function openFilesModal() {
@@ -602,6 +632,7 @@ function loadPageEvents() {
     EventModalArquivosBtn.addEventListener('click', _ => {
         openFilesModal();
     });
+    EventArquivosEnviarBtn.addEventListener('click', onEventArquivosEnviarBtnClicked);
 
     document.getElementById("inscritosListGoToTop")?.addEventListener("click", () => {
         // Scrolla pra cima
@@ -811,7 +842,7 @@ if (!document.getElementById("event-files-modal")) {
                             Autorização
                         </span>
                         <div style="justify-content: flex-end">
-                            <input type="file" name="fotoEvento" id="arquivo-evento-input" accept="application/pdf"><br>
+                            <input type="file" name="fotoEvento" id="event-arquivos-autorizacao" accept="application/pdf"><br>
                             <button class="danger" id="apagarFotoBtn" style="display: none">Apagar Documento Atual</button>
                         </div>
                     </div>
@@ -849,6 +880,7 @@ EventModalButtons = document.getElementById("event-modal-buttons");
 EventModalArquivosBtn = document.getElementById("event-modal-arquivos-btn");
 EventArquivosEl = document.getElementById("event-files-modal");
 EventArquivosTitleEl = document.getElementById("event-files-title");
+EventArquivosEnviarBtn = document.getElementById("event-files-enviar-btn");
 
 loadPageEvents();
 setupForAdmin().then( );
