@@ -1,5 +1,5 @@
-import {Auth, Database} from "../config/firebase";
-import {child, ref, get, onValue} from "firebase/database";
+import {APPS_SCRIPT_CHAVE_SECRETA, APPS_SCRIPT_URL, Auth, Database} from "../config/firebase";
+import {child, get, onValue, ref} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
 import {getUserRole} from "/src/js/auth";
 import {abrirAlerta} from "/src/js/modal";
@@ -464,7 +464,7 @@ export function convertToWebp(file, quality = 0.8) {
  * @returns {boolean} se o arquivo está dentro do tamanho máximo.
  */
 export function checkFileSize(file, maxSizeInMB) {
-    const maxSizeInBytes = maxSizeInMB * 1024 * 1024; // 5MB in bytes
+    const maxSizeInBytes = maxSizeInMB * 1024 * 1024; // Transforma em bytes
     return file.size <= maxSizeInBytes;
 }
 
@@ -476,4 +476,119 @@ export function checkFileSize(file, maxSizeInMB) {
  */
 export function checkPhotoSize(file) {
     return checkFileSize(file, 32);
+}
+
+/**
+ * Transforma o arquivo dado em uma String Base64.
+ * @param {File} file arquivo que se deseja transformar na string.
+ * @returns {Promise<String>} Promise com a string Base64 do arquivo.
+ */
+async function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+            // O resultado vem como "data:(o_tipo_do_arquivo);base64,JVBERi0xLjQK..."
+            // No entanto, precisamos apenas da parte depois da vírgula
+            const base64String = reader.result.split(',')[1];
+            resolve(base64String);
+        };
+        reader.onerror = error => reject(error);
+    });
+}
+
+/**
+ * Envia a informação dada ao API no Apps Script.
+ * @param {Object} data informação que será enviada ao apps script.
+ * @return {Promise<any>} Promise com a resposta do Apps Script.
+ */
+async function sendRequestToAppsScript(data) {
+
+    const response = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        // Send as plain text to avoid CORS preflight (OPTIONS) pre-checks
+        headers: {
+            'Content-Type': 'text/plain;charset=utf-8',
+        },
+        body: JSON.stringify(data)
+    });
+
+    if (!response.ok)
+        throw new Error('Erro na conexão com o Apps Script');
+
+    // Retorna a resposta
+    return await response.json();
+}
+
+// Classe responsável pela representação de um arquivo que será enviado para o banco de dados.
+export class FileData {
+    constructor(nome,  arquivo) {
+        this.nome = nome;
+        this.arquivo = arquivo;
+    }
+}
+
+/**
+ * Função que salva os arquivos dados no banco de dados, colocando
+ * os arquivos na referência dada.
+ * @param {DatabaseReference} ref referência do banco de dados onde os arquivos serão salvos.
+ *                                Note que é *a referência*, não uma string com a posição!
+ * @param {Array<FileData>} arquivos lista dos arquivos que serão salvos, com o respectivo identificador.
+ *                                   Lembre-se de obedecer a estrutura da classe FileData!
+ */
+export function saveFilesInDatabaseAsLinks(ref, arquivos) {
+    // Verifica o tamanho de cada arquivo antes de enviar.
+    // O tamanho máximo recomendado é de 10MB, uma vez que ainda
+    // será preciso convertê-lo em texto.
+    const maxFileSizeInMB = 10;
+    arquivos.forEach(fileData => {
+        if (!fileData.arquivo) {
+            // Se tiver o nome do arquivo, manda uma mensagem de erro com o nome do arquivo.
+            // Caso contrário, manda uma mensagem genérica.
+            if (fileData.nome)
+                throw new Error("O arquivo " + fileData.nome + " não foi encontrado.");
+            else
+                throw new Error("Um arquivo não identificado não foi encontrado. NOTA: Esse arquivo não teve seu campo `nome` preenchido, então não é possível identificar qual arquivo é.");
+        }
+
+        if (!checkFileSize(fileData.arquivo, maxFileSizeInMB))
+            throw new Error("O arquivo excede o tamanho máximo permitido de " + maxFileSizeInMB + "MB. Se você acha que isso é um problema, contate um administrador.");
+    });
+
+    // Faz várias promises enviando cada arquivo (para maximizar a eficiência)
+    const promises = arquivos.map(async (fileData) => {
+
+        const base64String = await fileToBase64(fileData.arquivo);
+
+        // Monta o que vai enviar ao Apps Script
+        const payload = {
+            fileName: fileData.nome || "arquivo_sem_nome", // Pega o nome do arquivo
+            mimeType: fileData.arquivo.type || "application/octet-stream", // Pega o tipo (ex: image/png, application/pdf)
+            fileContent: base64String, // Conteúdo do arquivo em Base64
+            tokenDeSeguranca: APPS_SCRIPT_CHAVE_SECRETA // Chave para poder enviar para o Apps Script (para evitar que qualquer um envie arquivos)
+        };
+
+        // Envia o payload para o Apps Script.
+        // Retorna um objeto com os campos: {status, fileUrl, fileId}
+        const resposta = await sendRequestToAppsScript(payload);
+
+        // Lança um erro se houve algum
+        if (resposta.status === 'error') {
+            throw new Error("Erro ao salvar no Drive: " + resposta.message);
+        }
+
+        const link = resposta.fileUrl;
+        const id = resposta.fileId; // o id é importante para apagar o arquivo depois, caso seja necessário.
+        console.log("Arquivo enviado! Link:" + link + " com id: " + id);
+
+        // Se não obteve o link, lança um erro
+        if (!link) {
+            throw new Error("Erro ao enviar o arquivo: o link retornado é inválido.");
+        }
+
+        return {link, id};
+    });
+
+    // Retorna todas as promessas
+    return Promise.all(promises);
 }

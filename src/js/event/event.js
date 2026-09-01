@@ -11,7 +11,7 @@ import {
     PhotosDatabaseRef,
     refFromDatabase,
     refFromUser, showItem, showItemAsFlex, showLoading,
-    getRealTime, hideLoading, delay, ArquivosDatabaseRef
+    getRealTime, hideLoading, delay, ArquivosDatabaseRef, saveFilesInDatabaseAsLinks
 } from "../utils";
 import {abrirAlerta, abrirConfirmacao, abrirModal, EntradasModal} from "../modal";
 import {isAdmin} from "../auth";
@@ -719,27 +719,21 @@ async function onSuccessfulSubscription(eventId) {
  *                da pasta identificadora.
  * @param {String} dataId  id dos arquivos que serão salvos, que será a pasta-filho da
  *                pasta do evento (ou seja, a pasta-mãe dessa pasta é o `eventId`).
- * @param {FileList} files lista dos arquivos que serão enviados
+ * @param {Array<FileData>} files lista dos arquivos que serão enviados
  */
-export function sendEventFiles(eventId, dataId, files) {
+export async function sendEventFiles(eventId, dataId, files) {
     if (!eventId || !dataId || !files)
         throw new Error("Id do evento, id dos arquivos e lista de arquivos são obrigatórios para enviar arquivos do evento.");
 
-    const reference = refFromDatabase(ArquivosDatabaseRef, `${eventId}/arquivos/${dataId}`);
-    const filesList = Array.from(files);
-    saveFilesInDatabaseAsLinks(reference, files);
+    const reference = refFromDatabase(ArquivosDatabaseRef, `${eventId}/${dataId}`);
+    try {
+        await saveFilesInDatabaseAsLinks(reference, files);
+        abrirAlerta("Arquivos enviados com sucesso!").then( );
+    } catch (e) {
+        enviarErroParaSentry(e);
+        abrirAlerta("Erro ao enviar arquivos. Tente novamente.").then( );
+    }
 }
-
-/**
- * Função que salva os arquivos dados no banco de dados, colocando
- * os arquivos na referência dada.
- * @param {DatabaseReference} ref referência do banco de dados onde os arquivos serão salvos
- * @param {Array<{id, arquivo}>} arquivos lista dos arquivos que serão salvos, com o respectivo identificador
- */
-function saveFilesInDatabaseAsLinks(ref, arquivos) {
-    // salvar no formato {id, arquivo}
-}
-
 
 // Define as função de inscrever/desinscrever no eventUI.js
 setEventFunctions(subscribeToEvent, unsubscribeFromEvent, showEventPhotos, updateEvent, removeEvent, listarInscritos, sendEventFiles);
