@@ -1,10 +1,10 @@
 # Dados sensíveis (principalmente do Firebase)
 # Tome cuidado com eles, por mais que já haja segurança
 .env
+.env.sentry-build-plugin
 
 # Site resultante
 dist/
-hosting/public/
 
 # Arquivos locais/privados
 local/
@@ -12,9 +12,6 @@ local/
 # Módulos
 node_modules/
 package-lock.json
-
-# Cache
-hosting/.firebase/*.cache
 
 # IDEs/editores
 .vscode/
@@ -25,6 +22,3 @@ hosting/.firebase/*.cache
 
 # Cache
 *.cache
-
-# Sentry Config File
-.env.sentry-build-plugin

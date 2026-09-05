@@ -1,25 +1,38 @@
 // função para preencher a lista de eventos
 import {Auth} from "../../config/firebase";
 import {
+    ArquivosDatabaseRef,
+    delay,
     EventsDatabaseRef,
     getAttributeFromUser,
     getDataFromDatabase,
     getDataFromUser,
+    getRealTime,
     hideItem,
+    hideLoading,
     InscricoesDatabaseRef,
     loading,
     PhotosDatabaseRef,
     refFromDatabase,
-    refFromUser, showItem, showItemAsFlex, showLoading,
-    getRealTime, hideLoading, delay, ArquivosDatabaseRef, saveFilesInDatabaseAsLinks
+    refFromUser,
+    saveFilesInDatabaseAsLinks,
+    showItem,
+    showItemAsFlex,
+    showLoading
 } from "../utils";
 import {abrirAlerta, abrirConfirmacao, abrirModal, EntradasModal} from "../modal";
 import {isAdmin} from "../auth";
 import {listarInscritos, removeEvent, updateEvent} from "./eventAdmin";
-import {remove, set, update, serverTimestamp} from "firebase/database";
+import {remove, serverTimestamp, set, update} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
 import {
-    createEventCard, fillEventModal, getEventElementId, getEventPhotos, setEventFunctions, setSubscribeButtons
+    createEventCard,
+    fillEventModal,
+    getEventElementId,
+    getEventPhotos,
+    setEventFunctions,
+    setSubscribeButtons,
+    updateEventModal
 } from "./eventUI";
 
 export const modalInscricaoEvento = document.getElementById("modalOverlayInscricaoEvento");
@@ -268,7 +281,7 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, alreadyRetrying
             // Se chegou até aqui, deu tudo certo na inscrição chama a função de sucesso.
             // NOTA: não é usado "await" aqui pq não tem motivos de esperar (essa função tem efeito puramente visual).
             onSuccessfulSubscription(eventId).then( );
-            setSubscribeButtons(true, subscribeBtn, unsubscribeBtn);
+            updateEventModal(true);
 
             // Botões do card de evento
             const cardSubscribeBtn = document.getElementById(getEventElementId('inscrever-btn', eventId));
@@ -286,7 +299,7 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, alreadyRetrying
                 // Tenta se inscrever novamente se não conseguiu de primeira
                 if (!alreadyRetrying) {
                     enviarErroParaSentry(error);
-                    subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, true);
+                    subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, true).then( );
                 // Se já tentou se inscrever duas vezes, apenas envia o erro
                 } else {
                     console.error('Erro ao inscrever:', error);
@@ -316,7 +329,7 @@ async function unsubscribeFromEvent(eventId, subscribeBtn, unsubscribeBtn) {
     // Retira o usuário do evento
     return unsubscribeUserFromEvent(eventId, uid).then(() => {
         abrirAlerta('Inscrição removida com sucesso!');
-        setSubscribeButtons(false, subscribeBtn, unsubscribeBtn);
+        updateEventModal(false);
 
         // Atualiza botões no card também
         const cardSubscribeBtn = document.getElementById(getEventElementId('inscrever-btn', eventId));
@@ -714,10 +727,11 @@ async function onSuccessfulSubscription(eventId) {
 /**
  * Função que salva os arquivos dados no banco de dados, ligando
  * o evento do id dado com o dataId(identificador dos arquivos
- * anexados em específico) dado.
+ * anexados em específico) dado. Os arquivos ficarão no
+ * caminho `arquivos/{eventId}/{dataId}/{arquivos}`.
  * @param {Array<FileData>} files lista dos arquivos que serão enviados
  * @param {String} eventId id do evento que os arquivos correspondem, que será a pasta-mãe
- *                         da pasta identificadora.
+ *                         (da pasta identificadora).
  * @param {String} dataId  id dos arquivos que serão salvos, que será a pasta-filho da pasta
  *                         do evento (ou seja, a pasta-mãe dessa pasta é o `eventId`). Se não
  *                         esse campo não for especificado, o arquivo será guardado na pasta
@@ -731,14 +745,24 @@ export async function sendEventFiles(files, eventId, dataId="geral") {
 
     const reference = refFromDatabase(ArquivosDatabaseRef, `${eventId}/${dataId}`);
     try {
-        await saveFilesInDatabaseAsLinks(reference, files);
-        abrirAlerta("Arquivos enviados com sucesso!").then( );
+        return await saveFilesInDatabaseAsLinks(reference, files);
     } catch (e) {
         enviarErroParaSentry(e);
         abrirAlerta("Erro ao enviar arquivos. Tente novamente.").then( );
-        console.error(e);
+        return false;
     }
 }
+
+/**
+ * Remove os arquivos com o identificador dado do evento dado. Essa função é útil
+ * para quando o usuário se desinscreve de um evento, por exemplo.
+ * @param {String} eventId Id do evento que os arquivos estão relacionados
+ * @param {String} dataId Id dos arquivos que estão relacionados
+ */
+function removeFiles(eventId, dataId) {
+    // TODO: implementar a função de remover arquivos do usuário do evento
+}
+
 
 // Define as função de inscrever/desinscrever no eventUI.js
 setEventFunctions(subscribeToEvent, unsubscribeFromEvent, showEventPhotos, updateEvent, removeEvent, listarInscritos, sendEventFiles);

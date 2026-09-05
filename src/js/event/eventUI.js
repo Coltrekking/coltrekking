@@ -7,9 +7,9 @@ import {
     FileData,
     getAttributeFromUser,
     getDataFromDatabase,
-    getRealTime, hideItem,
+    getRealTime, hideItem, hideLoading,
     InscricoesDatabaseRef,
-    PhotosDatabaseRef, showItemAsFlex
+    PhotosDatabaseRef, showItem, showItemAsFlex, showLoading
 } from "../utils";
 import {isAdmin, waitForUser} from "../auth";
 import {Auth} from "/src/config/firebase";
@@ -44,6 +44,41 @@ let EventArquivosEnviarBtn;
 
 const DEFAULT_EVENT_BACKGROUND_IMAGE = `url('/assets/images/default-event-image.jpg')`;
 
+// Imagens já salvas no site (para não precisar baixar de fora, economizando banda e tempo)
+// obs.: isso economiza bastante tempo
+const SAVED_IMAGES = {
+    // está no formato:
+    // "link da imagem": "caminho da imagem salva no site"
+    "https://i.ibb.co/8nkCKxMC/evento-1787353483330.webp": "/assets/images/fotoEventos/evento-travessia.webp",
+    "https://i.ibb.co/zV0DLz6y/evento-1787351103993.webp": "/assets/images/fotoEventos/evento-acampamento.webp",
+    "https://i.ibb.co/yFJ74Xjb/evento-1788564532931.webp" : "/assets/images/fotoEventos/evento-farofa.jpg",
+    "https://i.ibb.co/F4R34Vx0/evento-1788564255099.webp" : "/assets/images/fotoEventos/evento-itacolomi.jpg",
+    "https://i.ibb.co/6cDxbh8P/evento-1788564657141.webp": "/assets/images/fotoEventos/evento-bh-novalima.jpg",
+    "https://i.ibb.co/LzpTTtRQ/evento-1788564752902.webp": "/assets/images/fotoEventos/evento-travessao.jpg"
+}
+
+function _has_saved_image(url) {
+    return !!SAVED_IMAGES[url];
+}
+
+/**
+ * Retorna a URL de imagem real para a imagem salva ou externa.
+ * Útil para `Image.src` e `fetch`, não para `backgroundImage`.
+ */
+function _get_background_image(url) {
+    if (SAVED_IMAGES[url]) {
+        return SAVED_IMAGES[url];
+    }
+    return url;
+}
+
+/**
+ * Retorna o valor CSS válido para `backgroundImage`.
+ */
+function _get_background_image_css(url) {
+    return `url(${_get_background_image(url)})`;
+}
+
 // Usa lazy-load para carregar as imagens apenas quando for necessário.
 // Dessa forma, as imagens só serão carregadas quando o usuário ver ela
 const lazyBackgroundObserver = new IntersectionObserver((entries, observer) => {
@@ -52,6 +87,11 @@ const lazyBackgroundObserver = new IntersectionObserver((entries, observer) => {
         if (entry.isIntersecting) {
             const cardElement = entry.target;
             const imgUrl = cardElement.getAttribute('data-bg');
+
+            // Se houver imagem salva, coloca
+            if (_has_saved_image(imgUrl)) {
+                cardElement.style.backgroundImage = _get_background_image_css(imgUrl);
+            }
 
             // Carrega a imagem
             // (talvez dê para apagar isso depois que carregar a imagem)
@@ -68,11 +108,11 @@ const lazyBackgroundObserver = new IntersectionObserver((entries, observer) => {
 
                 imagePreloader.onload = () => {
                     // Quando a foto pesada terminar de baixar, substitui a borrada
-                    cardElement.style.backgroundImage = `url(${imgUrl})`;
+                    cardElement.style.backgroundImage = _get_background_image_css(imgUrl); // coloca a imagem pesada (de fora)
                 };
 
                 // Inicia o download da imagem
-                imagePreloader.src = imgUrl;
+                imagePreloader.src = _get_background_image(imgUrl);
 
                 // Limpa o atributo
                 cardElement.removeAttribute('data-bg');
@@ -84,7 +124,7 @@ const lazyBackgroundObserver = new IntersectionObserver((entries, observer) => {
     });
 }, {
     // Começa a baixar a imagem quando ela estiver 200px perto de aparecer na tela
-    rootMargin: "800px 0px",
+    rootMargin: "400px 0px",
     threshold: 0.01
 });
 
@@ -382,14 +422,22 @@ export function fillEventModal(eventId, eventData) {
 
     // Se o evento tiver uma imagem específica, carrega
     if (eventData.imagem) {
+        // obs: a imagem thumb já tá salva no firebase, então não precisa usar o _get_background_image
         EventModalImgEl.style.backgroundImage = `url(${eventData.thumbImagem})`;
         const modalPreloader = new Image();
         // Quando a imagem carregar, põe ela
         modalPreloader.onload = () => {
-            EventModalImgEl.style.backgroundImage = `url(${eventData.imagem})`;
+            // Só coloca a imagem se estiver no evento
+            if (currentSelectedEventId === eventId) {
+                EventModalImgEl.style.backgroundImage = _get_background_image_css(eventData.imagem);
+            }
         };
 
-        modalPreloader.src = eventData.imagem;
+        modalPreloader.src = _get_background_image(eventData.imagem);
+        if (_has_saved_image(eventData.imagem)) {
+            // Se for uma imagem salva, coloca ela imediatamente
+            EventModalImgEl.style.backgroundImage = _get_background_image_css(eventData.imagem);
+        }
     }
 
     EventModalTitleEl.innerText = eventData.nome || '---';
@@ -405,6 +453,10 @@ export function fillEventModal(eventId, eventData) {
     EventModalSubidaEl.innerText = eventData.subida ? `${eventData.subida}m` : '---';
     EventModalDescidaEl.innerText = eventData.descida ? `${eventData.descida}m` : '---';
     EventModalTrajetoEl.innerText = eventData.trajeto || '---';
+
+    // Retira o botão de "Anexar arquivos" para colocar apenas
+    // se o usuário já estiver inscritos
+    hideItem(EventModalArquivosBtn);
 
     // Esconde o botão se não houver fotos (ou, se for admin,
     // troca para algo que indique para adicionar uma foto)
@@ -449,7 +501,22 @@ export function fillEventModal(eventId, eventData) {
         getDataFromDatabase(InscricoesDatabaseRef, eventId + '/' + Auth.currentUser.uid)
             .then(snapshot => {
                 setSubscribeButtons(snapshot.exists(), EventModalInscreverBtnEl, EventModalCancelarInscricaoBtnEl);
+                if (snapshot.exists())
+                    showItem(EventModalArquivosBtn);
             });
+    }
+}
+
+/**
+ * Atualiza o modal de evento com os parâmetros dados.
+ * @param {Boolean} userSubscribed se o usuário está inscrito no evento
+ */
+export function updateEventModal(userSubscribed) {
+    setSubscribeButtons(userSubscribed, EventModalInscreverBtnEl, EventModalCancelarInscricaoBtnEl);
+    if (userSubscribed) {
+        showItem(EventModalArquivosBtn);
+    } else {
+        hideItem(EventModalArquivosBtn);
     }
 }
 
@@ -519,6 +586,7 @@ export function createEventCard(eventSnapshot, listaEventos) {
         // Salva o link da imagem no elemento
         elemento.setAttribute('data-bg', eventData.imagem);
 
+
         // O lazy observer fica observando o elemento (para renderizar a foto quando precisar)
         lazyBackgroundObserver.observe(elemento);
     } else {
@@ -575,21 +643,36 @@ function onEventArquivosEnviarBtnClicked() {
 
     // Se houver mais arquivos, guarde nesse vetor
     const files = [
-        // obs: de preferência, o nome pode ter informações sobre quem enviou e em qual contexto
-        new FileData("autorizacao_" + currentSelectedEventId + "_" + Auth.currentUser.uid, autorizacaoFile)
+        // obs: o nome do arquivo não precisa, necessariamente, ter informações de quem enviou
+        // o arquivo ou qual a relação dele com o evento/usuário, pois a forma que o arquivo
+        // é salvo no banco de dados guarda esse tipo de relação. Por exemplo, o caminho do
+        // arquivo é `arquivos/{eventId}/{userId}/{arquivo}`. Então, não é necessário que o nome
+        // do arquivo seja algo como `autorizacao_{userId}_{eventId}.pdf`, pois o caminho já
+        // guarda essas informações.
+        new FileData("autorizacao", autorizacaoFile)
     ];
 
+    // TODO: verificar a validade da autorização
+
+    showLoading();
     // Salva o arquivo no banco de dados
     sendEventFiles(files, currentSelectedEventId, Auth.currentUser.uid)
-        .then(() => {
+        .then((result) => {
+            console.log(result)
             // Sucesso!
             hideItem(EventArquivosEl);
 
-            if (files.length > 1)
-                abrirAlerta("Arquivos enviados com sucesso!").then( );
-            else
-                abrirAlerta("Arquivo enviado com sucesso!").then( );
-    });
+            if (result) {
+                const plural = files.length > 1 ? "s" : "";
+                abrirAlerta(`Arquivo${plural} enviado${plural} com sucesso!`).then( );
+            }
+        })
+        .catch(error => {
+            // Faz nada
+        })
+        .finally(() => {
+            hideLoading();
+        });
 }
 
 /**
@@ -600,6 +683,9 @@ function openFilesModal() {
     if (!currentSelectedEventId || !currentSelectedEventName) return;
 
     EventArquivosTitleEl.textContent = currentSelectedEventName;
+
+    // Limpa as entradas
+    document.getElementById("event-arquivos-autorizacao").value = "";
 
     showItemAsFlex(EventArquivosEl);
 }

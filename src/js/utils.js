@@ -1,5 +1,5 @@
 import {APPS_SCRIPT_CHAVE_SECRETA, APPS_SCRIPT_URL, Auth, Database} from "../config/firebase";
-import {child, get, onValue, ref} from "firebase/database";
+import {child, get, onValue, ref, update} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
 import {getUserRole} from "/src/js/auth";
 import {abrirAlerta} from "/src/js/modal";
@@ -536,33 +536,42 @@ export class FileData {
  * @param {Array<FileData>} arquivos lista dos arquivos que serão salvos, com o respectivo identificador.
  *                                   Lembre-se de obedecer a estrutura da classe FileData!
  */
-export function saveFilesInDatabaseAsLinks(ref, arquivos) {
+export async function saveFilesInDatabaseAsLinks(ref, arquivos) {
     // Verifica o tamanho de cada arquivo antes de enviar.
     // O tamanho máximo recomendado é de 10MB, uma vez que ainda
     // será preciso convertê-lo em texto.
     const maxFileSizeInMB = 10;
-    arquivos.forEach(fileData => {
-        if (!fileData.arquivo) {
-            // Se tiver o nome do arquivo, manda uma mensagem de erro com o nome do arquivo.
-            // Caso contrário, manda uma mensagem genérica.
-            if (fileData.nome)
-                throw new Error("O arquivo " + fileData.nome + " não foi encontrado.");
-            else
-                throw new Error("Um arquivo não identificado não foi encontrado. NOTA: Esse arquivo não teve seu campo `nome` preenchido, então não é possível identificar qual arquivo é.");
-        }
+    try {
+        arquivos.forEach(fileData => {
+            if (!fileData.arquivo) {
+                // Se tiver o nome do arquivo, manda uma mensagem de erro com o nome do arquivo.
+                // Caso contrário, manda uma mensagem genérica.
+                if (fileData.nome)
+                    throw new Error("O arquivo " + fileData.nome + " não foi encontrado.");
+                else
+                    throw new Error("Um arquivo não identificado não foi encontrado. NOTA: Esse arquivo não teve seu campo `nome` preenchido, então não é possível identificar qual arquivo é.");
+            }
 
-        if (!checkFileSize(fileData.arquivo, maxFileSizeInMB))
-            throw new Error("O arquivo excede o tamanho máximo permitido de " + maxFileSizeInMB + "MB. Se você acha que isso é um problema, contate um administrador.");
-    });
+            if (!checkFileSize(fileData.arquivo, maxFileSizeInMB))
+                throw new Error("O arquivo excede o tamanho máximo permitido de " + maxFileSizeInMB + "MB. Se você acha que isso é um problema, contate um administrador.");
+        });
+    } catch (error) {
+        abrirAlerta(error.message).then( );
+        return false;
+    }
 
     // Faz várias promises enviando cada arquivo (para maximizar a eficiência)
     const promises = arquivos.map(async (fileData) => {
 
         const base64String = await fileToBase64(fileData.arquivo);
 
+        // O nome do arquivo no drive deve dar para entender a posição do arquivo.
+        // Esse nome não afeta o nome no banco de dados
+        const nomeArquivoDrive = `${ref.toString()}/${fileData.nome || "arquivo_sem_nome"}`;
+
         // Monta o que vai enviar ao Apps Script
         const payload = {
-            fileName: fileData.nome || "arquivo_sem_nome", // Pega o nome do arquivo
+            fileName: nomeArquivoDrive, // Pega o nome do arquivo no drive
             mimeType: fileData.arquivo.type || "application/octet-stream", // Pega o tipo (ex: image/png, application/pdf)
             fileContent: base64String, // Conteúdo do arquivo em Base64
             tokenDeSeguranca: APPS_SCRIPT_CHAVE_SECRETA // Chave para poder enviar para o Apps Script (para evitar que qualquer um envie arquivos)
@@ -587,9 +596,22 @@ export function saveFilesInDatabaseAsLinks(ref, arquivos) {
             throw new Error("Erro ao enviar o arquivo: o link retornado é inválido.");
         }
 
-        return {link, id};
+        const nome = fileData.nome;
+        return {nome, link, id};
     });
 
-    // Retorna todas as promessas
-    return Promise.all(promises);
+    // Espera todas as promessas
+    const results = await Promise.all(promises);
+    console.log(results);
+
+    // Salva no banco de dados
+    const updates = {};
+    results.forEach((result) => {
+        const link = result.link, id = result.id;
+        updates[`${result.nome}`] = {link, id};
+    })
+    await update(ref, updates);
+
+    // Se chegou até aqui, deu tudo certo
+    return true;
 }
