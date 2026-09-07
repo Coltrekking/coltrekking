@@ -1101,11 +1101,16 @@ textarea {
 }
 
 .event-files-list-element > div {
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: row;
+    align-items: center;
 
+    gap: 10px;
 }
 
 .event-files-list-element input[type="file"] {
-
+    width: 40%;
 }
 
 #createPhoto {

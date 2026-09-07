@@ -12,18 +12,18 @@ import {
     hideLoading,
     InscricoesDatabaseRef,
     loading,
-    PhotosDatabaseRef,
+    PhotosDatabaseRef, PublishedFile,
     refFromDatabase,
     refFromUser,
     saveFilesInDatabaseAsLinks,
     showItem,
     showItemAsFlex,
-    showLoading
+    showLoading, standardFileRelativePath
 } from "../utils";
 import {abrirAlerta, abrirConfirmacao, abrirModal, EntradasModal} from "../modal";
 import {isAdmin} from "../auth";
 import {listarInscritos, removeEvent, updateEvent} from "./eventAdmin";
-import {remove, serverTimestamp, set, update} from "firebase/database";
+import {get, remove, serverTimestamp, set, update} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
 import {
     createEventCard,
@@ -729,15 +729,16 @@ async function onSuccessfulSubscription(eventId) {
  * o evento do id dado com o dataId(identificador dos arquivos
  * anexados em específico) dado. Os arquivos ficarão no
  * caminho `arquivos/{eventId}/{dataId}/{arquivos}`.
- * @param {Array<FileData>} files lista dos arquivos que serão enviados
+ * @param {Array<FileForUpload>} files lista dos arquivos que serão enviados
  * @param {String} eventId id do evento que os arquivos correspondem, que será a pasta-mãe
  *                         (da pasta identificadora).
  * @param {String} dataId  id dos arquivos que serão salvos, que será a pasta-filho da pasta
  *                         do evento (ou seja, a pasta-mãe dessa pasta é o `eventId`). Se não
  *                         esse campo não for especificado, o arquivo será guardado na pasta
  *                         "geral" do evento.
+ * @return {Boolean} se houve sucesso ou não no envio dos arquivos.
  */
-export async function sendEventFiles(files, eventId, dataId="geral") {
+export async function sendEventFiles(files, eventId, dataId = standardFileRelativePath) {
     if (!eventId || !files)
         throw new Error("Id do evento e lista de arquivos são obrigatórios para enviar arquivos do evento.");
     else if (!dataId)
@@ -754,10 +755,61 @@ export async function sendEventFiles(files, eventId, dataId="geral") {
 }
 
 /**
+ * Obtém um arquivo publicado no evento dado, no caminho relativo e com o nome especificado.
+ * @param {String} eventId ID do evento.
+ * @param {String} relativePath caminho relativo dentro do evento (padrão: "geral").
+ * @param {String} fileName nome do arquivo que se deseja obter.
+ * @return {Promise<PublishedFile>} Promise com o arquivo publicado, contendo o nome, o link e o id no Google Drive.
+ */
+export async function getFileFromEvent(eventId, relativePath=standardFileRelativePath, fileName) {
+    const fileRef = refFromDatabase(`arquivos/${eventId}/${relativePath}/${fileName}`);
+
+    const snapshot = await get(fileRef);
+
+    if (snapshot.exists()) {
+        const val = snapshot.val();
+
+        return new PublishedFile(fileName, val.link, val.id);
+    } else {
+        return null;
+    }
+}
+
+/**
+ * Obtém os arquivos publicados no evento dado e no caminho relativo.
+ * @param {String} eventId ID do evento.
+ * @param {String} relativePath caminho relativo dentro do evento (padrão: "geral").
+ * @return {Promise<Array<PublishedFile>>} Promise com os arquivos publicados, contendo o nome,
+ *                                         o link e o id no Google Drive. Se não houver arquivos,
+ *                                         o vetor retornado estará vazio.
+ */
+export async function getFilesFromEvent(eventId, relativePath = standardFileRelativePath) {
+    const filesRef = refFromDatabase(`arquivos/${eventId}/${relativePath}`);
+
+    const snapshot = await get(filesRef);
+
+    const files = [];
+
+    if (snapshot.exists()) {
+        const val = snapshot.val();
+
+        // Obtém os arquivos
+        for (const [fileName, fileData] of Object.entries(val)) {
+            files.push(new PublishedFile(fileName, fileData.link, fileData.id));
+        }
+
+        return files;
+    }
+
+    return files;
+}
+
+/**
  * Remove os arquivos com o identificador dado do evento dado. Essa função é útil
  * para quando o usuário se desinscreve de um evento, por exemplo.
  * @param {String} eventId Id do evento que os arquivos estão relacionados
  * @param {String} dataId Id dos arquivos que estão relacionados
+ * @return {Boolean} se conseguiu ou não apagar o(s) arquivo(s)
  */
 function removeFiles(eventId, dataId) {
     // TODO: implementar a função de remover arquivos do usuário do evento
@@ -765,4 +817,4 @@ function removeFiles(eventId, dataId) {
 
 
 // Define as função de inscrever/desinscrever no eventUI.js
-setEventFunctions(subscribeToEvent, unsubscribeFromEvent, showEventPhotos, updateEvent, removeEvent, listarInscritos, sendEventFiles);
+setEventFunctions(subscribeToEvent, unsubscribeFromEvent, showEventPhotos, updateEvent, removeEvent, listarInscritos, sendEventFiles, getFilesFromEvent);

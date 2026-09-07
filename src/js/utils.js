@@ -36,9 +36,11 @@ export const InscricoesDatabaseRef = refFromDatabase("inscricoes/");
 export const PhotosDatabaseRef = refFromDatabase("photos/");
 export const UsersDatabaseRef = refFromDatabase("users/");
 export const GeralDatabaseRef = refFromDatabase("geral/");
-export const ArquivosDatabaseRef = refFromDatabase("arquivos/");
 // NOTA: não vale a pena colocar o ArquivosDatabase dentro de geral, pois a tendência
 // é que "geral" tenha poucas informações, enquanto o ArquivosDatabase tenha muitas.
+export const ArquivosDatabaseRef = refFromDatabase("arquivos/");
+
+export const standardFileRelativePath = "geral"; // caminho relativo padrão para arquivos dentro de cada evento. Recomendo, no geral, nunca trocar!
 
 
 // Função estática para gerar um delay
@@ -95,8 +97,9 @@ export function showAuth() {
  * Retorna a referência da célula do banco de dados no caminho dado.
  * @param path caminho para a célula, como `users/AjdkaJDJId892` ou `event/`
  * @param chName nome da criança/atributo (por exemplo, `email` ou `uid`), se
- *        quiser um filho de `path`.
- * @returns DatabaseReference
+ *        quiser um filho de `path`. Por padrão, esse valor é nulo, o que
+ *        significa que a referência retornada será exatamente a do `path`.
+ * @returns {DatabaseReference} Referência do banco de dados no caminho dado.
  */
 export function refFromDatabase(path, chName=null) {
     let refPath = path;
@@ -520,11 +523,20 @@ async function sendRequestToAppsScript(data) {
     return await response.json();
 }
 
-// Classe responsável pela representação de um arquivo que será enviado para o banco de dados.
-export class FileData {
-    constructor(nome,  arquivo) {
+// Classe responsável pela representação de um arquivo que será enviado ao banco de dados.
+export class FileForUpload {
+    constructor(nome, arquivo) {
         this.nome = nome;
         this.arquivo = arquivo;
+    }
+}
+
+// Classe responsável pela representação de um arquivo já salvo no banco, com o link e o id no Google Drive.
+export class PublishedFile {
+    constructor(nome, link, id) {
+        this.nome = nome;
+        this.link = link;
+        this.id = id;
     }
 }
 
@@ -533,8 +545,8 @@ export class FileData {
  * os arquivos na referência dada.
  * @param {DatabaseReference} ref referência do banco de dados onde os arquivos serão salvos.
  *                                Note que é *a referência*, não uma string com a posição!
- * @param {Array<FileData>} arquivos lista dos arquivos que serão salvos, com o respectivo identificador.
- *                                   Lembre-se de obedecer a estrutura da classe FileData!
+ * @param {Array<FileForUpload>} arquivos lista dos arquivos que serão salvos, com o respectivo identificador.
+ *                                   Lembre-se de obedecer a estrutura da classe FileForUpload!
  */
 export async function saveFilesInDatabaseAsLinks(ref, arquivos) {
     // Verifica o tamanho de cada arquivo antes de enviar.
@@ -589,7 +601,6 @@ export async function saveFilesInDatabaseAsLinks(ref, arquivos) {
 
         const link = resposta.fileUrl; // link do arquivo no Google Drive
         const id = resposta.fileId; // o id é importante para apagar o arquivo depois, caso seja necessário.
-        console.log("Arquivo enviado! Link:" + link + " com id: " + id);
 
         // Se não obteve o link, lança um erro
         if (!link) {
@@ -597,12 +608,11 @@ export async function saveFilesInDatabaseAsLinks(ref, arquivos) {
         }
 
         const nome = fileData.nome;
-        return {nome, link, id};
+        return new PublishedFile(nome, link, id);
     });
 
     // Espera todas as promessas
     const results = await Promise.all(promises);
-    console.log(results);
 
     // Salva no banco de dados
     const updates = {};

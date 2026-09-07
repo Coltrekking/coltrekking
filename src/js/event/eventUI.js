@@ -4,7 +4,7 @@
  */
 import {formattedDate} from "../date";
 import {
-    FileData,
+    FileForUpload,
     getAttributeFromUser,
     getDataFromDatabase,
     getRealTime, hideItem, hideLoading,
@@ -152,12 +152,14 @@ let updateEvent;
 let removeEvent;
 let listarInscritos;
 let sendEventFiles;
+let getFilesFromEvent;
 
 // Retorna o id do elemento com o nome e o id dado
 export const getEventElementId = (name, id) => `event-${name}-${id}`;
 
 /**
  * Define as funções locais (do eventUI.js) como as funções dadas.
+ * Isso é necessário para evitar dependências circulares entre event.js e eventUI.js.
  * @param f_subscribe função de inscrever
  * @param f_unsubscribe função de desinscrever
  * @param f_showEventPhotos função de mostrar fotos do evento
@@ -165,9 +167,10 @@ export const getEventElementId = (name, id) => `event-${name}-${id}`;
  * @param f_removeEvent função de remover um evento
  * @param f_listarInscritos função de listar os inscritos
  * @param f_sendEventFiles função de enviar arquivos do evento
+ * @param f_getFilesFromEvent função de obter os arquivos de um evento
  */
 export function setEventFunctions
-(f_subscribe, f_unsubscribe, f_showEventPhotos, f_updateEvent, f_removeEvent, f_listarInscritos, f_sendEventFiles) {
+(f_subscribe, f_unsubscribe, f_showEventPhotos, f_updateEvent, f_removeEvent, f_listarInscritos, f_sendEventFiles, f_getFilesFromEvent) {
     subscribeToEvent = f_subscribe;
     unsubscribeFromEvent = f_unsubscribe;
     showEventPhotos = f_showEventPhotos;
@@ -175,6 +178,7 @@ export function setEventFunctions
     removeEvent = f_removeEvent;
     listarInscritos = f_listarInscritos;
     sendEventFiles = f_sendEventFiles;
+    getFilesFromEvent = f_getFilesFromEvent;
 }
 
 // Estados do botão de inscrição/desinscrição
@@ -646,10 +650,10 @@ function onEventArquivosEnviarBtnClicked() {
         // obs: o nome do arquivo não precisa, necessariamente, ter informações de quem enviou
         // o arquivo ou qual a relação dele com o evento/usuário, pois a forma que o arquivo
         // é salvo no banco de dados guarda esse tipo de relação. Por exemplo, o caminho do
-        // arquivo é `arquivos/{eventId}/{userId}/{arquivo}`. Então, não é necessário que o nome
-        // do arquivo seja algo como `autorizacao_{userId}_{eventId}.pdf`, pois o caminho já
-        // guarda essas informações.
-        new FileData("autorizacao", autorizacaoFile)
+        // arquivo (de um evento) é `arquivos/{eventId}/{userId}/{arquivo}`. Então, não é
+        // necessário que o nome do arquivo seja algo como `autorizacao_{userId}_{eventId}.pdf`,
+        // pois o caminho já guarda essas informações.
+        new FileForUpload("autorizacao", autorizacaoFile)
     ];
 
     // TODO: verificar a validade da autorização
@@ -657,18 +661,17 @@ function onEventArquivosEnviarBtnClicked() {
     showLoading();
     // Salva o arquivo no banco de dados
     sendEventFiles(files, currentSelectedEventId, Auth.currentUser.uid)
-        .then((result) => {
-            console.log(result)
+        .then((success) => {
             // Sucesso!
             hideItem(EventArquivosEl);
 
-            if (result) {
+            if (success) {
                 const plural = files.length > 1 ? "s" : "";
                 abrirAlerta(`Arquivo${plural} enviado${plural} com sucesso!`).then( );
             }
         })
         .catch(error => {
-            // Faz nada
+            // Faz nada, pois o erro já é tratado na função sendEventFiles (conferir isso)
         })
         .finally(() => {
             hideLoading();
@@ -687,7 +690,42 @@ function openFilesModal() {
     // Limpa as entradas
     document.getElementById("event-arquivos-autorizacao").value = "";
 
-    showItemAsFlex(EventArquivosEl);
+    // Obtém os arquivos já publicados pelo usuário do evento
+    getFilesFromEvent(currentSelectedEventId, Auth.currentUser.uid).then(files => {
+        // Atualmente, só há a autorização. Portanto, se houver algum elemento no
+        // vetor, necessariamente é a autorização
+        if (files.length > 0) {
+            // Se houver autorização, mostra o link para download
+            console.log("Há arquivo: ");
+            console.log(files[0]);
+
+            // o código abaixo pode ser reaproveitado para mais arquivos =)
+            // só substituir o "-autorizacao" pelo respectivo nome.
+            const arquivo = files[0];
+
+            // Desaparece o botão de anexar arquivo
+            document.getElementById("event-arquivos-autorizacao").style.display = "none";
+            // Aparece o botão de ver o arquivo e apagá-lo
+            document.getElementById("verArquivoBtn-autorizacao").href = arquivo.link;
+            document.getElementById("verArquivoBtn-autorizacao").style.display = "block";
+
+            document.getElementById("apagarArquivoBtn-autorizacao").style.display = "block";
+        } else {
+            // o código abaixo pode ser reaproveitado para mais arquivos =)
+            // só substituir o "-autorizacao" pelo respectivo nome.
+
+            // Desaparece os botões de ver o arquivo e apagá-lo
+            document.getElementById("verArquivoBtn-autorizacao").style.display = "none";
+            document.getElementById("verArquivoBtn-autorizacao").href = ""; // deixa a referência em branco, pra não levar a nenhum lugar
+
+            document.getElementById("apagarArquivoBtn-autorizacao").style.display = "none";
+            // Aparece o botão de anexar arquivo
+            document.getElementById("event-arquivos-autorizacao").style.display = "block";
+        }
+    }).then(_ => {
+        // Quando acabar os processos, mostra o modal
+        showItemAsFlex(EventArquivosEl);
+    })
 }
 
 /**
@@ -911,7 +949,7 @@ if (!document.getElementById("event-modal")) {
 if (!document.getElementById("event-files-modal")) {
     const modalHTML = `
         <div id="event-files-modal" class="event-modal-background" style="display: none">        
-            <div class="modal-content" style="position: relative; background-color: #e5d7bd;">
+            <div class="modal-content" style="position: relative; background-color: #e5d7bd; max-width: 60vw;">
                 <!-- Botões do topo -->
                 <div class="top-buttons">
                     <button id="fechar-menu-arquivos-evento" title="Fechar" class="icon-button">
@@ -923,13 +961,14 @@ if (!document.getElementById("event-files-modal")) {
                 
                 <!-- Lista dos inputs -->
                 <div class="event-files-list"> <!-- Tentei deixar de forma que dê para adicionar mais arquivos depois -->
-                    <div class="event-files-list-element">
+                    <div class="event-files-list-element"> <!-- Isso é um elemento -->
                         <span class="text google-font big-text font-bold flex-center center">
                             Autorização
                         </span>
-                        <div style="justify-content: flex-end">
+                        <div>
                             <input type="file" name="fotoEvento" id="event-arquivos-autorizacao" accept="application/pdf"><br>
-                            <button class="danger" id="apagarFotoBtn" style="display: none">Apagar Documento Atual</button>
+                            <a href="" target="_blank" class="text big-text" id="verArquivoBtn-autorizacao">Ver Arquivo</a>
+                            <button class="danger" id="apagarArquivoBtn-autorizacao" style="display: none">Apagar Documento Atual</button>
                         </div>
                     </div>
                 </div>
