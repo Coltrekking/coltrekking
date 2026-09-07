@@ -14,7 +14,7 @@ import {
     loading,
     PhotosDatabaseRef, PublishedFile,
     refFromDatabase,
-    refFromUser,
+    refFromUser, removeFile,
     saveFilesInDatabaseAsLinks,
     showItem,
     showItemAsFlex,
@@ -807,14 +807,15 @@ export async function getFilesFromEvent(eventId, relativePath = standardFileRela
 /**
  * Remove os arquivos com o identificador dado do evento dado. Essa função é útil
  * para quando o usuário se desinscreve de um evento, por exemplo.
- * @param {String} eventId Id do evento que os arquivos estão relacionados
- * @param {String} dataId Id dos arquivos que estão relacionados
+ * @param {String} eventId id do evento que o arquivo estão relacionados
+ * @param {String} relativePath caminho relativo dentro do evento
+ * @param {String} fileName nome do arquivo
  * @return {Boolean} se conseguiu ou não apagar o(s) arquivo(s)
  */
-function removeFiles(eventId, dataId) {
-    // TODO: implementar a função de remover arquivos do usuário do evento
+export async function removeFileFromEvent(eventId, relativePath=standardFileRelativePath, fileName) {
+   return await removeFile(refFromDatabase(`arquivos/${eventId}/${relativePath}/${fileName}`));
 }
 
 
 // Define as função de inscrever/desinscrever no eventUI.js
-setEventFunctions(subscribeToEvent, unsubscribeFromEvent, showEventPhotos, updateEvent, removeEvent, listarInscritos, sendEventFiles, getFilesFromEvent);
+setEventFunctions(subscribeToEvent, unsubscribeFromEvent, showEventPhotos, updateEvent, removeEvent, listarInscritos, sendEventFiles, getFilesFromEvent, removeFileFromEvent);

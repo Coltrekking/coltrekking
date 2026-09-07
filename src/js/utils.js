@@ -1,5 +1,5 @@
 import {APPS_SCRIPT_CHAVE_SECRETA, APPS_SCRIPT_URL, Auth, Database} from "../config/firebase";
-import {child, get, onValue, ref, update} from "firebase/database";
+import {child, get, onValue, ref, remove, update} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
 import {getUserRole} from "/src/js/auth";
 import {abrirAlerta} from "/src/js/modal";
@@ -31,13 +31,12 @@ export let editEventForm = document.getElementById('editEventForm');
 //export let eventContainer = document.getElementById('eventContainer');
 //export let eventCount = document.getElementById('eventCount');
 
+// NOTA: alterar essas referências pode fazer o código ter um comportamento inesperado!
 export const EventsDatabaseRef = refFromDatabase("event/");
 export const InscricoesDatabaseRef = refFromDatabase("inscricoes/");
 export const PhotosDatabaseRef = refFromDatabase("photos/");
 export const UsersDatabaseRef = refFromDatabase("users/");
 export const GeralDatabaseRef = refFromDatabase("geral/");
-// NOTA: não vale a pena colocar o ArquivosDatabase dentro de geral, pois a tendência
-// é que "geral" tenha poucas informações, enquanto o ArquivosDatabase tenha muitas.
 export const ArquivosDatabaseRef = refFromDatabase("arquivos/");
 
 export const standardFileRelativePath = "geral"; // caminho relativo padrão para arquivos dentro de cada evento. Recomendo, no geral, nunca trocar!
@@ -503,10 +502,18 @@ async function fileToBase64(file) {
 /**
  * Envia a informação dada ao API no Apps Script.
  * @param {Object} data informação que será enviada ao apps script.
+ * @param {String} type tipo de requisição que será enviada ao apps script.
+ *                      Os tipos de requisição são:
+ *                      - "uploadFile": para upar o arquivo dado. Precisa dos atributos `fileName`, `mimeType` e `fileContent`(arquivo em Base64) no objeto data.
+ *                                      No caso de upar um arquivo, opte por usar a função `saveFilesInDatabaseAsLinks`, que já faz a conversão para Base64 e salva
+ *                                      no banco de dados.
+ *                      - "deleteFile": apagar um arquivo a partir do id dado. Precisa do atributo `fileId` no objeto data.
+ *
  * @return {Promise<any>} Promise com a resposta do Apps Script.
  */
-async function sendRequestToAppsScript(data) {
-
+async function sendRequestToAppsScript(data, type) {
+    data.type = type;
+    data.tokenDeSeguranca = APPS_SCRIPT_CHAVE_SECRETA // Chave para poder enviar para o Apps Script (para evitar que qualquer um envie arquivos)
     const response = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         // Send as plain text to avoid CORS preflight (OPTIONS) pre-checks
@@ -517,7 +524,8 @@ async function sendRequestToAppsScript(data) {
     });
 
     if (!response.ok)
-        throw new Error('Erro na conexão com o Apps Script');
+        return {status: 'error', message: 'Erro na conexão com o Apps Script'}
+
 
     // Retorna a resposta
     return await response.json();
@@ -525,9 +533,10 @@ async function sendRequestToAppsScript(data) {
 
 // Classe responsável pela representação de um arquivo que será enviado ao banco de dados.
 export class FileForUpload {
-    constructor(nome, arquivo) {
+    constructor(nome, arquivo, nomeNoDrive=nome) {
         this.nome = nome;
         this.arquivo = arquivo;
+        this.nomeNoDrive = nomeNoDrive;
     }
 }
 
@@ -579,20 +588,19 @@ export async function saveFilesInDatabaseAsLinks(ref, arquivos) {
 
         // O nome do arquivo no drive deve dar para entender a posição do arquivo.
         // Esse nome não afeta o nome no banco de dados
-        const nomeArquivoDrive = `${ref.toString()}/${fileData.nome || "arquivo_sem_nome"}`;
+        const nomeArquivoDrive = `${fileData.nomeNoDrive || "arquivo_sem_nome"}`;
 
         // Monta o que vai enviar ao Apps Script
         const payload = {
             fileName: nomeArquivoDrive, // Pega o nome do arquivo no drive
             mimeType: fileData.arquivo.type || "application/octet-stream", // Pega o tipo (ex: image/png, application/pdf)
-            fileContent: base64String, // Conteúdo do arquivo em Base64
-            tokenDeSeguranca: APPS_SCRIPT_CHAVE_SECRETA // Chave para poder enviar para o Apps Script (para evitar que qualquer um envie arquivos)
+            fileContent: base64String // Conteúdo do arquivo em Base64
         };
 
 
         // Envia o payload para o Apps Script.
         // Retorna um objeto com os campos: {status, fileUrl, fileId}
-        const resposta = await sendRequestToAppsScript(payload);
+        const resposta = await sendRequestToAppsScript(payload, "uploadFile");
 
         // Lança um erro se houve algum
         if (resposta.status === 'error') {
@@ -621,6 +629,32 @@ export async function saveFilesInDatabaseAsLinks(ref, arquivos) {
         updates[`${result.nome}`] = {link, id};
     })
     await update(ref, updates);
+
+    // Se chegou até aqui, deu tudo certo
+    return true;
+}
+
+/**
+ * Remove o arquivo na posição dada do banco de dados e também do Google Drive.
+ * @param {DatabaseReference} reference Id do evento que os arquivos estão relacionados
+ * @return {Promise<Boolean>} se conseguiu ou não apagar o arquivo
+ */
+export async function removeFile(reference) {
+    const arquivoSnapshot = await get(reference);
+    if (!arquivoSnapshot.exists())
+        throw new Error("O arquivo não existe no banco de dados.");
+
+    const arquivo = arquivoSnapshot.val();
+
+    // Tenta apagar o arquivo
+    const respostaAppsScript = await sendRequestToAppsScript({fileId: arquivo.id}, "deleteFile");
+
+    // Lança um erro se houve algum
+    if (respostaAppsScript.status === 'error')
+        throw new Error("Erro ao apagar no Drive: " + respostaAppsScript.message);
+
+    // Se chegou até aqui, o arquivo está apagado. Então, remove do banco de dados
+    await remove(reference);
 
     // Se chegou até aqui, deu tudo certo
     return true;

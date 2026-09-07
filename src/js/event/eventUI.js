@@ -153,6 +153,7 @@ let removeEvent;
 let listarInscritos;
 let sendEventFiles;
 let getFilesFromEvent;
+let removeFileFromEvent;
 
 // Retorna o id do elemento com o nome e o id dado
 export const getEventElementId = (name, id) => `event-${name}-${id}`;
@@ -168,9 +169,10 @@ export const getEventElementId = (name, id) => `event-${name}-${id}`;
  * @param f_listarInscritos função de listar os inscritos
  * @param f_sendEventFiles função de enviar arquivos do evento
  * @param f_getFilesFromEvent função de obter os arquivos de um evento
+ * @param f_removeFileFromEvent função de retirar arquivos de um evento
  */
 export function setEventFunctions
-(f_subscribe, f_unsubscribe, f_showEventPhotos, f_updateEvent, f_removeEvent, f_listarInscritos, f_sendEventFiles, f_getFilesFromEvent) {
+(f_subscribe, f_unsubscribe, f_showEventPhotos, f_updateEvent, f_removeEvent, f_listarInscritos, f_sendEventFiles, f_getFilesFromEvent, f_removeFileFromEvent) {
     subscribeToEvent = f_subscribe;
     unsubscribeFromEvent = f_unsubscribe;
     showEventPhotos = f_showEventPhotos;
@@ -179,10 +181,11 @@ export function setEventFunctions
     listarInscritos = f_listarInscritos;
     sendEventFiles = f_sendEventFiles;
     getFilesFromEvent = f_getFilesFromEvent;
+    removeFileFromEvent = f_removeFileFromEvent;
 }
 
 // Estados do botão de inscrição/desinscrição
-export const SubscribeButtonStates = Object.freeze({  // O `Object.freeze()` certifica que não é possível atualizar
+export const SubscribeButtonStates = Object.freeze({  // O `Object.freeze()` certifica que não é possível atualizar o objeto
     INSCREVER: 'Inscrever',
     DESINSCREVER: 'Desinscrever',
     EVENTO_REALIZADO: 'eventoRealizado',
@@ -653,7 +656,7 @@ function onEventArquivosEnviarBtnClicked() {
         // arquivo (de um evento) é `arquivos/{eventId}/{userId}/{arquivo}`. Então, não é
         // necessário que o nome do arquivo seja algo como `autorizacao_{userId}_{eventId}.pdf`,
         // pois o caminho já guarda essas informações.
-        new FileForUpload("autorizacao", autorizacaoFile)
+        new FileForUpload("autorizacao", autorizacaoFile, `autorizacao-${currentSelectedEventName}-${Auth.currentUser.uid}`)
     ];
 
     // TODO: verificar a validade da autorização
@@ -695,10 +698,6 @@ function openFilesModal() {
         // Atualmente, só há a autorização. Portanto, se houver algum elemento no
         // vetor, necessariamente é a autorização
         if (files.length > 0) {
-            // Se houver autorização, mostra o link para download
-            console.log("Há arquivo: ");
-            console.log(files[0]);
-
             // o código abaixo pode ser reaproveitado para mais arquivos =)
             // só substituir o "-autorizacao" pelo respectivo nome.
             const arquivo = files[0];
@@ -757,6 +756,23 @@ function loadPageEvents() {
         openFilesModal();
     });
     EventArquivosEnviarBtn.addEventListener('click', onEventArquivosEnviarBtnClicked);
+    document.getElementById("apagarArquivoBtn-autorizacao").addEventListener('click', _ => {
+        try {
+            showLoading();
+            removeFileFromEvent(currentSelectedEventId, Auth.currentUser.uid, "autorizacao").then(success => {
+                openFilesModal(); // atualiza o modal de arquivos
+                hideLoading();
+                if (success) {
+                    abrirAlerta("Arquivo removido com sucesso!").then( );
+                } else {
+                    abrirAlerta("Não foi possível remover o arquivo.").then( );
+                }
+            });
+        } catch (e) {
+            hideLoading();
+            abrirAlerta("Não foi possível apagar o arquivo.").then( );
+        }
+    });
 
     document.getElementById("inscritosListGoToTop")?.addEventListener("click", () => {
         // Scrolla pra cima
@@ -967,7 +983,7 @@ if (!document.getElementById("event-files-modal")) {
                         </span>
                         <div>
                             <input type="file" name="fotoEvento" id="event-arquivos-autorizacao" accept="application/pdf"><br>
-                            <a href="" target="_blank" class="text big-text" id="verArquivoBtn-autorizacao">Ver Arquivo</a>
+                            <a href="" target="_blank" class="text big-text" id="verArquivoBtn-autorizacao" style="color: gray;">Ver Arquivo</a>
                             <button class="danger" id="apagarArquivoBtn-autorizacao" style="display: none">Apagar Documento Atual</button>
                         </div>
                     </div>
