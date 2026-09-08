@@ -641,9 +641,20 @@ async function removeLink(eventKey, url) {
 
     return getDataFromDatabase(PhotosDatabaseRef, eventKey).then(async snapshot => {
         const links = snapshot.val() || [];
-        const index = links.indexOf(url);
-        
-        if (index === -1) return; // Se o link não estiver na lista, não faz nada
+        let index = links.indexOf(url);
+
+        // Se o link não estiver na lista, tenta procurar outras formas que
+        // ele pode estar estruturado.
+        if (index === -1) {
+            url = url.slice(7); // retira o "http://"
+            index = links.indexOf(url);
+            if (index === -1) {
+                url = url.slice(1); // retira o que sobrou se for "https://"
+                index = links.indexOf(url);
+                if (index === -1)
+                    return; // não achou
+            }
+        }
         
         links.splice(index, 1);
 
