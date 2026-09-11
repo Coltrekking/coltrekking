@@ -536,18 +536,39 @@ export function updateEventModal(userSubscribed) {
  * @param eventCard elemento eventCard do evento, para mostrar o aviso
  */
 function checkForDifficult(userUid, pontuacaoNecessaria, eventDate, eventCard) {
-    getAttributeFromUser(userUid, "pontos").then(pontuacaoUsuario => {
-        // Se não tiver pontos suficientes, mostra um aviso.
-        if (pontuacaoUsuario < pontuacaoNecessaria) {
-            if (eventDate && getRealTime() > eventDate.getTime()) return; // se o evento já passou, não mostra aviso
+    if (!pontuacaoNecessaria || pontuacaoNecessaria <= 0) return;
 
-            // Cria elemento de aviso em vez de usar innerHTML +=
-            const avisoElem = document.createElement('p');
-            avisoElem.className = 'soft-warn';
-            avisoElem.textContent = `Você precisa de ${pontuacaoNecessaria} pontos para participar deste evento!`;
-            eventCard.appendChild(avisoElem);
-        }
-    });
+    const checkPoints = (uid) => {
+        if (!uid) return;
+        getAttributeFromUser(uid, "pontos").then(pontuacaoUsuario => {
+            const pontos = Number(pontuacaoUsuario) || 0;
+            // Se não tiver pontos suficientes, mostra um aviso.
+            if (pontos < pontuacaoNecessaria) {
+                const eventDateTime = eventDate ? new Date(eventDate).getTime() : null;
+                if (eventDateTime && getRealTime() > eventDateTime) return; // se o evento já passou, não mostra aviso
+
+                // Cria elemento de aviso em vez de usar innerHTML +=
+                const avisoElem = document.createElement('p');
+                avisoElem.className = 'soft-warn';
+                avisoElem.textContent = `Você precisa de ${pontuacaoNecessaria} pontos para participar deste evento!`;
+                eventCard.appendChild(avisoElem);
+            }
+        }).catch(err => {
+            console.error("Erro ao verificar pontuação do usuário:", err);
+        });
+    };
+
+    if (userUid) {
+        checkPoints(userUid);
+    } else if (Auth.currentUser?.uid) {
+        checkPoints(Auth.currentUser.uid);
+    } else {
+        waitForUser().then(() => {
+            if (Auth.currentUser?.uid) {
+                checkPoints(Auth.currentUser.uid);
+            }
+        });
+    }
 }
 
 /**
@@ -611,7 +632,7 @@ export function createEventCard(eventSnapshot, listaEventos) {
 
     let pontuacaoNecessaria = eventData.pontuacaoNecessaria;
     if (pontuacaoNecessaria === null || pontuacaoNecessaria === undefined) pontuacaoNecessaria = 0; // dificuldade padrão
-    checkForDifficult(eventId, pontuacaoNecessaria, eventData.data, elemento);
+    checkForDifficult(Auth.currentUser?.uid, pontuacaoNecessaria, eventData.data, elemento);
 
     // Trata os eventos
     const inscreverBtn = document.getElementById(getEventElementId('inscrever-btn', eventId));
@@ -746,7 +767,7 @@ function loadPageEvents() {
         subscribeToEvent(currentSelectedEventId, EventModalInscreverBtnEl, EventModalCancelarInscricaoBtnEl);
     });
     EventModalCancelarInscricaoBtnEl.addEventListener('click', () => {
-        unsubscribeFromEvent(currentSelectedEventId, EventModalInscreverBtnEl, EventModalCancelarInscricaoBtnEl);
+        unsubscribeFromEvent(currentSelectedEventId);
     });
     EventModalFotosBtn.addEventListener('click', _ => {
         showEventPhotos(currentSelectedEventName, currentSelectedEventId).then( );

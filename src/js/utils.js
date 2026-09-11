@@ -511,7 +511,7 @@ async function fileToBase64(file) {
  *
  * @return {Promise<any>} Promise com a resposta do Apps Script.
  */
-async function sendRequestToAppsScript(data, type) {
+export async function sendRequestToAppsScript(data, type) {
     data.type = type;
     data.tokenDeSeguranca = APPS_SCRIPT_CHAVE_SECRETA // Chave para poder enviar para o Apps Script (para evitar que qualquer um envie arquivos)
     const response = await fetch(APPS_SCRIPT_URL, {

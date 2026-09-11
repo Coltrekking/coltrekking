@@ -1122,6 +1122,17 @@ textarea {
     margin: 1vw;
 }
 
+.event-files-list-element a:hover, .event-files-list-element button:hover {
+    cursor: pointer;
+    border-color: #e56f15;
+}
+
+.event-files-list-element button:hover {
+    background-color: #f53e3e;
+    outline: 2px solid #e06a6a;
+}
+
+
 #createPhoto {
     display: block;
     margin: 10px auto;

@@ -1,5 +1,6 @@
 // Importa as coisas do firebase que serão usadas
 import {
+    ArquivosDatabaseRef,
     checkPhotoSize,
     compressImageToBlob,
     editEventForm,
@@ -20,7 +21,7 @@ import {get, push, remove, set, update} from 'firebase/database'
 import {
     atualizarPontuacaoUsuario,
     calcularPontuacaoDoEvento, checkSubscribedEventsRequiringMinimumPoints,
-    getPontuacaoMinimaParaEvento,
+    getPontuacaoMinimaParaEvento, removeAllFilesFromEvent,
     unsubscribeUserFromEvent, updateEventCard
 } from "/src/js/event/event";
 import {enviarErroParaSentry} from "/src/js/main";
@@ -380,7 +381,8 @@ export async function removeEvent(key, name) {
                 // Executa as duas remoções em paralelo
                 Promise.all([
                     remove(eventRef),
-                    remove(inscricoesRef)
+                    remove(inscricoesRef),
+                    removeAllFilesFromEvent(key)
                 ])
                     .then(async () => {
                         let card = document.getElementById(getEventElementId('card', key));
