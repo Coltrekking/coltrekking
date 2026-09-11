@@ -1,7 +1,7 @@
 import {APPS_SCRIPT_CHAVE_SECRETA, APPS_SCRIPT_URL, Auth, Database} from "../config/firebase";
 import {child, get, onValue, ref, remove, update} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
-import {getUserRole} from "/src/js/auth";
+import {getUserRole, isAdmin} from "/src/js/auth";
 import {abrirAlerta} from "/src/js/modal";
 
 // Referências dos elementos da página
@@ -563,14 +563,31 @@ export async function saveFilesInDatabaseAsLinks(ref, arquivos) {
     // será preciso convertê-lo em texto.
     const maxFileSizeInMB = 10;
     try {
+        // Obtém os arquivos já existentes no banco de dados para a referência
+        const snapshot = await get(ref);
+        const existingData = snapshot.exists() ? snapshot.val() : {};
+
         arquivos.forEach(fileData => {
             if (!fileData.arquivo) {
+                // Se o arquivo já existir no banco de dados, não acusa erro de não anexado
+                if (fileData.nome && existingData && typeof existingData === "object" && existingData[fileData.nome]) {
+                    return;
+                }
+
                 // Se tiver o nome do arquivo, manda uma mensagem de erro com o nome do arquivo.
                 // Caso contrário, manda uma mensagem genérica.
-                if (fileData.nome)
-                    throw new Error("O arquivo " + fileData.nome + " não foi encontrado.");
-                else
-                    throw new Error("Um arquivo não identificado não foi encontrado. NOTA: Esse arquivo não teve seu campo `nome` preenchido, então não é possível identificar qual arquivo é.");
+                if (fileData.nome) {
+                    // Coloca a acentuação em "autorização"
+                    if (fileData.nome === "autorizacao")
+                        throw new Error("O arquivo de autorização não foi anexado.");
+                    else
+                        throw new Error("O arquivo " + fileData.nome + " não foi anexado.");
+                } else {
+                    if (isAdmin())
+                        throw new Error("Um arquivo não identificado não foi anexado. NOTA: Esse arquivo não teve seu campo `nome` preenchido, então não é possível identificar qual arquivo é.");
+                    else
+                        throw new Error("Um arquivo não identificado não foi anexado.");
+                }
             }
 
             if (!checkFileSize(fileData.arquivo, maxFileSizeInMB))
@@ -581,8 +598,16 @@ export async function saveFilesInDatabaseAsLinks(ref, arquivos) {
         return false;
     }
 
+    // Filtra apenas os arquivos que realmente possuem arquivo anexado para envio
+    const arquivosParaUpload = arquivos.filter(fileData => fileData.arquivo);
+
+    // Se nenhum arquivo precisa ser enviado ao Google Drive (por exemplo, já estavam salvos no banco)
+    if (arquivosParaUpload.length === 0) {
+        return true;
+    }
+
     // Faz várias promises enviando cada arquivo (para maximizar a eficiência)
-    const promises = arquivos.map(async (fileData) => {
+    const promises = arquivosParaUpload.map(async (fileData) => {
 
         const base64String = await fileToBase64(fileData.arquivo);
 
@@ -596,7 +621,6 @@ export async function saveFilesInDatabaseAsLinks(ref, arquivos) {
             mimeType: fileData.arquivo.type || "application/octet-stream", // Pega o tipo (ex: image/png, application/pdf)
             fileContent: base64String // Conteúdo do arquivo em Base64
         };
-
 
         // Envia o payload para o Apps Script.
         // Retorna um objeto com os campos: {status, fileUrl, fileId}

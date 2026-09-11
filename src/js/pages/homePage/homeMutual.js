@@ -137,6 +137,8 @@ async function loadCommon() {
     // Atualiza os eventos todas às vezes que algum dado atualizar
     onValue(EventsDatabaseRef, function (dataSnapshot) {
         fillEventList(dataSnapshot);
+    }, (error) => {
+        console.warn("Erro ao ouvir eventos:", error.message);
     });
 
 

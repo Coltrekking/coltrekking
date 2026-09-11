@@ -1113,6 +1113,15 @@ textarea {
     width: 40%;
 }
 
+.event-files-list-element a, .event-files-list-element button {
+    min-width: 12vw;
+    width: auto;
+    background-color: #f29c2c;
+    color: white;
+    padding: 0.7vw 1vw;
+    margin: 1vw;
+}
+
 #createPhoto {
     display: block;
     margin: 10px auto;

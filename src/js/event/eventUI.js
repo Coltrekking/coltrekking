@@ -983,8 +983,8 @@ if (!document.getElementById("event-files-modal")) {
                         </span>
                         <div>
                             <input type="file" name="fotoEvento" id="event-arquivos-autorizacao" accept="application/pdf"><br>
-                            <a href="" target="_blank" class="text big-text" id="verArquivoBtn-autorizacao" style="color: gray;">Ver Arquivo</a>
-                            <button class="danger" id="apagarArquivoBtn-autorizacao" style="display: none">Apagar Documento Atual</button>
+                            <a href="" target="_blank" class="event-modal-btn" id="verArquivoBtn-autorizacao" style="text-decoration: none;">Ver Arquivo</a>
+                            <button class="event-modal-btn danger" id="apagarArquivoBtn-autorizacao" style="display: none; background-color: red;">Apagar Documento Atual</button>
                         </div>
                     </div>
                 </div>

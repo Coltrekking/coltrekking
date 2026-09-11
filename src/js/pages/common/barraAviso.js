@@ -105,4 +105,6 @@ function onAvisoAtualizado(snapshot) {
 
 
 // Quando o Aviso for atualizado, chama a respectiva função
-onValue(AvisoDatabaseRef, onAvisoAtualizado);
+onValue(AvisoDatabaseRef, onAvisoAtualizado, (error) => {
+    console.warn("Aviso indisponível ou permissão negada:", error.message);
+});
