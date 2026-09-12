@@ -5,10 +5,13 @@
 // Versão da página //
 export const PAGE_VERSION = "a1509";
 
+// Determina se usará emuladores do Firebase em testes locais //
+const USE_EMULATOR_ON_LOCALHOST = true;
+
 
 import { initializeApp } from "firebase/app"; // Para inicializar o app
 
-import { getAuth, connectAuthEmulator } from 'firebase/auth'; // Para obter o auth
+import { getAuth } from 'firebase/auth'; // Para obter o auth
 import { getDatabase, connectDatabaseEmulator } from 'firebase/database'; // Para obter o Realtime Database
 
 // Dados do firebase
@@ -37,7 +40,7 @@ export const Auth = getAuth(App);
 export const Database = getDatabase(App);
 
 /* Configurar o emulador */
-if (window.location.hostname === "localhost") {
+if (USE_EMULATOR_ON_LOCALHOST && window.location.hostname === "localhost") {
     // Para não precisar cadastrar novamente as contas do Google
     //connectAuthEmulator(Auth, "http://127.0.0.1:9099");
 

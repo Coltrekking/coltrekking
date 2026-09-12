@@ -304,7 +304,7 @@ p {
 }
 
 #loading {
-    z-index: 100000;
+    z-index: 999999999;
 }
 
 @keyframes spin {
@@ -777,7 +777,7 @@ textarea {
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.6);
-    z-index: 5; /* garante que fique por cima do site principal */
+    z-index: 10000; /* garante que fique por cima do site principal */
 
     display: flex;
     justify-content: center;
@@ -853,6 +853,26 @@ textarea {
     outline-width: 3px;
     outline-color: #ec9626;
     opacity: 1;
+}
+
+.event-modal-btn-auto-width {
+    min-width: 10px !important;
+    width: auto;
+    min-height: max(30px, 2.5vw);
+
+    cursor: pointer;
+    display: inline-block;
+
+    font-family: 'Google Sans', sans-serif;
+    font-size: max(13px, 1.3vw);
+    font-weight: bold;
+
+    background-color: #f29c2cDD;
+    outline: 2px solid #f3c79d;
+    border-radius: 100px;
+
+    transition: all ease-in 0.1s;
+    box-sizing: border-box;
 }
 
 .event-modal-data {
@@ -1338,11 +1358,22 @@ textarea {
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.6);
-    z-index: 9999; /* garante que fique por cima de tudo no site */
+    z-index: 10000; /* garante que fique por cima do site principal */
 
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+#event-files-modal {
+    z-index: 20000; /* fica por cima do modal de evento e de gerenciar inscritos */
+}
+#modalOverlayGerenciarInscritosEvento {
+    z-index: 15000;
+}
+
+#modalOverlay {
+    z-index: 30000; /* alertas, confirmações e modais genéricos ficam por cima de tudo */
 }
 
 #loading {
@@ -1504,7 +1535,7 @@ h1, h2, h3, h4, .event-card h3, .event-card h2 {
 
     flex-shrink: 0; /* Para a barra não ser amassada */
 
-    z-index: 10000;
+    z-index: 1000;
 
     padding: 5px 0;
 

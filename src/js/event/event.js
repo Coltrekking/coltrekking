@@ -1,5 +1,5 @@
 // função para preencher a lista de eventos
-import {Auth} from "../../config/firebase";
+import {Auth} from "/src/config/firebase";
 import {
     ArquivosDatabaseRef,
     delay,
@@ -16,7 +16,6 @@ import {
     refFromDatabase,
     refFromUser, removeFile,
     saveFilesInDatabaseAsLinks,
-    sendRequestToAppsScript,
     showItem,
     showItemAsFlex,
     showLoading, standardFileRelativePath
@@ -851,66 +850,8 @@ export async function removeUserFilesFromEvent(eventId, userId) {
     await Promise.all(filesPromises);
 }
 
-/**
- * Remove todos os arquivos do evento dado no Google Drive e no banco de dados,
- * suportando qualquer hierarquia de pastas (ex: arquivos/{eventId}/{userId}/autorizacao,
- * arquivos/{eventId}/geral/{arquivo}, arquivos/{eventId}/.../{arquivo}).
- * @param {String} eventId id do evento que os arquivos estão relacionados
- * @return {Promise<Boolean>} se conseguiu ou não apagar o(s) arquivo(s)
- */
-export async function removeAllFilesFromEvent(eventId) {
-    if (!eventId) return true;
-
-    // Obtém todos os arquivos do evento
-    const eventFilesRef = refFromDatabase(ArquivosDatabaseRef, eventId);
-    const filesSnapshot = await getDataFromDatabase(eventFilesRef);
-
-    // Se não houver arquivos, pode considerar que já limpou eles
-    if (!filesSnapshot.exists()) return true;
-
-    const filesData = filesSnapshot.val();
-
-    // Função recursiva para extrair todos os ids de arquivos.
-    // Isso é necessário, pois pode haver diversas formas de hierarquias.
-    const fileIds = [];
-    function extractFileIds(data) {
-        if (!data || typeof data !== 'object') return fileIds;
-
-        // Se for um nó de arquivo com id do Drive
-        if (data.id !== undefined && data.id !== null && typeof data.id === 'string' && data.id.trim() !== '') {
-            fileIds.push(data.id);
-        }
-
-        // Percorre recursivamente todas as chaves
-        for (const key of Object.keys(data)) {
-            extractFileIds(data[key]);
-        }
-    }
-
-    extractFileIds(filesData);
-
-    // Apaga os arquivos do Google Drive
-    const deletePromises = fileIds.map(async (fileId) => {
-        try {
-            const resposta = await sendRequestToAppsScript({ fileId }, "deleteFile");
-            if (resposta && resposta.status === 'error') {
-                console.warn(`Aviso ao apagar arquivo ${fileId} do Drive:`, resposta.message);
-            }
-            return resposta;
-        } catch (err) {
-            throw err;
-        }
-    });
-
-    // Espera todas as promessas de remoção
-    await Promise.all(deletePromises);
-
-    // Remove toda a árvore de arquivos do evento do banco de dados
-    await remove(eventFilesRef);
-
-    return true;
-}
 
 
-// Define as função de inscrever/desinscrever no eventUI.js
+// Define as funções no eventUI.js
+// Isso é necessário para evitar dependência cíclica (event.js e eventUI.js dependendo entre si)
 setEventFunctions(subscribeToEvent, unsubscribeFromEvent, showEventPhotos, updateEvent, removeEvent, listarInscritos, sendEventFiles, getFilesFromEvent, removeFileFromEvent);

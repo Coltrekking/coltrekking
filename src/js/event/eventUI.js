@@ -698,7 +698,7 @@ function onEventArquivosEnviarBtnClicked() {
                 abrirAlerta(`Arquivo${plural} enviado${plural} com sucesso!`).then( );
             }
         })
-        .catch(error => {
+        .catch(_error => {
             // Faz nada, pois o erro já é tratado na função sendEventFiles (conferir isso)
         })
         .finally(() => {
@@ -706,6 +706,7 @@ function onEventArquivosEnviarBtnClicked() {
         });
 }
 
+let currentFilesUserId = null;
 /**
  * Abre o modal de arquivos do evento atualmente selecionado
  */
@@ -714,6 +715,8 @@ function openFilesModal() {
     if (!currentSelectedEventId || !currentSelectedEventName) return;
 
     EventArquivosTitleEl.textContent = currentSelectedEventName;
+
+    currentFilesUserId = Auth.currentUser.uid;
 
     // Limpa as entradas
     document.getElementById("event-arquivos-autorizacao").value = "";
@@ -747,9 +750,52 @@ function openFilesModal() {
             document.getElementById("event-arquivos-autorizacao").style.display = "block";
         }
     }).then(_ => {
+        // Faz o botão de enviar aparecer
+        EventArquivosEnviarBtn.style.display = 'inline-block';
         // Quando acabar os processos, mostra o modal
         showItemAsFlex(EventArquivosEl);
     })
+}
+
+/**
+ * Abre o modal de arquivos com os arquivos dados, permitindo
+ * a visualização e a edição deles.
+ * @param {Array<PublishedFile>} files arquivos que serão apresentados
+ * @param {String} title título do modal de arquivos
+ * @param {String} userId id do usuário dono dos arquivos
+ */
+export function openFilesModalWithFiles(files, title, userId) {
+
+    EventArquivosTitleEl.textContent = title;
+
+    currentFilesUserId = userId;
+
+    // Limpa as entradas (isso não é necessário, pois o usuário não verá isso)
+    document.getElementById("event-arquivos-autorizacao").value = "";
+
+    // Teoricamente, o código nunca entrará nesse if, uma vez que
+    // há uma verificação anterior semelhante a essa quando essa função
+    // é usada (ao listar os arquivos de evento de um usuário).
+    if (files.length <= 0) {
+        EventArquivosTitleEl.textContent = "Não há arquivos para o usuário \"" + getAttributeFromUser(userId, 'nome') + "\"";
+        return;
+    }
+
+    files.forEach(arquivo => {
+        // Desaparece o botão de anexar arquivo
+        document.getElementById("event-arquivos-autorizacao").style.display = "none";
+        // Aparece o botão de ver o arquivo e apagá-lo
+        document.getElementById("verArquivoBtn-autorizacao").href = arquivo.link;
+        document.getElementById("verArquivoBtn-autorizacao").style.display = "block";
+
+        document.getElementById("apagarArquivoBtn-autorizacao").style.display = "block";
+    });
+
+    // Desaparece o botão de enviar
+    EventArquivosEnviarBtn.style.display = 'none';
+
+    // Quando acabar os processos, mostra o modal
+    showItemAsFlex(EventArquivosEl);
 }
 
 /**
@@ -784,7 +830,8 @@ function loadPageEvents() {
     document.getElementById("apagarArquivoBtn-autorizacao").addEventListener('click', _ => {
         try {
             showLoading();
-            removeFileFromEvent(currentSelectedEventId, Auth.currentUser.uid, "autorizacao").then(success => {
+            // Como só existe autorização, coloquei diretamente
+            removeFileFromEvent(currentSelectedEventId, currentFilesUserId, "autorizacao").then(success => {
                 openFilesModal(); // atualiza o modal de arquivos
                 hideLoading();
                 if (success) {
@@ -989,7 +1036,7 @@ if (!document.getElementById("event-modal")) {
 // Adiciona o modal de anexar arquivos no evento
 if (!document.getElementById("event-files-modal")) {
     const modalHTML = `
-        <div id="event-files-modal" class="event-modal-background" style="display: none">        
+        <div id="event-files-modal" class="event-modal-background" style="display: none;">        
             <div class="modal-content" style="position: relative; background-color: #e5d7bd; max-width: 60vw;">
                 <!-- Botões do topo -->
                 <div class="top-buttons">

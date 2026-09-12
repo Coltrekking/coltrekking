@@ -5,12 +5,12 @@ import {
     compressImageToBlob,
     editEventForm,
     eventForm, eventFormModal,
-    EventsDatabaseRef,
+    EventsDatabaseRef, getAttributeFromUser,
     getDataFromDatabase,
     hideItem, hideLoading,
     InscricoesDatabaseRef,
-    loading,
-    refFromDatabase,
+    loading, PublishedFile,
+    refFromDatabase, sendRequestToAppsScript,
     showError,
     showItem,
     submitEventForm,
@@ -21,14 +21,15 @@ import {get, push, remove, set, update} from 'firebase/database'
 import {
     atualizarPontuacaoUsuario,
     calcularPontuacaoDoEvento, checkSubscribedEventsRequiringMinimumPoints,
-    getPontuacaoMinimaParaEvento, removeAllFilesFromEvent,
+    getPontuacaoMinimaParaEvento,
     unsubscribeUserFromEvent, updateEventCard
 } from "/src/js/event/event";
 import {enviarErroParaSentry} from "/src/js/main";
 import {Auth} from "/src/config/firebase";
 import * as XLSX from 'xlsx-js-style';
 import {abrirAlerta, abrirConfirmacao, abrirModal, EntradasModal} from "/src/js/modal";
-import {closeEventModal, getEventElementId} from "./eventUI";
+import {closeEventModal, getEventElementId, openFilesModalWithFiles} from "./eventUI";
+import {isAdmin} from "/src/js/auth";
 
 // Botão para apagar foto de um evento
 const apagarFotoBtn = document.getElementById("apagarFotoBtn");
@@ -919,7 +920,7 @@ export function listarInscritos(eventId, onlyUpdate = false) {
     }
 
     // Limpa os elementos de dentro
-    inscritosList.innerHTML = "";
+    inscritosList.replaceChildren();
 
     currentListingSubscribeEvent = eventId;
 
@@ -946,13 +947,16 @@ export function listarInscritos(eventId, onlyUpdate = false) {
     }
 
     getDataFromDatabase(InscricoesDatabaseRef, eventId)
-        .then(snapshot => {
+        .then(async snapshot => {
 
             if (!snapshot.exists()) {
                 inscritosList.innerHTML = "<p>Nenhum inscrito encontrado neste evento.</p>";
                 totalElem.textContent = "Total de inscritos: 0";
                 return;
             }
+
+            // Obtém as autorizações do evento
+            const autorizacoes = await getEventAuthorizations(eventId);
 
             // Obtém o status
             const state = inscritoSearchState?.value.trim() || TODOS_SELECT;
@@ -999,9 +1003,28 @@ export function listarInscritos(eventId, onlyUpdate = false) {
                     nameElem.textContent = user.nome || "---";
                     row.appendChild(nameElem);
 
+                    // Div responsável por conter as interações com o usuário
+                    const optionsDiv = document.createElement("div");
+
                     const presencaBtn = document.createElement("button");
                     presencaBtn.textContent = inscricao.presenca ? "Presente" : "Ausente";
                     presencaBtn.className = `presenca-btn ${inscricao.presenca ? "presente" : "ausente"}`;
+
+                    // NOTA: se precisar adicionar mais arquivos, adicione um botão aqui que abra um
+                    //       modal que liste todos os arquivos.
+                    const autorizacaoBtn = document.createElement('button');
+                    autorizacaoBtn.classList = 'event-modal-btn-auto-width icon-button';
+                    autorizacaoBtn.style.width = 'auto';
+                    autorizacaoBtn.style.minWidth = '10px';
+
+                    const autorizacaoBtnImg = document.createElement('img');
+                    autorizacaoBtnImg.src = 'assets/icons/document-icon.svg';
+                    autorizacaoBtnImg.alt = 'Foto de um documento';
+                    // Se não houver arquivo, troca o ícone
+                    if (!autorizacoes[inscricao.uid]) {
+                        autorizacaoBtnImg.src = 'assets/icons/document-cross.svg';
+                        autorizacaoBtnImg.alt = 'Foto de um documento com um X no meio';
+                    }
 
                     presencaBtn.addEventListener("click", async () => {
                         try {
@@ -1027,7 +1050,30 @@ export function listarInscritos(eventId, onlyUpdate = false) {
                         }
                     });
 
-                    row.appendChild(presencaBtn);
+                    autorizacaoBtn.addEventListener('click', async () => {
+                        const autorizacao = autorizacoes[inscricao.uid];
+                        const userName = await getAttributeFromUser(inscricao.uid, 'nome');
+
+                        // Se o usuário não tiver anexado nada, mostra um aviso
+                        if (!autorizacao) {
+                            abrirAlerta("O usuário \"" + userName + "\" não anexou nenhum arquivo.").then();
+                            return;
+                        }
+
+                        // Se chegou até aqui, há arquivos
+
+                        // NOTA: atualmente, só há o arquivo de autorização, então é mais prático
+                        //       colocá-lo manualmente (tô com pouco tempo e ainda tem uma chance
+                        //       considerável de ele ser o único necessário em qualquer evento)
+                        openFilesModalWithFiles([autorizacao], "Arquivos de \"" + userName + "\"", inscricao.uid);
+                    });
+
+                    autorizacaoBtn.appendChild(autorizacaoBtnImg);
+
+                    optionsDiv.appendChild(autorizacaoBtn);
+                    optionsDiv.appendChild(presencaBtn);
+
+                    row.appendChild(optionsDiv);
                     userCard.appendChild(row);
                     inscritosList.appendChild(userCard);
                 });
@@ -1275,4 +1321,105 @@ function setApagarFotoBtnState(state) {
         apagarFotoBtn.classList.remove("danger");
         apagarFotoBtn.style.display = 'none';
     }
+}
+
+/**
+ * Remove todos os arquivos do evento dado no Google Drive e no banco de dados,
+ * suportando qualquer hierarquia de pastas (ex: arquivos/{eventId}/{userId}/autorizacao,
+ * arquivos/{eventId}/geral/{arquivo}, arquivos/{eventId}/.../{arquivo}).
+ * @param {String} eventId id do evento que os arquivos estão relacionados
+ * @return {Promise<Boolean>} se conseguiu ou não apagar o(s) arquivo(s)
+ */
+async function removeAllFilesFromEvent(eventId) {
+    if (!isAdmin())
+        throw new Error("O usuário não tem permissão de apagar todos os arquivos de um evento");
+
+    if (!eventId) return true;
+
+    // Obtém todos os arquivos do evento
+    const eventFilesRef = refFromDatabase(ArquivosDatabaseRef, eventId);
+    const filesSnapshot = await getDataFromDatabase(eventFilesRef);
+
+    // Se não houver arquivos, pode considerar que já limpou eles
+    if (!filesSnapshot.exists()) return true;
+
+    const filesData = filesSnapshot.val();
+
+    // Função recursiva para extrair todos os ids de arquivos.
+    // Isso é necessário, pois pode haver diversas formas de hierarquias.
+    const fileIds = [];
+    function extractFileIds(data) {
+        if (!data || typeof data !== 'object') return fileIds;
+
+        // Se for um nó de arquivo com id do Drive
+        if (data.id !== undefined && data.id !== null && typeof data.id === 'string' && data.id.trim() !== '') {
+            fileIds.push(data.id);
+        }
+
+        // Percorre recursivamente todas as chaves
+        for (const key of Object.keys(data)) {
+            extractFileIds(data[key]);
+        }
+    }
+
+    extractFileIds(filesData);
+
+    // Apaga os arquivos do Google Drive
+    const deletePromises = fileIds.map(async (fileId) => {
+        try {
+            const resposta = await sendRequestToAppsScript({ fileId }, "deleteFile");
+            if (resposta && resposta.status === 'error') {
+                console.warn(`Aviso ao apagar arquivo ${fileId} do Drive:`, resposta.message);
+            }
+            return resposta;
+        } catch (err) {
+            throw err;
+        }
+    });
+
+    // Espera todas as promessas de remoção
+    await Promise.all(deletePromises);
+
+    // Remove toda a árvore de arquivos do evento do banco de dados
+    await remove(eventFilesRef);
+
+    return true;
+}
+
+/**
+ * Obtém as autorizações do evento dado.
+ * @param {String} eventId id do evento
+ * @return {Promise<Map<String, PublishedFile>>} promessa com um mapa das autorizações, de
+ *          forma que o id do usuário está ligado ao respectivo PublishedFile.
+ */
+async function getEventAuthorizations(eventId) {
+    if (!isAdmin())
+        throw new Error("O usuário não tem permissão de acessar as autorizações de um evento");
+
+    const files = {};
+
+    // Obtém os arquivos
+    const filesSnapshot = await getDataFromDatabase(ArquivosDatabaseRef, eventId);
+    if (!filesSnapshot.exists())
+        return files;
+
+    // Para cada arquivo, cria um PublishedFile e adiciona no mapa
+    filesSnapshot.forEach((snap) => {
+        if (!snap.exists()) return;
+
+        const name = snap.key;
+
+        // Ignora se for geral
+        if (name === 'geral') return;
+
+        const autorizacaoData = snap.val()['autorizacao'];
+
+        // Se não tiver autorização, ignora
+        if (!autorizacaoData) return;
+
+        files[name] = new PublishedFile('autorizacao', autorizacaoData.link, autorizacaoData.id);
+    });
+
+    // Retorna os arquivos obtidos
+    return files;
 }
