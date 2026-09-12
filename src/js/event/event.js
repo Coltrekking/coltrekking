@@ -42,7 +42,7 @@ export const modalInscricaoEvento = document.getElementById("modalOverlayInscric
  * Retorna a quantidade mínima de pontos para se inscrever
  * no evento dado.
  * @param eventoId id do evento
- * @return {number} pontuação mínima necessária para se inscrever no evento dado.
+ * @return {Promise<number>} pontuação mínima necessária para se inscrever no evento dado.
  */
 export async function getPontuacaoMinimaParaEvento(eventoId) {
     const snap = await getDataFromDatabase(EventsDatabaseRef, eventoId);
@@ -84,18 +84,6 @@ export function updateEventCard(eventId) {
  */
 function fillEventContainer(dataSnapshot) {
     if (!Auth.currentUser) return;
-    // Obtém o uid do usuário local
-    const uid = localStorage.getItem('uid');
-    if (!uid) {
-        // Isso só acontece se o usuário (na maioria das vezes) porque o usuário
-        // está com o email inválido. Nesse caso, só retornar é suficiente.
-
-        /*console.warn('UID não encontrado no localStorage.');
-        enviarErroParaSentry("UID não foi encontrado no localStorage. Por isso, os eventos não serão carregados.");
-        hideItem(loading);
-        abrirAlerta("Reinicie a página.");*/
-        return;
-    }
 
     // Começa a criar e preencher //
 
@@ -237,7 +225,7 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, alreadyRetrying
             const userData = snapshot.val();
 
             if (!userData || !userData.userId || !userData.userClass || !userData.userCourse) {
-                abrirAlerta("⚠️ Antes de se inscrever, preencha suas informações pessoais (RA, Turma e Curso).").then( );
+                abrirAlerta("⚠️ Antes de se inscrever, preencha suas informações pessoais (CPF, Turma e Curso).").then( );
                 throw new Error("Dados pessoais incompletos");
             }
 
@@ -300,11 +288,14 @@ function subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, alreadyRetrying
                 // Tenta se inscrever novamente se não conseguiu de primeira
                 if (!alreadyRetrying) {
                     enviarErroParaSentry(error);
-                    subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, true).then( );
+                    setTimeout(_ => {
+                        subscribeToEvent(eventId, subscribeBtn, unsubscribeBtn, true).then( );
+                    }, minimumTimeBetweenSubscriptionAttempts+10);
                 // Se já tentou se inscrever duas vezes, apenas envia o erro
                 } else {
                     console.error('Erro ao inscrever:', error);
                     enviarErroParaSentry(error);
+                    hideLoading();
                     abrirAlerta('Erro ao realizar inscrição. Tente novamente.').then();
                 }
             }
@@ -440,7 +431,7 @@ export async function checkSubscribedEventsRequiringMinimumPoints(uid) {
  * Verifica se o usuário do uid dado está inscrito no evento do id dado.
  * @param {String} userUid uid do usuário
  * @param {String} eventId id do evento
- * @return {Boolean} se o usuário está ou não inscrito no evento
+ * @return {Promise<Boolean>} se o usuário está ou não inscrito no evento
  */
 async function isUserSubscribedInEvent(userUid, eventId) {
     const inscricaoEvento = await getDataFromDatabase(InscricoesDatabaseRef, eventId + '/' + userUid);
@@ -453,7 +444,7 @@ async function isUserSubscribedInEvent(userUid, eventId) {
  * Verifica se o usuário do uid dado está inscrito e presente no evento do id dado.
  * @param {String} userUid uid do usuário
  * @param {String} eventId id do evento
- * @return {Boolean} se o usuário está ou não presente e inscrito no evento
+ * @return {Promise<Boolean>} se o usuário está ou não presente e inscrito no evento
  */
 async function isUserPresentInEvent(userUid, eventId) {
     const inscricaoEvento = await getDataFromDatabase(InscricoesDatabaseRef, eventId + '/' + userUid);

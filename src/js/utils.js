@@ -665,8 +665,11 @@ export async function saveFilesInDatabaseAsLinks(ref, arquivos) {
  */
 export async function removeFile(reference) {
     const arquivoSnapshot = await get(reference);
-    if (!arquivoSnapshot.exists())
-        throw new Error("O arquivo não existe no banco de dados.");
+    if (!arquivoSnapshot.exists()) {
+        //   throw new Error("O arquivo não existe no banco de dados.");
+        // Se o arquivo não existe, está tudo bem! Pode considerar que já apagou
+        return true;
+    }
 
     const arquivo = arquivoSnapshot.val();
 
