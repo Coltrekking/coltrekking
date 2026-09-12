@@ -54,7 +54,11 @@ const SAVED_IMAGES = {
     "https://i.ibb.co/yFJ74Xjb/evento-1788564532931.webp" : "/assets/images/fotoEventos/evento-farofa.jpg",
     "https://i.ibb.co/F4R34Vx0/evento-1788564255099.webp" : "/assets/images/fotoEventos/evento-itacolomi.jpg",
     "https://i.ibb.co/6cDxbh8P/evento-1788564657141.webp": "/assets/images/fotoEventos/evento-bh-novalima.jpg",
-    "https://i.ibb.co/LzpTTtRQ/evento-1788564752902.webp": "/assets/images/fotoEventos/evento-travessao.jpg"
+    "https://i.ibb.co/LzpTTtRQ/evento-1788564752902.webp": "/assets/images/fotoEventos/evento-travessao.jpg",
+    "https://i.ibb.co/fdM5562C/evento-1789049707976.webp": "/assets/images/fotoEventos/evento-uaimii.webp",
+    "https://i.ibb.co/RkjT7qqP/evento-1788903590204.webp": "/assets/images/fotoEventos/evento-travessia-2025.webp",
+    "https://i.ibb.co/Swq9wBtr/evento-1788903511234.webp": "/assets/images/fotoEventos/evento-acampamento-2025.webp"
+
 }
 
 function _has_saved_image(url) {

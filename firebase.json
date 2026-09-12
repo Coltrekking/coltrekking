@@ -9,5 +9,17 @@
       "**/node_modules/**",
       "**/*.js.map"
     ]
+  },
+  "emulators": {
+    "auth": {
+      "port": 9099
+    },
+    "database": {
+      "port": 9000
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4000
+    }
   }
 }

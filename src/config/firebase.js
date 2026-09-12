@@ -3,13 +3,13 @@
  */
 
 // Versão da página //
-export const PAGE_VERSION = "aXX08";
+export const PAGE_VERSION = "a1509";
 
 
 import { initializeApp } from "firebase/app"; // Para inicializar o app
 
-import { getAuth } from 'firebase/auth'; // Para obter o auth
-import { getDatabase } from 'firebase/database'; // Para obter o Realtime Database
+import { getAuth, connectAuthEmulator } from 'firebase/auth'; // Para obter o auth
+import { getDatabase, connectDatabaseEmulator } from 'firebase/database'; // Para obter o Realtime Database
 
 // Dados do firebase
 const firebaseConfig = {
@@ -35,6 +35,20 @@ export const App = initializeApp( firebaseConfig );
 // Inicializa o Firebase e exporta as bibliotecas
 export const Auth = getAuth(App);
 export const Database = getDatabase(App);
+
+/* Configurar o emulador */
+if (window.location.hostname === "localhost") {
+    // Para não precisar cadastrar novamente as contas do Google
+    //connectAuthEmulator(Auth, "http://127.0.0.1:9099");
+
+    // Para o Realtime Database, passamos o host e a porta separadamente
+    connectDatabaseEmulator(Database, "127.0.0.1", 9000);
+
+    console.log("===================================================");
+    console.log("**Conectado aos Emuladores Locais!**");
+    console.log("QUALQUER MUDANÇA NÃO AFETARÁ O BANCO DE DADOS REAL.");
+    console.log("===================================================");
+}
 
 export default App;
 
