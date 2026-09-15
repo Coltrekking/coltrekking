@@ -22,6 +22,18 @@ export default defineConfig({
         },
     },
 
+    optimizeDeps: {
+        esbuildOptions: {
+            define: {
+                global: 'globalThis',
+            },
+        },
+    },
+
+    define: {
+        global: 'globalThis',
+    },
+
     server: {
         fs: {
             // Permite que o Vite busque arquivos fora da pasta 'pages'

@@ -4,6 +4,7 @@
  */
 import {formattedDate} from "../date";
 import {
+    checkSignature,
     FileForUpload,
     getAttributeFromUser,
     getDataFromDatabase,
@@ -13,7 +14,7 @@ import {
 } from "../utils";
 import {isAdmin, waitForUser} from "../auth";
 import {Auth} from "/src/config/firebase";
-import {abrirAlerta} from "../modal";
+import {abrirAlerta, abrirAviso} from "../modal";
 
 // Elementos do event modal
 // (São definidos mais tarde, depois que há certeza que os elementos estão no site)
@@ -670,11 +671,26 @@ export function getEventPhotos(eventId) {
  * Quando o botão de "enviar" do modal de arquivos do evento é clicado,
  * essa função é chamada.
  */
-function onEventArquivosEnviarBtnClicked() {
+async function onEventArquivosEnviarBtnClicked() {
+    showLoading();
+
     // Obtém os arquivos
         // NOTA: atualmente, só o arquivo de autorização é usado
     const autorizacaoFileInput = document.getElementById("event-arquivos-autorizacao");
     const autorizacaoFile = autorizacaoFileInput?.files[0];
+
+    // Verifica a veracidade da assinatura
+    try {
+        if (!await checkSignature(autorizacaoFile)) {
+            hideLoading();
+            abrirAviso("A autorização anexada não é válida! Certifique-se de que ela está assinada pelo gov.br.").then();
+            return;
+        }
+    } catch (e) {
+        hideLoading();
+        abrirAlerta("Não foi possível verificar a veracidade da autorização. Tente novamente.").then();
+        return;
+    }
 
     // Se houver mais arquivos, guarde nesse vetor
     const files = [
@@ -687,9 +703,6 @@ function onEventArquivosEnviarBtnClicked() {
         new FileForUpload("autorizacao", autorizacaoFile, `autorizacao-${currentSelectedEventName}-${Auth.currentUser.uid}`)
     ];
 
-    // TODO: verificar a validade da autorização
-
-    showLoading();
     // Salva o arquivo no banco de dados
     sendEventFiles(files, currentSelectedEventId, Auth.currentUser.uid)
         .then((success) => {

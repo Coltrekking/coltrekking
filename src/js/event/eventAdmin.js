@@ -485,9 +485,10 @@ export function updateEvent(key) {
  * Ordena a lista de inscrições dada. Cada inscrição precisa ter o atributo
  * "dataInscricao" ou "posicao"(se não tiver "posicao", vai usar a "dataInscricao").
  * @param {Array} inscricoes lista das inscrições
+ * @return {Array} vetor das inscrições ordenado
  */
 function ordenarListaInscricoes(inscricoes) {
-    return compareSubscriptionsByTimestampAndUid(inscricoes);
+    return inscricoes.sort(compareSubscriptionsByTimestampAndUid);
 }
 
 // botão para listar inscrições de um evento e exportar CSV
@@ -544,7 +545,7 @@ export function exportarInscricoesCSV(eventId, nomeEvento = 'Evento', dataInicio
             }
 
             // Ordena a lista de inscrições
-            ordenarListaInscricoes(inscricoes);
+            inscricoes = ordenarListaInscricoes(inscricoes);
 
             function formatarData(ts) {
                 if (!ts) return '---';
@@ -637,7 +638,8 @@ export function exportarInscricoesXLSX(eventId, nomeEvento = 'Evento', dataInici
             }
 
             // Ordena a lista de inscrições
-            ordenarListaInscricoes(inscricoes);
+            inscricoes = ordenarListaInscricoes(inscricoes);
+
 
             function formatarData(ts) {
                 if (!ts) return '---';
@@ -756,7 +758,8 @@ export function exportarSelecionadosXLSX(eventId, nomeEvento = 'Evento', dataIni
             }
 
             // Ordena as inscrições
-            ordenarListaInscricoes(inscricoes);
+            inscricoes = ordenarListaInscricoes(inscricoes);
+
 
             // Adiciona o atributo "passou" aos primeiros 'qntdSelecionados' inscritos
             for (let i = 0; i < inscricoes.length; i++) {
@@ -963,7 +966,7 @@ export function listarInscritos(eventId, onlyUpdate = false) {
             const state = inscritoSearchState?.value.trim() || TODOS_SELECT;
 
             // Lista inscritos
-            const inscricoes = [];
+            let inscricoes = [];
             snapshot.forEach(childSnap => {
                 const presenca = childSnap.val().presenca || false;
 
@@ -977,8 +980,7 @@ export function listarInscritos(eventId, onlyUpdate = false) {
                 });
             });
 
-            ordenarListaInscricoes(inscricoes);
-
+            inscricoes = ordenarListaInscricoes(inscricoes);
 
             if (state !== TODOS_SELECT) // Se estiver filtrando pelo estado, adiciona o estado no texto
                 totalElem.textContent = `Total de inscritos (${state}s): ${inscricoes.length}`;

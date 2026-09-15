@@ -3,6 +3,7 @@ import {child, get, onValue, ref, remove, update} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
 import {getUserRole, isAdmin} from "/src/js/auth";
 import {abrirAlerta} from "/src/js/modal";
+import {extractSignature} from "@signpdf/utils";
 
 // Referências dos elementos da página
 export let loading = document.getElementById('loading');
@@ -689,3 +690,29 @@ export async function removeFile(reference) {
     return true;
 }
 
+/**
+ * Verifica se o arquivo dado tem uma assinatura.
+ * NOTA: no futuro, ainda se mostra necessário verificar se a
+ *       assinatura é verídica.
+ * @param {File} file
+ * @return {Promise<Boolean>} promessa que
+ */
+export async function checkSignature(file) {
+    try {
+        const pdfBuffer = Buffer.from(await file.arrayBuffer());
+
+        // Extrai as assinaturas contidas na estrutura do PDF
+        //const { signature, signedData } = extractSignature(pdfBuffer);
+        const { signature } = extractSignature(pdfBuffer);
+
+        // Retorna se há assinatura
+        return !!signature;
+    } catch (error) {
+        // Se o erro for que não achou o campo de pdf assinado, retorna falso
+        if (error?.message?.includes("Failed to locate ByteRange")) {
+            return false;
+        }
+        console.error('Erro ao analisar o PDF:', error.message);
+        throw error;
+    }
+}

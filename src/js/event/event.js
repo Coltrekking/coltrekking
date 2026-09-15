@@ -673,7 +673,7 @@ async function removeLink(eventKey, url) {
 
 // Tempo, em milissegundos, para esperar para obter a
 // colocação quando o usuário se inscreve em um evento.
-const delayForGettingPosition = 4000;
+const delayForGettingPosition = 5000;
 
 export function compareSubscriptionsByTimestampAndUid(a, b) {
     const timeDiff = (a.dataInscricao || 0) - (b.dataInscricao || 0);

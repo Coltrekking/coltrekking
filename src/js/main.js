@@ -10,6 +10,11 @@
 // É importante que ele seja o primeiro a inicializar para
 // capturar erros que possam acontecer a qualquer momento.
 import * as Sentry from "@sentry/browser";
+import { Buffer } from "buffer";
+
+if (typeof window !== "undefined" && !window.Buffer) {
+    window.Buffer = Buffer;
+}
 
 // Só inicializa o Sentry se já não estiver inicializado e se não estiver no localhost
 if ( !Sentry.isInitialized() && !window.location.href.includes("localhost")) {
