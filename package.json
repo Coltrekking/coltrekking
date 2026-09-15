@@ -16,6 +16,7 @@
     "@sentry/browser": "^10.51.0",
     "@sentry/vite-plugin": "^5.2.1",
     "firebase": "^12.12.1",
+    "jszip": "^3.10.2",
     "lodash": "^4.18.1",
     "vue": "^3.5.33",
     "xlsx-js-style": "^1.2.0"

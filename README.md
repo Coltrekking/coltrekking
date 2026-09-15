@@ -130,6 +130,18 @@ Quando vi o Coltrekking, achei muito maneiro e, como eu sempre gostei de andar e
 pensei que seria uma boa eu ir a uma trilha para ver como é (e eu gostei muito)! Desde a minha primeira trilha,
 tentei ao máximo não perder nenhuma outra!
 
+<div align="center">
+<table align="center">
+  <tr>
+    <td>
+      <img src="public/assets/images/github/dev-bobinho.jpeg" width="400"><br>
+      <img src="public/assets/images/github/dev2-bandeira.jpg" width="400">
+    </td>
+  </tr>
+</table>
+</div>
+
+
 ---
 
 ### COLTEC 2026

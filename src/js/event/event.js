@@ -22,7 +22,7 @@ import {
 } from "../utils";
 import {abrirAlerta, abrirConfirmacao, abrirModal, EntradasModal} from "../modal";
 import {isAdmin} from "../auth";
-import {listarInscritos, removeEvent, updateEvent} from "./eventAdmin";
+import {downloadEventAuthorizations, listarInscritos, removeEvent, updateEvent} from "./eventAdmin";
 import {get, remove, serverTimestamp, set, update} from "firebase/database";
 import {enviarErroParaSentry} from "/src/js/main";
 import {
@@ -673,7 +673,13 @@ async function removeLink(eventKey, url) {
 
 // Tempo, em milissegundos, para esperar para obter a
 // colocação quando o usuário se inscreve em um evento.
-const delayForGettingPosition = 700;
+const delayForGettingPosition = 4000;
+
+export function compareSubscriptionsByTimestampAndUid(a, b) {
+    const timeDiff = (a.dataInscricao || 0) - (b.dataInscricao || 0);
+    if (timeDiff !== 0) return timeDiff;
+    return (a.uid || "").localeCompare(b.uid || "");
+}
 /**
  * Quando o usuário consegue se inscrever com sucesso, essa função é chamada
  * @param eventId id do evento que o usuário local acabou de se inscrever
@@ -710,7 +716,7 @@ async function onSuccessfulSubscription(eventId) {
             });
         });
 
-        inscricoes.sort((a, b) => a.dataInscricao - b.dataInscricao);
+        inscricoes.sort(compareSubscriptionsByTimestampAndUid);
 
         // Obtém a posição
         indice = inscricoes.findIndex((v) => {
@@ -854,4 +860,4 @@ export async function removeUserFilesFromEvent(eventId, userId) {
 
 // Define as funções no eventUI.js
 // Isso é necessário para evitar dependência cíclica (event.js e eventUI.js dependendo entre si)
-setEventFunctions(subscribeToEvent, unsubscribeFromEvent, showEventPhotos, updateEvent, removeEvent, listarInscritos, sendEventFiles, getFilesFromEvent, removeFileFromEvent);
+setEventFunctions(subscribeToEvent, unsubscribeFromEvent, showEventPhotos, updateEvent, removeEvent, listarInscritos, sendEventFiles, getFilesFromEvent, removeFileFromEvent, downloadEventAuthorizations);

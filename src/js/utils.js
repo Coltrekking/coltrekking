@@ -508,6 +508,8 @@ async function fileToBase64(file) {
  *                                      No caso de upar um arquivo, opte por usar a função `saveFilesInDatabaseAsLinks`, que já faz a conversão para Base64 e salva
  *                                      no banco de dados.
  *                      - "deleteFile": apagar um arquivo a partir do id dado. Precisa do atributo `fileId` no objeto data.
+ *                      - "downloadFile": baixar um arquivo do Google Drive a partir do `fileId`. O Apps Script deve responder com
+ *                                        `{status: 'ok', data: '<base64>', mimeType: 'application/pdf', fileName: 'arquivo.pdf'}`
  *
  * @return {Promise<any>} Promise com a resposta do Apps Script.
  */
@@ -686,3 +688,4 @@ export async function removeFile(reference) {
     // Se chegou até aqui, deu tudo certo
     return true;
 }
+

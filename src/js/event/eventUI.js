@@ -158,6 +158,7 @@ let listarInscritos;
 let sendEventFiles;
 let getFilesFromEvent;
 let removeFileFromEvent;
+let downloadEventAuthorizations;
 
 // Retorna o id do elemento com o nome e o id dado
 export const getEventElementId = (name, id) => `event-${name}-${id}`;
@@ -174,9 +175,10 @@ export const getEventElementId = (name, id) => `event-${name}-${id}`;
  * @param f_sendEventFiles função de enviar arquivos do evento
  * @param f_getFilesFromEvent função de obter os arquivos de um evento
  * @param f_removeFileFromEvent função de retirar arquivos de um evento
+ * @param f_downloadEventAuthorizations função de baixar todas as autorizações de um evento
  */
 export function setEventFunctions
-(f_subscribe, f_unsubscribe, f_showEventPhotos, f_updateEvent, f_removeEvent, f_listarInscritos, f_sendEventFiles, f_getFilesFromEvent, f_removeFileFromEvent) {
+(f_subscribe, f_unsubscribe, f_showEventPhotos, f_updateEvent, f_removeEvent, f_listarInscritos, f_sendEventFiles, f_getFilesFromEvent, f_removeFileFromEvent, f_downloadEventAuthorizations) {
     subscribeToEvent = f_subscribe;
     unsubscribeFromEvent = f_unsubscribe;
     showEventPhotos = f_showEventPhotos;
@@ -186,6 +188,7 @@ export function setEventFunctions
     sendEventFiles = f_sendEventFiles;
     getFilesFromEvent = f_getFilesFromEvent;
     removeFileFromEvent = f_removeFileFromEvent;
+    downloadEventAuthorizations = f_downloadEventAuthorizations;
 }
 
 // Estados do botão de inscrição/desinscrição
@@ -832,7 +835,17 @@ function loadPageEvents() {
             showLoading();
             // Como só existe autorização, coloquei diretamente
             removeFileFromEvent(currentSelectedEventId, currentFilesUserId, "autorizacao").then(success => {
-                openFilesModal(); // atualiza o modal de arquivos
+
+                // Fecha a tela se for admin.
+                // NOTA: se houver mais arquivos, seria bom verificar se
+                //       ainda tem arquivos disponíveis antes de fechar.
+                if (isAdmin()) {
+                    hideItem(EventArquivosEl);
+                    listarInscritos(currentSelectedEventId, true); // apenas atualiza a lista de inscritos
+                } else {
+                    openFilesModal(); // atualiza o modal de arquivos
+                }
+
                 hideLoading();
                 if (success) {
                     abrirAlerta("Arquivo removido com sucesso!").then( );
@@ -898,6 +911,24 @@ async function setupForAdmin() {
         removerBtn.onclick = () => removeEvent(currentSelectedEventId, currentSelectedEventName);
         EventModalButtons.appendChild(removerBtn);
     }
+
+    // Quando o botão de obter todas autorizações for pressionado
+    document.getElementById('menuInscritosObterAutorizacoesBtn')?.addEventListener('click', async () => {
+        if (!currentSelectedEventId) {
+            await abrirAlerta('Nenhum evento selecionado para baixar as autorizações.');
+            return;
+        }
+
+        try {
+            showLoading();
+            await downloadEventAuthorizations(currentSelectedEventId);
+            abrirAlerta("Autorizações baixadas com sucesso!").then( );
+            hideLoading();
+        } catch (error) {
+            console.error('Erro ao baixar todas as autorizações:', error);
+            abrirAlerta('Não foi possível baixar as autorizações em lote. Tente novamente.').then();
+        }
+    });
 }
 
 export function closeEventModal() {

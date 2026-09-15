@@ -20,13 +20,14 @@ import {validarOrdemDatas} from "../date";
 import {get, push, remove, set, update} from 'firebase/database'
 import {
     atualizarPontuacaoUsuario,
-    calcularPontuacaoDoEvento, checkSubscribedEventsRequiringMinimumPoints,
+    calcularPontuacaoDoEvento, checkSubscribedEventsRequiringMinimumPoints, compareSubscriptionsByTimestampAndUid,
     getPontuacaoMinimaParaEvento,
     unsubscribeUserFromEvent, updateEventCard
 } from "/src/js/event/event";
 import {enviarErroParaSentry} from "/src/js/main";
 import {Auth} from "/src/config/firebase";
 import * as XLSX from 'xlsx-js-style';
+import JSZip from 'jszip';
 import {abrirAlerta, abrirConfirmacao, abrirModal, EntradasModal} from "/src/js/modal";
 import {closeEventModal, getEventElementId, openFilesModalWithFiles} from "./eventUI";
 import {isAdmin} from "/src/js/auth";
@@ -486,7 +487,7 @@ export function updateEvent(key) {
  * @param {Array} inscricoes lista das inscrições
  */
 function ordenarListaInscricoes(inscricoes) {
-    inscricoes.sort((a, b) => (a.dataInscricao || 0) - (b.dataInscricao || 0));
+    return compareSubscriptionsByTimestampAndUid(inscricoes);
 }
 
 // botão para listar inscrições de um evento e exportar CSV
@@ -976,7 +977,7 @@ export function listarInscritos(eventId, onlyUpdate = false) {
                 });
             });
 
-            inscricoes.sort((a, b) => a.dataInscricao - b.dataInscricao);
+            ordenarListaInscricoes(inscricoes);
 
 
             if (state !== TODOS_SELECT) // Se estiver filtrando pelo estado, adiciona o estado no texto
@@ -1422,4 +1423,105 @@ async function getEventAuthorizations(eventId) {
 
     // Retorna os arquivos obtidos
     return files;
+}
+
+/**
+ * Baixa todas as autorizações do evento dado em um único arquivo .zip.
+ * @param {String} eventId id do evento
+ * @return {Promise<Boolean>} Promessa que resolve quando o zip foi gerado e baixado,
+ *                          ou que false em caso de ausência de arquivos.
+ */
+export async function downloadEventAuthorizations(eventId) {
+    if (!isAdmin()) throw new Error("Você não tem permissão para fazer isso");
+    if (!eventId) throw new Error("Nenhum evento foi selecionado para baixar as autorizações.");
+
+    const autorizacoes = await getEventAuthorizations(eventId);
+    const entries = Object.entries(autorizacoes);
+
+    if (entries.length === 0) {
+        await abrirAlerta("Nenhuma autorização foi enviada para esse evento.");
+        return false;
+    }
+
+    const eventoSnap = await getDataFromDatabase(EventsDatabaseRef, eventId);
+    const evento = eventoSnap.val() || {};
+    const nomeEvento = 'autorizacoes-' + (evento.nome || 'evento')
+        .replace(/[\\/:*?"<>|]+/g, '_')
+        .replace(/\s+/g, '_')
+        .trim() || 'evento';
+
+    const zip = new JSZip();
+    const promises = entries.map(async ([uid, arquivo]) => {
+        if (!arquivo || !arquivo.id) {
+            console.warn(`Autorização sem id do Drive para o usuário ${uid}:`, arquivo);
+            return;
+        }
+
+        try {
+            const resposta = await sendRequestToAppsScript({ fileId: arquivo.id }, "downloadFile");
+            if (!resposta || resposta.status === 'error') {
+                throw new Error(resposta?.message || `Falha ao baixar autorização de ${uid}`);
+            }
+
+            const base64Data = resposta.data;
+            if (!base64Data) {
+                throw new Error(`Autorização vazia para o usuário ${uid}`);
+            }
+
+            const binaryString = atob(base64Data);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+
+            const mimeType = (resposta.mimeType || 'application/pdf').toLowerCase();
+            const userSnap = await getDataFromDatabase(UsersDatabaseRef, uid);
+            const userData = userSnap.val() || {};
+            const nomeUsuario = (userData.nome || uid)
+                .normalize('NFD')
+                .replace(/[̀-ͯ]/g, '')
+                .replace(/[^a-zA-Z0-9 _-]/g, '_')
+                .trim() || uid;
+
+            let extensao = 'pdf';
+            if (mimeType.includes('application/pdf')) extensao = 'pdf';
+            else if (mimeType.includes('image/png')) extensao = 'png';
+            else if (mimeType.includes('image/jpeg')) extensao = 'jpg';
+            else if (mimeType.includes('application/zip')) extensao = 'zip';
+            else if (mimeType.includes('application/vnd.openxmlformats-officedocument.wordprocessingml.document')) extensao = 'docx';
+            else if (mimeType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) extensao = 'xlsx';
+            else if (mimeType.includes('text/plain')) extensao = 'txt';
+            else if (resposta.fileName) {
+                const match = resposta.fileName.match(/\.[a-z0-9]+$/i);
+                if (match) extensao = match[0].slice(1).toLowerCase();
+            }
+
+            const nomeArquivo = `${nomeUsuario}_${uid}.${extensao}`.replace(/[\/:*?"<>|]+/g, '_');
+            zip.file(nomeArquivo, new Blob([bytes.buffer], { type: mimeType }));
+        } catch (error) {
+            console.error(`Erro ao adicionar autorização do usuário ${uid} ao zip:`, error);
+            throw error;
+        }
+    });
+
+    try {
+        await Promise.all(promises);
+    } catch (error) {
+        await abrirAlerta('Ocorreu um erro ao preparar o zip das autorizações. Tente novamente.');
+        enviarErroParaSentry(error);
+        return false;
+    }
+
+    const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(zipBlob);
+
+    link.href = url;
+    link.download = `${nomeEvento}_autorizacoes.zip`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+    return true;
 }

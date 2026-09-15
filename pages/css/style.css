@@ -1130,7 +1130,7 @@ textarea {
 }
 
 .event-files-list-element input[type="file"] {
-    width: 40%;
+    width: 70%;
 }
 
 .event-files-list-element a, .event-files-list-element button {
@@ -1370,6 +1370,10 @@ textarea {
 }
 #modalOverlayGerenciarInscritosEvento {
     z-index: 15000;
+}
+
+#modalOverlayInscricaoEvento {
+    z-index: 11000;
 }
 
 #modalOverlay {
