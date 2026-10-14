@@ -1519,7 +1519,7 @@ export async function downloadEventAuthorizations(eventId) {
     const url = URL.createObjectURL(zipBlob);
 
     link.href = url;
-    link.download = `${nomeEvento}_autorizacoes.zip`;
+    link.download = `${nomeEvento}.zip`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

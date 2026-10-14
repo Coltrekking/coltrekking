@@ -940,12 +940,15 @@ async function setupForAdmin() {
 
         try {
             showLoading();
-            await downloadEventAuthorizations(currentSelectedEventId);
-            abrirAlerta("Autorizações baixadas com sucesso!").then( );
-            hideLoading();
+            const result = await downloadEventAuthorizations(currentSelectedEventId);
+            if (result !== false) {
+                abrirAlerta("Autorizações baixadas com sucesso!").then( );
+            }
         } catch (error) {
             console.error('Erro ao baixar todas as autorizações:', error);
             abrirAlerta('Não foi possível baixar as autorizações em lote. Tente novamente.').then();
+        } finally {
+            hideLoading();
         }
     });
 }
