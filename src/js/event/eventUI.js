@@ -723,6 +723,12 @@ async function onEventArquivosEnviarBtnClicked() {
 }
 
 let currentFilesUserId = null;
+
+function setEventArquivosEnviarBtnVisibility(hasAuthorizationFile) {
+    if (!EventArquivosEnviarBtn) return;
+    EventArquivosEnviarBtn.style.display = hasAuthorizationFile ? 'none' : 'inline-block';
+}
+
 /**
  * Abre o modal de arquivos do evento atualmente selecionado
  */
@@ -753,6 +759,7 @@ function openFilesModal() {
             document.getElementById("verArquivoBtn-autorizacao").style.display = "block";
 
             document.getElementById("apagarArquivoBtn-autorizacao").style.display = "block";
+            setEventArquivosEnviarBtnVisibility(true);
         } else {
             // o código abaixo pode ser reaproveitado para mais arquivos =)
             // só substituir o "-autorizacao" pelo respectivo nome.
@@ -764,10 +771,9 @@ function openFilesModal() {
             document.getElementById("apagarArquivoBtn-autorizacao").style.display = "none";
             // Aparece o botão de anexar arquivo
             document.getElementById("event-arquivos-autorizacao").style.display = "block";
+            setEventArquivosEnviarBtnVisibility(false);
         }
     }).then(_ => {
-        // Faz o botão de enviar aparecer
-        EventArquivosEnviarBtn.style.display = 'inline-block';
         // Quando acabar os processos, mostra o modal
         showItemAsFlex(EventArquivosEl);
     })

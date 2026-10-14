@@ -1142,6 +1142,38 @@ textarea {
     margin: 1vw;
 }
 
+/* Design responsivo para o menu de arquivos de evento */
+@media (max-width: 640px) {
+    .event-files-list {
+        width: 100% !important;
+        padding: 0 10px !important;
+        box-sizing: border-box !important;
+    }
+
+    .event-files-list-element {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+        width: 100% !important;
+    }
+
+    .event-files-list-element input[type="file"] {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+
+        font-size: 13px !important;
+    }
+
+    .event-files-list-element a,
+    .event-files-list-element button {
+        width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+    }
+}
+
 .event-files-list-element a:hover, .event-files-list-element button:hover {
     cursor: pointer;
     border-color: #e56f15;
