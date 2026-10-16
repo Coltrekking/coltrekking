@@ -3,7 +3,7 @@
  */
 
 // Versão da página //
-export const PAGE_VERSION = "a1509";
+export const PAGE_VERSION = "a1610";
 
 // Determina se usará emuladores do Firebase em testes locais //
 const USE_EMULATOR_ON_LOCALHOST = true;

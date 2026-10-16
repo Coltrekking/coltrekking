@@ -181,6 +181,13 @@ button {
     cursor: pointer;
 }
 
+#eventoAlterarPontuacaoNecessaria {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+}
+
 .no-padding {
     padding: 0;
 }
@@ -1390,26 +1397,46 @@ textarea {
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.6);
-    z-index: 10000; /* garante que fique por cima do site principal */
+    z-index: 10000; /* camada base dos modais */
 
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-#event-files-modal {
-    z-index: 20000; /* fica por cima do modal de evento e de gerenciar inscritos */
+/* Camadas dos modais: cada modal aberto sobre outro precisa ter uma camada
+   própria, independentemente da ordem em que foi inserido no DOM. */
+#darkOverlay {
+    z-index: 9000;
 }
-#modalOverlayGerenciarInscritosEvento {
-    z-index: 15000;
+
+#event-modal {
+    z-index: 10000;
 }
 
 #modalOverlayInscricaoEvento {
     z-index: 11000;
 }
 
+#editPersonalInfoModal,
+#eventFormModal {
+    z-index: 12000;
+}
+
+#modalOverlayGerenciarInscritosEvento {
+    z-index: 15000;
+}
+
+#modalOverlayFotosEvento {
+    z-index: 20000;
+}
+
+#event-files-modal {
+    z-index: 21000;
+}
+
 #modalOverlay {
-    z-index: 30000; /* alertas, confirmações e modais genéricos ficam por cima de tudo */
+    z-index: 30000; /* alertas e confirmações ficam por cima de tudo */
 }
 
 #loading {
@@ -1496,7 +1523,8 @@ textarea {
     padding-right: 8px;
 }
 
-#fecharMenuInscritos {
+#fecharMenuInscritos,
+#cancelEventForm {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1521,7 +1549,8 @@ textarea {
     cursor: pointer;
 }
 
-#fecharMenuInscritos:hover {
+#fecharMenuInscritos:hover,
+#cancelEventForm:hover {
     color: #d9534f;
     transform: scale(1.1);
 }
@@ -1767,7 +1796,8 @@ h1, h2, h3, h4, .event-card h3, .event-card h2 {
         padding-top: 70px; /* Aumenta o recuo do topo no celular para o X não cobrir o título */
     }
 
-    #fecharMenuInscritos {
+    #fecharMenuInscritos,
+    #cancelEventForm {
         font-size: 2.6rem;
         top: 8px;
         right: 8px;
@@ -1775,7 +1805,8 @@ h1, h2, h3, h4, .event-card h3, .event-card h2 {
         color: #222;
     }
 
-    #fecharMenuInscritos img {
+    #fecharMenuInscritos img,
+    #cancelEventForm img {
         height: 35px;
         width: 35px;
     }

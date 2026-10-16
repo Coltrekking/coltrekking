@@ -133,19 +133,6 @@ function loadEvents() {
         }
     });
 
-    const eventoFormGoToTopBtn = document.getElementById('eventoFormGoToTop');
-    if (eventoFormGoToTopBtn) {
-        eventoFormGoToTopBtn.addEventListener('click', () => {
-            const modalContent = document.getElementById('eventformContent');
-            if (modalContent) {
-                modalContent.scrollTo({
-                    top: 0,
-                    left: 0,
-                    behavior: "smooth"
-                });
-            }
-        });
-    }
 }
 
 function loadPage() {
@@ -157,7 +144,6 @@ function loadPage() {
 }
 
 if (isAdmin()) loadPage();
-
 
 
 

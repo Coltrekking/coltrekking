@@ -129,14 +129,14 @@
         </div>
 
         <!-- Modal para criar/editar um evento -->
-        <div class="modal-overlay" id="eventFormModal" style="display: none; z-index: 10001">
+        <div class="modal-overlay" id="eventFormModal" style="display: none;">
             <div class="event-modal-content" id="eventformContent">
-                <h2>Criar/Editar Evento</h2>
-
                 <!-- Botão de fechar -->
                 <button id="cancelEventForm" title="Fechar" class="icon-button close-image-modal-button">
                     <img src="/assets/icons/close-icon.svg" alt="Ícone de X, para fechar" class="close-modal-icon">
                 </button>
+
+                <h2>Criar/Editar Evento</h2>
 
                 <!-- Formulário -->
                 <form id="eventForm">
@@ -205,23 +205,16 @@
                     <!-- Pontuação necessária para o evento -->
                     <p class="big-text"><i>Pontuação necessária para poder se inscrever no evento:</i></p>
                     <p class="small-text"><i>Dica: se quiser que apenas <b>pessoas que já foram em um evento</b> consigam se inscrever, coloque como 1 ponto.</i></p>
-                    <span id="eventoPontuacaoNecessaria" class="soft-warn text" style="font-style: normal; font-size: 2rem; margin: 0;">0 pontos</span>
+                    <span id="eventoPontuacaoNecessaria" class="text big-text soft-warn" style="font-style: normal; margin: 0;">0 pontos</span>
 
                     <!-- Botão para editar a pontuação necessária-->
-                    <button id="eventoAlterarPontuacaoNecessaria" type="button" class="icon-button">
+                    <button id="eventoAlterarPontuacaoNecessaria" type="button" class="icon-button big-text">
                         <img src="/assets/icons/edit-icon.svg" alt="Editar Pontos" id="editPointsIcon" class="edit-icon">
                     </button>
 
                     <!-- Botões de Salvar/Cancelar -->
                     <br><button type="submit" id="submitEventForm">Salvar Evento</button>
                     <br><button type="button" class="alternative" id="editEventForm">Salvar Edição</button>
-
-                    <div class="flex-center">
-                        <span id="eventoFormGoToTop" class="text big-text flex-center cursor-pointer" style="width: auto; margin-bottom: 3px;">
-                            <img src="/assets/icons/up-arrow-icon.svg" alt="Seta para cima" class="icon icon-on-button">
-                            <u>Voltar ao topo</u>
-                        </span>
-                    </div>
                 </form>
             </div>
         </div>
